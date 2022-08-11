@@ -4,4 +4,4 @@ V.1.0.0:
 |
  ---- contains 4 constitutive models: Neohookean,Fixed_Corotated(snow),water,Drucker_Prager(sand)
       contains collision detection.
-      using v4.0.alpha13.official [59dcddc45] being the latest
+      using Godot v4.0.alpha13.official [59dcddc45] being the latest
