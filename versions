@@ -1,0 +1,6 @@
+Sort of a version update of changes I continue to make.
+
+V.1.0.0:
+|
+ ---- contains 4 constitutive models: Neohookean,Fixed_Corotated(snow),water,Drucker_Prager(sand)
+      contains collision detection.
