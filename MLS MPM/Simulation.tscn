@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1jdmj2ojlf3k"]
+
+[ext_resource type="Script" path="res://Simulation.gd" id="1_77ohw"]
+
+[node name="Simulation" type="Node"]
+script = ExtResource( "1_77ohw" )
+
+[connection signal="ready" from="." to="." method="_on_Simulation_ready"]

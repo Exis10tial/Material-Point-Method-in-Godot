@@ -1,0 +1,33 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="MLS Material Point Method"
+config/description="\"Testing MLS Material Point Methond\""
+run/main_scene="res://Test Area.tscn"
+config/features=PackedStringArray("4.0", "Vulkan Clustered")
+config/icon="res://icon.png"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/width=1280
+window/size/height=720
+
+[physics]
+
+common/physics_ticks_per_second=90
+
+[rendering]
+
+driver/threads/thread_model=2
+environment/defaults/default_environment="res://default_env.tres"

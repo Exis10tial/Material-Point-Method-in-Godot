@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6yghw2piguor"]
+
+[ext_resource type="Script" path="res://Program.gd" id="1_qgbmf"]
+
+[node name="Program" type="Node"]
+script = ExtResource( "1_qgbmf" )
+
+[connection signal="ready" from="." to="." method="_on_Program_ready"]

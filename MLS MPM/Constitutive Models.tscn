@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3dfy8c2nnbpm"]
+
+[ext_resource type="Script" path="res://Constitutive Models.gd" id="1_dc0q3"]
+
+[node name="Constitutive Models" type="Node"]
+script = ExtResource( "1_dc0q3" )
+
+[connection signal="ready" from="." to="." method="_on_constitutive_models_ready"]
