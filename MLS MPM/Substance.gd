@@ -17,6 +17,7 @@ var flipped_kernel_y : float
 var dx : float
 var domain : Rect2
 var domain_size : Vector2
+var cut_into : bool = false
 var prime_set_of_numbers : Array = []
 var powers_of_2_set_of_numbers : Array = []
 var find_x_factors : Array = []
@@ -47,8 +48,9 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(48.0,42.0)
 	#domain_size = Vector2(35.0,30.0)
-	domain_size = Vector2(25.0,25.0)
+	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
+	domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(4.0,4.0)
 	#domain_size = Vector2(1.0,2.0)
@@ -56,15 +58,16 @@ func Initial_Collection_Of_Substance():
 	#---------------------------------
 	# if particles size is always 1...
 	#domain_size = Vector2(2,10.0)
-	
+	#domain_size = Vector2(10.0,10.0)
 	
 	return domain_size
 
 
-func Cross_Section_Of_Substance():
+func Cross_Section_Of_Substance(into_pieces:bool):
 	### the size of the substance is parsed into evenly cut squares/cubes = (Length == Width)
 	
-	if domain_size.x == domain_size.y and domain_size.x != 1 and domain_size.y != 1:
+	###if code require into_pieces == false you will get particle at domain size.
+	if domain_size.x == domain_size.y and domain_size.x != 1 and domain_size.y != 1 and into_pieces == true :
 		
 		### Powers of 2 Check...
 		var n = 0.0
@@ -75,17 +78,22 @@ func Cross_Section_Of_Substance():
 			
 			n +=1
 		
-		if powers_of_2_set_of_numbers.has(domain_size.y) == true:
+		if powers_of_2_set_of_numbers.has(domain_size.y) == true and into_pieces == true:
 			
 			cell_size = int(domain_size.x / pow(2,1))
+			print('power of 2')
 		else:
 			### the number is not a power of 2...
 			
 			#Square Root Check
-			if fmod(domain_size.x,sqrt(domain_size.x)) == 0:
+			if fmod(domain_size.x,sqrt(domain_size.x)) == 0:# and into_pieces == true:
 				cell_size = sqrt(domain_size.x)
+				print('square root',' ',cell_size)
 			else:
+				print('greatest factor')
 				### Not a power of 2 or a has a square root...
+				
+				# find the greatest common factor between the domain sizes::
 				for number in range(1,domain_size.x+1):
 					if int(domain_size.x) % number == 0:
 						find_x_factors.append(number)
@@ -93,7 +101,7 @@ func Cross_Section_Of_Substance():
 					if int(domain_size.y) % number == 0:
 						find_y_factors.append(number)
 				
-				### using the greatest common factor to aquire a cell size...
+				### using the greatest common factor to acquire a cell size...
 				if domain_size.x == domain_size.y:
 					for number in range(len(find_x_factors)-1,-1,-1):
 						if find_x_factors[number] in find_y_factors:
@@ -111,7 +119,9 @@ func Cross_Section_Of_Substance():
 							break
 											
 	else:
-		
+		#print('greatest factor')
+		cell_size = 1
+		"""
 		# find the greatest common factor between the domain sizes::
 		for number in range(1,domain_size.x+1):
 			if int(domain_size.x) % number == 0:
@@ -120,7 +130,7 @@ func Cross_Section_Of_Substance():
 			if int(domain_size.y) % number == 0:
 				find_y_factors.append(number)
 		
-		### using the greatest common factor to aquire a cell size...
+		### using the greatest common factor to acquire a cell size...
 		if domain_size.x == domain_size.y:
 			for number in range(len(find_x_factors)-1,-1,-1):
 				if find_x_factors[number] in find_y_factors:
@@ -136,7 +146,7 @@ func Cross_Section_Of_Substance():
 				if find_y_factors[number] in find_x_factors:
 					cell_size = find_y_factors[number]
 					break
-		
+		#"""
 	return float(cell_size)
 	
 
@@ -157,7 +167,9 @@ func _on_Substance_ready():
 	if gather_the_particles.file_exists("res://2D Particle.tscn"):
 		
 		Initial_Collection_Of_Substance()
-		Cross_Section_Of_Substance()
+		
+		#cut_into = true
+		cell_size = Cross_Section_Of_Substance(cut_into)
 		
 		#25x25 : 1 fps
 		#10x10 : 13 fps
@@ -165,15 +177,24 @@ func _on_Substance_ready():
 		#7x5 : 60 fps
 		#5x5 : 60 fps
 		
-		### use if particles to be size 1...
-		#particle_limit = float(defined_columns * defined_rows)
-		#cell_size = 1
 		
 		
 		defined_columns = int(domain_size.x/ cell_size)
 		defined_rows = int(domain_size.y / cell_size)
+		print(defined_columns,' columns')
+		print(defined_rows,' rows')
 		
-		particle_limit = float(defined_columns * defined_rows)# / 2
+		
+		### determines the size/shape of particles...
+		if cut_into == false:
+			### use if particles to be size 1 always...
+			particle_limit = float(defined_columns * defined_rows)
+			print('a')
+		else:
+			### the particle will end up as power of two or square root cut...
+			particle_limit = float(defined_columns * defined_rows)# / 2
+			print(cell_size,' cellsize')
+			print('b')
 		
 		substance_starting_point = Vector2(
 		((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
@@ -211,7 +232,7 @@ func _on_Substance_ready():
 			particle.velocity = maintain_velocity
 			#"""
 			# testing hyperelastic - neohookean
-			particle.coefficient_of_restitution = 0.5 #rubber
+			particle.coefficient_of_restitution = 1.0 #rubber
 			particle.coefficient_of_static_friction = 0.9 #rubber
 			particle.coefficient_of_kinetic_friction = 0.250 #rubber
 			particle.physical_state = 'solid'
