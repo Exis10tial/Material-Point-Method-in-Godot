@@ -48,9 +48,9 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(48.0,42.0)
 	#domain_size = Vector2(35.0,30.0)
-	#domain_size = Vector2(25.0,25.0)
+	domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
-	domain_size = Vector2(10.0,10.0)
+	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(4.0,4.0)
 	#domain_size = Vector2(1.0,2.0)
@@ -86,7 +86,7 @@ func Cross_Section_Of_Substance(into_pieces:bool):
 			### the number is not a power of 2...
 			
 			#Square Root Check
-			if fmod(domain_size.x,sqrt(domain_size.x)) == 0:# and into_pieces == true:
+			if fmod(domain_size.x,sqrt(domain_size.x)) == 0 and into_pieces == true:
 				cell_size = sqrt(domain_size.x)
 				print('square root',' ',cell_size)
 			else:
