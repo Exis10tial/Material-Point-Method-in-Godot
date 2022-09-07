@@ -48,7 +48,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(48.0,42.0)
 	#domain_size = Vector2(35.0,30.0)
-	domain_size = Vector2(25.0,25.0)
+	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
@@ -57,7 +57,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(1.0,1.0)
 	#---------------------------------
 	# if particles size is always 1...
-	#domain_size = Vector2(2,10.0)
+	domain_size = Vector2(2,10.0)
 	#domain_size = Vector2(10.0,10.0)
 	
 	return domain_size
@@ -81,16 +81,13 @@ func Cross_Section_Of_Substance(into_pieces:bool):
 		if powers_of_2_set_of_numbers.has(domain_size.y) == true and into_pieces == true:
 			
 			cell_size = int(domain_size.x / pow(2,1))
-			print('power of 2')
 		else:
 			### the number is not a power of 2...
 			
 			#Square Root Check
 			if fmod(domain_size.x,sqrt(domain_size.x)) == 0 and into_pieces == true:
 				cell_size = sqrt(domain_size.x)
-				print('square root',' ',cell_size)
 			else:
-				print('greatest factor')
 				### Not a power of 2 or a has a square root...
 				
 				# find the greatest common factor between the domain sizes::
@@ -119,34 +116,35 @@ func Cross_Section_Of_Substance(into_pieces:bool):
 							break
 											
 	else:
-		#print('greatest factor')
-		cell_size = 1
-		"""
-		# find the greatest common factor between the domain sizes::
-		for number in range(1,domain_size.x+1):
-			if int(domain_size.x) % number == 0:
-				find_x_factors.append(number)
-		for number in range(1,domain_size.y+1):
-			if int(domain_size.y) % number == 0:
-				find_y_factors.append(number)
-		
-		### using the greatest common factor to acquire a cell size...
-		if domain_size.x == domain_size.y:
-			for number in range(len(find_x_factors)-1,-1,-1):
-				if find_x_factors[number] in find_y_factors:
-					cell_size = find_x_factors[number] 
-					break
-		elif domain_size.x < domain_size.y:
-			for number in range(len(find_x_factors)-1,-1,-1):
-				if find_x_factors[number] in find_y_factors:
-					cell_size =  find_x_factors[number] 
-					break
-		elif domain_size.x > domain_size.y:
-			for number in range(len(find_y_factors)-1,-1,-1):
-				if find_y_factors[number] in find_x_factors:
-					cell_size = find_y_factors[number]
-					break
-		#"""
+		if into_pieces == false :
+			cell_size = 1
+		else:
+			#"""
+			# find the greatest common factor between the domain sizes::
+			for number in range(1,domain_size.x+1):
+				if int(domain_size.x) % number == 0:
+					find_x_factors.append(number)
+			for number in range(1,domain_size.y+1):
+				if int(domain_size.y) % number == 0:
+					find_y_factors.append(number)
+			
+			### using the greatest common factor to acquire a cell size...
+			if domain_size.x == domain_size.y:
+				for number in range(len(find_x_factors)-1,-1,-1):
+					if find_x_factors[number] in find_y_factors:
+						cell_size = find_x_factors[number] 
+						break
+			elif domain_size.x < domain_size.y:
+				for number in range(len(find_x_factors)-1,-1,-1):
+					if find_x_factors[number] in find_y_factors:
+						cell_size =  find_x_factors[number] 
+						break
+			elif domain_size.x > domain_size.y:
+				for number in range(len(find_y_factors)-1,-1,-1):
+					if find_y_factors[number] in find_x_factors:
+						cell_size = find_y_factors[number]
+						break
+			#"""
 	return float(cell_size)
 	
 
@@ -168,7 +166,7 @@ func _on_Substance_ready():
 		
 		Initial_Collection_Of_Substance()
 		
-		#cut_into = true
+		cut_into = true
 		cell_size = Cross_Section_Of_Substance(cut_into)
 		
 		#25x25 : 1 fps
