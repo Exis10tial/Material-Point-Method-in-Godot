@@ -91,16 +91,16 @@ func Collision_with_Walls(substance,baluster,structure,cell_size):
 			### suppose to be a wall where the particle hits...
 			
 			if wall == 'top':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -10.0
+				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
 				baluster['window outline'][wall]['outline'] = 0 + (cell_size)# / 2.0)
 			elif wall == 'right':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -10.0
+				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
 				baluster['window outline'][wall]['outline'] = ProjectSettings.get_setting('display/window/size/width') - (cell_size)# / 2.0)
 			elif wall == 'bottom':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -10.0
+				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
 				baluster['window outline'][wall]['outline'] = ProjectSettings.get_setting('display/window/size/height') - (cell_size)# / 2.0)
 			elif wall == 'left':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -10.0
+				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
 				baluster['window outline'][wall]['outline'] = 0 + (cell_size)# / 2.0)
 				
 			if wall == 'top' and particle.surrounding_area.position.y <= baluster['window outline']["top"]['outline']:
@@ -140,8 +140,8 @@ func Collision_with_Walls(substance,baluster,structure,cell_size):
 						### ...
 						
 						line_of_impact = wall_center
-						incoming_angle = rad2deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad2deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
+						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
+						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
 						x_leg_of_particle_velocity = structure[particle]['velocity'].y * tan(outgoing_angle)
 						# determine which friction static or kinetic...
 						#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
@@ -215,8 +215,8 @@ func Collision_with_Walls(substance,baluster,structure,cell_size):
 					elif collision_restitution < 1.0 and collision_restitution > 0.0:
 						### ...
 						line_of_impact = wall_center
-						incoming_angle = rad2deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad2deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
+						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
+						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
 						x_leg_of_particle_velocity = snapped((structure[particle]['velocity'].y * tan(outgoing_angle)),.01)
 						# determine which friction static or kinetic...
 						#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
@@ -298,8 +298,8 @@ func Collision_with_Walls(substance,baluster,structure,cell_size):
 						#print(structure[particle]['velocity'],' velocity before collision')
 						
 						line_of_impact = wall_center
-						incoming_angle = rad2deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad2deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
+						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
+						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
 						y_leg_of_particle_velocity = structure[particle]['velocity'].y
 						x_leg_of_particle_velocity = y_leg_of_particle_velocity * tan(outgoing_angle)
 						
@@ -377,8 +377,8 @@ func Collision_with_Walls(substance,baluster,structure,cell_size):
 					elif collision_restitution < 1.0 and collision_restitution > 0.0:
 						### ...
 						line_of_impact = wall_center
-						incoming_angle = rad2deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad2deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
+						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
+						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
 						x_leg_of_particle_velocity = structure[particle]['velocity'].y * tan(outgoing_angle)
 						# determine which friction static or kinetic...
 						#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
@@ -447,7 +447,7 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		### the velocity of the artifact...
 		grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] - ( elastic_term_1_of_vector_2 / elastic_mass_addition ) * ( elastic_dot_vector_2 / elastic_magnitude_kernel_of_vector_2 ) * ( elastic_position_kernel_of_vector_2 )
 		### the velocitiy of the other artifact...
-		grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 )
+		#grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 )
 						
 	elif collision_restitution < 1.0 and collision_restitution > 0.0:
 		### collision is impartial inelastic...
@@ -458,9 +458,9 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		#line_of_impact = artifact.get_position() + (artifact.relation_to_domain[other_artifact] / 2.0)
 		line_of_impact = (artifact.surrounding_area.intersection(other_artifact.surrounding_area)).get_center()
 		#print(line_of_impact,' artifact to other artifact')
-		incoming_angle_of_artifact = rad2deg(artifact.get_position().angle_to(line_of_impact))
+		incoming_angle_of_artifact = rad_to_deg(artifact.get_position().angle_to(line_of_impact))
 		#print(incoming_angle_of_artifact,' incoming angle artifact to other artifact')
-		outgoing_angle_of_artifact = rad2deg(atan(other_artifact.coefficient_of_restitution * incoming_angle_of_artifact ))
+		outgoing_angle_of_artifact = rad_to_deg(atan(other_artifact.coefficient_of_restitution * incoming_angle_of_artifact ))
 		x_leg_of_updated_artifact_velocity = snapped((grid_field[artifact]['velocity'].y * tan(outgoing_angle_of_artifact)),.01)
 		# determine which friction static or kinetic...
 		#if grid_field[artifact]['velocity'].x in range(-1,2) and grid_field[artifact]['velocity'].y in range(-1,2):
@@ -479,8 +479,8 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		#print(other_artifact,' ',grid_field[other_artifact]['velocity'],' checking y value')
 		#line_of_impact = other_artifact.get_position() - (other_artifact.relation_to_domain[artifact] / 2.0)
 		#print(line_of_impact,' other artifact to artifact')
-		incoming_angle_of_other_artifact = rad2deg(other_artifact.get_position().angle_to(line_of_impact))
-		outgoing_angle_of_other_artifact = rad2deg(atan(artifact.coefficient_of_restitution * incoming_angle_of_other_artifact ))
+		incoming_angle_of_other_artifact = rad_to_deg(other_artifact.get_position().angle_to(line_of_impact))
+		outgoing_angle_of_other_artifact = rad_to_deg(atan(artifact.coefficient_of_restitution * incoming_angle_of_other_artifact ))
 		x_leg_of_updated_other_artifact_velocity = snapped((grid_field[other_artifact]['velocity'].y * tan(outgoing_angle_of_other_artifact)),.01)
 		# determine which friction static or kinetic...
 		#if grid_field[other_artifact]['velocity'].x in range(-1,2) and grid_field[other_artifact]['velocity'].y in range(-1,2):
@@ -501,5 +501,6 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 						
 		grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] - final_velocity
 		
-		grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - final_velocity
-
+		#grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - final_velocity
+	
+	return grid_field[artifact]['velocity']
