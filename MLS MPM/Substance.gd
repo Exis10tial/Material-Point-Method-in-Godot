@@ -17,7 +17,10 @@ var flipped_kernel_y : float
 var dx : float
 var domain : Rect2
 var domain_size : Vector2
-var cut_into : bool = false
+var fine_grained : bool = false
+var one_particle : bool = false
+var x_ : int
+var y_ : int
 var prime_set_of_numbers : Array = []
 var powers_of_2_set_of_numbers : Array = []
 var find_x_factors : Array = []
@@ -52,14 +55,16 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(16.0,16.0)
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
+	#domain_size = Vector2(6.0,6.0)
+	#domain_size = Vector2(5.0,5.0)
 	#domain_size = Vector2(4.0,4.0)
 	#domain_size = Vector2(1.0,2.0)
 	#domain_size = Vector2(1.0,1.0)
 	#---------------------------------
 	# if particles size is always 1...
-	domain_size = Vector2(2,10.0)
+	#domain_size = Vector2(2,10.0)
 	#domain_size = Vector2(10.0,10.0)
-	
+	domain_size = Vector2(100.0,100.0)
 	return domain_size
 
 
@@ -162,46 +167,67 @@ func Establish_Rate():
 func _on_Substance_ready():
 	gather_the_particles = File.new()
 	
+	#if gather_the_particles.file_exists("res://2D Particle.tscn") or gather_the_particles.file_exists("res://2D Particle(thru_rigid_body).tscn"):
 	if gather_the_particles.file_exists("res://2D Particle.tscn"):
-		
+	#if gather_the_particles.file_exists("res://2D Particle(thru_rigid_body).tscn"):
+	#if gather_the_particles.file_exists("res://2D Particle(thru sprite).tscn"):
 		Initial_Collection_Of_Substance()
 		
-		cut_into = true
-		cell_size = Cross_Section_Of_Substance(cut_into)
-		
-		#25x25 : 1 fps
-		#10x10 : 13 fps
-		#7x8: 33 fps
-		#7x5 : 60 fps
-		#5x5 : 60 fps
+		### alters how many particles ...
+		# one_particle is 1 particle no matter the domain size...
+		# fine_grained is number of particle is determined by domain.x * domain.y
+		one_particle = true
+		fine_grained = true
 		
 		
-		
-		defined_columns = int(domain_size.x/ cell_size)
-		defined_rows = int(domain_size.y / cell_size)
-		print(defined_columns,' columns')
-		print(defined_rows,' rows')
-		
-		
-		### determines the size/shape of particles...
-		if cut_into == false:
-			### use if particles to be size 1 always...
-			particle_limit = float(defined_columns * defined_rows)
-			print('a')
+		if one_particle == true:
+			
+			defined_columns = int(domain_size.x / domain_size.x)
+			defined_rows = int(domain_size.y / domain_size.y)
+			
+			particle_limit = int(defined_columns * defined_rows)
+			cell_size = 1
+			
 		else:
-			### the particle will end up as power of two or square root cut...
-			particle_limit = float(defined_columns * defined_rows)# / 2
-			print(cell_size,' cellsize')
-			print('b')
+			cell_size = Cross_Section_Of_Substance(fine_grained)
+			#print(cell_size,' cell size check')
+			
+			#25x25 : 1 fps
+			#10x10 : 13 fps
+			#7x8: 33 fps
+			#7x5 : 60 fps
+			#5x5 : 60 fps
+			
+			###
+			defined_columns = int(domain_size.x / cell_size)
+			defined_rows = int(domain_size.y / cell_size)
+				
+			##print(defined_columns,' checking columns')
+			##print(defined_rows,' checking rows')
+				
+			### determines the size/shape of particles...
+			if fine_grained == false:
+				### use if particles to be size 1 always...
+				particle_limit = int(defined_columns * defined_rows)
+					
+			else:
+				### the particle will end up as power of two or square root cut...
+				particle_limit = int(defined_columns * defined_rows)# / 2
 		
 		substance_starting_point = Vector2(
 		((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
 		((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
 		)
 		
-		while get_child_count() < (defined_rows * defined_columns):
+		while get_child_count() < particle_limit:
 			###
+			
 			particle = load("res://2D Particle.tscn").instantiate()
+			#particle = load("res://2D Particle(thru_rigid_body).tscn").instantiate()
+			#particle = load("res://2D Particle(thru sprite).tscn").instantiate()
+			
+			
+			
 			particle_name = '{a}{b}{c}{d}{1}{2}{3}{4}'.format({
 				'a':letters_list[int(randi_range(0,len(letters_list)-1))],
 				'b':letters_list[int(randi_range(0,len(letters_list)-1))],
@@ -214,7 +240,15 @@ func _on_Substance_ready():
 				})
 			
 			particle.set_name(particle_name)
-			particle.adjust_size(cell_size)
+			
+			if one_particle == true:
+				x_ = domain_size.x
+				y_ = domain_size.y
+			else:
+				x_ = 0
+				y_ = 0
+			
+			particle.adjust_size(cell_size,one_particle,x_,y_)
 			
 			
 			#default_mass_of_particle = 1.00 #/ particle_limit

@@ -1,6 +1,5 @@
 extends Node2D
 
-
 ### particle state,type of state...
 var physical_state : String
 var type_of_substance : String
@@ -66,7 +65,20 @@ func _on_2D_Particle_ready():
 	#$"shape".set_position($"shape".rect_size/2.0)
 	pass
 
-func adjust_size(new_size):
+func adjust_size(new_size:int,only_one:bool,x_size:int,y_size:int):
 	### adjust the size of the particle...
-	$"shape".set_size(Vector2(new_size,new_size))
+	if only_one == true:
+		$"shape".set_size(Vector2(x_size,y_size))
+	else:
+		$"shape".set_size(Vector2(new_size,new_size))
 	$"shape".set_position(Vector2(new_size/2.0,new_size/2.0))
+	
+	if get_class() == "RigidBody2D":
+		#print('adjust')
+		$"domain".set_position(Vector2(new_size/2.0,new_size/2.0))
+		### circle collision shape to color rect ratio::: (1/2)-.25 px = 1 px
+		#print($"domain".get_shape(),' shape')
+		
+		#$"domain".get_shape().set_radius(($"shape".get_size().x/2.0) -.25 )
+		$"domain".get_shape().set_size(Vector2(new_size,new_size))
+		#$"domain".get_shape().set_radius(10.0)
