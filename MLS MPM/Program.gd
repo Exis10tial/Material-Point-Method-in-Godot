@@ -95,7 +95,8 @@ func _on_Program_ready():
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.0
 		barriers['window outline'][wall]['coefficient of static friction'] = 1.0
 		barriers['window outline'][wall]['coefficient of kinetic friction'] = 1.0
-		barriers['window outline'][wall]['mass'] = 1000.00
+		#barriers['window outline'][wall]['mass'] = 1000.00
+		barriers['window outline'][wall]['mass'] = 1.00
 		
 		barriers['window outline'][wall]['velocity'] = Vector2(1.0,1.0)
 		
@@ -197,7 +198,13 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 		
 		
 		# establish the particle grid domain...
-		particle.surrounding_area = Rect2(Vector2(particle.position.x - ((grid_domain/2.0)*area_multiplier),particle.position.y - ((grid_domain/2.0)*area_multiplier)),Vector2(grid_domain*area_multiplier,grid_domain*area_multiplier))
+		#particle.surrounding_area = Rect2(Vector2(particle.position.x - ((grid_domain/2.0)*area_multiplier),particle.position.y - ((grid_domain/2.0)*area_multiplier)),Vector2(grid_domain*area_multiplier,grid_domain*area_multiplier))
+		#area_multiplier = 1.0
+		#particle.surrounding_area = Rect2(Vector2(particle.position.x - ((particle.get_node("shape").get_size().x/2.0)*area_multiplier),particle.position.y - ((particle.get_node("shape").get_size().y/2.0)*area_multiplier)),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
+		
+		#particle.surrounding_area = Rect2(Vector2(particle.position.x,particle.position.y),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
+		particle.surrounding_area = Rect2(Vector2((particle.position.x+particle.get_node("shape").get_position().x),(particle.position.y+particle.get_node("shape").get_position().y)),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
+		
 		#print(particle.surrounding_area,' particle domain')
 		particle.F = particle.I.duplicate(true)
 		particle.J = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Determinant(particle.F)
@@ -286,7 +293,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			#print(the_grid[node]['mass'],' mass check')
 			#the_grid[node]['momentum'] = the_grid[node]['momentum'].normalized() + (time_passed * ((the_grid[node]['mass'] * gravity) + the_grid[node]['force']))
 			#the_grid[node]['momentum'] = the_grid[node]['momentum'] + (time_passed * ((the_grid[node]['mass'] * gravity) + the_grid[node]['force']))
-			
+			#the_grid[node]['momentum'] = the_grid[node]['momentum'] + (time_passed * ((the_grid[node]['mass'] * gravity) ))
 			#standby_momentum_x = snapped((the_grid[node]['momentum'].x + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.x),.01) + the_grid[node]['force'].x),.01)),.01)),.01)
 			#standby_momentum_y = snapped((the_grid[node]['momentum'].y + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.y),.01) + the_grid[node]['force'].y),.01)),.01)),.01)
 			#the_grid[node]['momentum'] = Vector2(standby_momentum_x,standby_momentum_y)
@@ -315,22 +322,22 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 		if particle.surrounding_area.position.x < barriers['window outline']['left']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached left')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
 		
 		elif particle.surrounding_area.end.x >= barriers['window outline']['right']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached right')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
 		
 		elif particle.surrounding_area.position.y < barriers['window outline']['top']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached top')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
 		
 		elif particle.surrounding_area.end.y >= barriers['window outline']['bottom']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached bottom')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
 		else:
 			### the particle is within the window outline...
 			pass

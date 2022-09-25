@@ -17,7 +17,7 @@ var flipped_kernel_y : float
 var dx : float
 var domain : Rect2
 var domain_size : Vector2
-var fine_grained : bool = false
+var gathered_into_chunks : bool = false
 var one_particle : bool = false
 var x_ : int
 var y_ : int
@@ -52,7 +52,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(48.0,42.0)
 	#domain_size = Vector2(35.0,30.0)
 	#domain_size = Vector2(25.0,25.0)
-	#domain_size = Vector2(16.0,16.0)
+	domain_size = Vector2(16.0,16.0)
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(6.0,6.0)
@@ -64,7 +64,7 @@ func Initial_Collection_Of_Substance():
 	# if particles size is always 1...
 	#domain_size = Vector2(2,10.0)
 	#domain_size = Vector2(10.0,10.0)
-	domain_size = Vector2(100.0,100.0)
+	#domain_size = Vector2(100.0,100.0)
 	return domain_size
 
 
@@ -175,9 +175,11 @@ func _on_Substance_ready():
 		
 		### alters how many particles ...
 		# one_particle is 1 particle no matter the domain size...
-		# fine_grained is number of particle is determined by domain.x * domain.y
-		one_particle = true
-		fine_grained = true
+		# default: Is using the greatest common factor between domain_size x and domain_size.y to acquire a number of particles/cell size..
+		# gathered_into_chunks: First a if both domain_size are a power of 2 , then square root is check , then to the default...
+		# if one particle and gathered into chunks is false, number of particles is domain_size.x * domain_size.y
+		#one_particle = true
+		gathered_into_chunks = true
 		
 		
 		if one_particle == true:
@@ -189,7 +191,7 @@ func _on_Substance_ready():
 			cell_size = 1
 			
 		else:
-			cell_size = Cross_Section_Of_Substance(fine_grained)
+			cell_size = Cross_Section_Of_Substance(gathered_into_chunks)
 			#print(cell_size,' cell size check')
 			
 			#25x25 : 1 fps
@@ -206,7 +208,7 @@ func _on_Substance_ready():
 			##print(defined_rows,' checking rows')
 				
 			### determines the size/shape of particles...
-			if fine_grained == false:
+			if gathered_into_chunks == false:
 				### use if particles to be size 1 always...
 				particle_limit = int(defined_columns * defined_rows)
 					
@@ -214,10 +216,16 @@ func _on_Substance_ready():
 				### the particle will end up as power of two or square root cut...
 				particle_limit = int(defined_columns * defined_rows)# / 2
 		
-		substance_starting_point = Vector2(
-		((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
-		((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
-		)
+		if one_particle == true:
+			substance_starting_point = Vector2(
+			((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
+			((ProjectSettings.get_setting('display/window/size/height') / 2.0))
+			)
+		else:
+			substance_starting_point = Vector2(
+			((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
+			((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
+			)
 		
 		while get_child_count() < particle_limit:
 			###
@@ -332,7 +340,10 @@ func _on_Substance_ready():
 		var n = 0
 		for x in range(1,defined_rows+1):
 			for y in range(1,defined_columns+1):
-				get_child(n).set_position(Vector2(substance_starting_point.x + (cell_size * y),substance_starting_point.y + (cell_size * x)) )
+				if one_particle == true:
+					get_child(n).set_position(Vector2(substance_starting_point.x + (domain_size.x * y),substance_starting_point.y + (domain_size.y * x)) )
+				else:
+					get_child(n).set_position(Vector2(substance_starting_point.x + (cell_size * y),substance_starting_point.y + (cell_size * x)) )
 				n += 1
 		
 		### establish the erase board grid
@@ -343,7 +354,12 @@ func _on_Substance_ready():
 		for particle in get_children():
 			# establish the particle grid domain...
 			var area_multiplier = 1.0
-			particle.surrounding_area = Rect2(Vector2(particle.position.x - ((cell_size/2.0)*area_multiplier),particle.position.y - ((cell_size/2.0)*area_multiplier)),Vector2(cell_size*area_multiplier,cell_size*area_multiplier))
+			#particle.surrounding_area = Rect2(Vector2(particle.position.x - ((particle.get_node("shape").get_size().x/2.0)*area_multiplier),particle.position.y - ((particle.get_node("shape").get_size().y/2.0)*area_multiplier)),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
+			particle.surrounding_area = Rect2(Vector2((particle.position.x+particle.get_node("shape").get_position().x),(particle.position.y+particle.get_node("shape").get_position().y)),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
+			
+			#print(particle.position,' particle positon')
+			#print(particle.get_node("shape").get_position())
+			#print(particle.surrounding_area.position,' surrounding area')
 			
 		### establish particle relation to others...
 		for particle in get_children():

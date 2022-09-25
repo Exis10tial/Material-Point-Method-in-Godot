@@ -69,13 +69,15 @@ func adjust_size(new_size:int,only_one:bool,x_size:int,y_size:int):
 	### adjust the size of the particle...
 	if only_one == true:
 		$"shape".set_size(Vector2(x_size,y_size))
+		$"shape".set_position(Vector2((x_size/2.0)*-1.0,(y_size/2.0)*-1.0))
+	
 	else:
 		$"shape".set_size(Vector2(new_size,new_size))
-	$"shape".set_position(Vector2(new_size/2.0,new_size/2.0))
+		$"shape".set_position(Vector2((new_size/2.0)*-1.0,(new_size/2.0)*-1.0))
 	
 	if get_class() == "RigidBody2D":
 		#print('adjust')
-		$"domain".set_position(Vector2(new_size/2.0,new_size/2.0))
+		$"domain".set_position(Vector2((new_size/2.0)*-1.0,(new_size/2.0)*-1.0))
 		### circle collision shape to color rect ratio::: (1/2)-.25 px = 1 px
 		#print($"domain".get_shape(),' shape')
 		
