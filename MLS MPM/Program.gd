@@ -360,7 +360,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 		#print(' ')
 		#print(particle,' checking particle...')
 		### if the particle has contacted another particle....
-		print()
+		#print()
 		for other_particle in material:
 			
 			# particle contact and/or relation to every other particle...
@@ -368,7 +368,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			#contact_with = (particle.surrounding_area.get_center() - other_particle.surrounding_area.get_center()) / grid_domain
 			#print("checking if colliding with ",other_particle)
 			#print(' ')
-			print(particle,' distance from other particle ',other_particle,' is ',contact_with)#*grid_domain)
+			#print(particle,' distance from other particle ',other_particle,' is ',contact_with)#*grid_domain)
 			#print(grid_domain/grid_domain,' and ',-(grid_domain/grid_domain),' are the particle barrier')
 			#print(particle,' relation to ',other_particle,' is ',particle.relation_to_domain[other_particle],' check before update')
 				
