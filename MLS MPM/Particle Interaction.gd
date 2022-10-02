@@ -136,13 +136,13 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 				### use of kinetic friction...
 				x_component = x_leg_of_particle_velocity * kinetic_friction
 							
-			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+			structure[mote]['velocity'] = structure[mote]['velocity'] + Vector2(x_component,structure[mote]['velocity'].y)
 						
 			
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['top']['mass'] * baluster['window outline']['top']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['top']['mass']) 
 						
-			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
 						
 			
 	if breach == 'right':
@@ -204,13 +204,13 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 				### use of kinetic friction...
 				x_component = x_leg_of_particle_velocity * kinetic_friction
 							
-			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+			structure[mote]['velocity'] = structure[mote]['velocity'] + Vector2(x_component,structure[mote]['velocity'].y)
 						
 			
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['right']['mass'] * baluster['window outline']['right']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['right']['mass']) 
 						
-			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
 						
 			
 	if breach == 'bottom':
@@ -272,12 +272,12 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 				### use of kinetic friction...
 				x_component = x_leg_of_particle_velocity * kinetic_friction
 							
-			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+			structure[mote]['velocity'] = structure[mote]['velocity'] + Vector2(x_component,structure[mote]['velocity'].y)
 						
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['bottom']['mass'] * baluster['window outline']['bottom']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['bottom']['mass']) 
 						
-			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
 						
 	
 	if breach == 'left':
@@ -340,13 +340,13 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 				### use of kinetic friction...
 				x_component = x_leg_of_particle_velocity * kinetic_friction
 							
-			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+			structure[mote]['velocity'] = structure[mote]['velocity'] + Vector2(x_component,structure[mote]['velocity'].y)
 						
 			
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['left']['mass'] * baluster['window outline']['left']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['left']['mass']) 
 						
-			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
 						
 	
 	
@@ -365,8 +365,9 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 	### Collision between the particles....
 	
 	collision_restitution = artifact.coefficient_of_restitution * other_artifact.coefficient_of_restitution
-
+	wall_center = artifact.surrounding_area.intersection(other_artifact.surrounding_area).get_center()
 	if collision_restitution >= 1.0 :
+		"""
 		### the collision is perfect elastic...
 		elastic_term_1_of_vector_1 = 2.0 * grid_field[artifact]['mass']
 		elastic_term_1_of_vector_2 = 2.0 * grid_field[other_artifact]['mass']
@@ -389,7 +390,46 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] - ( elastic_term_1_of_vector_2 / elastic_mass_addition ) * ( elastic_dot_vector_2 / elastic_magnitude_kernel_of_vector_2 ) * ( elastic_position_kernel_of_vector_2 )
 		### the velocitiy of the other artifact...
 		#grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 )
-						
+		"""
+		#baluster['window outline']['left']['velocity'] = mote.velocity * 0.0
+		#baluster['window outline']['left']['outline'] = 0 + (cell_size)# / 2.0)
+			
+		var normal_vector = Vector2(wall_center - artifact.surrounding_area.get_center())
+		#print(normal_vector,' normal')
+		var unit_vector = normal_vector / (snapped(sqrt(pow(normal_vector.x,2.0)),.01) + snapped(sqrt(pow(normal_vector.y,2.0)),.01))
+		#print(unit_vector,' unit')
+		##print(structure[mote]['velocity'],' right after wall contact 1.0')
+		var unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
+		#print(unit_tangent,' unit_tangent')
+				
+		var dotted_unit_artifact_velocity = unit_vector.dot(grid_field[artifact]['velocity'])
+		var dotted_tangent_artifact_velocity = unit_tangent.dot(grid_field[artifact]['velocity'])
+		#print(dotted_unit_mote_velocity,' dot unit mote velocity')
+		#print(dotted_tangent_mote_velocity,' dotted_tangent_mote_velocity')
+		var dotted_unit_other_artifact_velocity = unit_vector.dot(grid_field[other_artifact]['velocity'])
+		var dotted_tangent_other_artifact_velocity = unit_tangent.dot(grid_field[other_artifact]['velocity'])
+		#print(dotted_unit_wall_velocity,' dotted_unit_wall_velocity')
+		#print(dotted_tangent_wall_velocity,' dotted_tangent_wall_velocity')
+					
+		var final_tangential_artifact_velocity = dotted_tangent_artifact_velocity
+		var final_tangential_wall_velocity = dotted_tangent_other_artifact_velocity
+					
+					
+		var final_normal_artifact_velocity = (dotted_unit_artifact_velocity * (grid_field[artifact]['mass'] - grid_field[other_artifact]['mass']) + 2.0 * grid_field[other_artifact]['mass'] * dotted_unit_other_artifact_velocity ) / (grid_field[artifact]['mass'] + grid_field[other_artifact]['mass'])
+		var final_normal_other_artifact_velocity = (dotted_unit_other_artifact_velocity * (grid_field[other_artifact]['mass'] - grid_field[artifact]['mass']) + 2.0 * grid_field[other_artifact]['mass'] * dotted_unit_artifact_velocity ) / (grid_field[artifact]['mass'] + grid_field[other_artifact]['mass'])
+							
+		#print(final_normal_mote_velocity,' final_normal_mote_velocity')
+		#print(final_normal_wall_velocity,' final_normal_wall_velocity')
+							
+							
+		grid_field[artifact]['velocity'] = (final_normal_artifact_velocity * unit_vector) + (final_tangential_artifact_velocity * unit_tangent)
+		#final_tangential_mote_velocity * unit_tangent
+							
+		#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
+							
+		#
+		#print(structure[mote]['velocity']," structure[mote]['velocity']")
+		
 	elif collision_restitution < 1.0 and collision_restitution > 0.0:
 		### collision is impartial inelastic...
 		#"""
