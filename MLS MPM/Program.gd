@@ -308,7 +308,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			
 			### Forces from other objects.
 			#the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(randf_range(-10.0,10.0),randf_range(-10.0,10.0))
-			the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(10.0,0.0)
+			#the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(0.0,0.0)
 			
 			#print(node,' ',the_grid[node]['velocity'],' velocity ')
 		else:
@@ -452,8 +452,8 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			#print(weight_interpolation,' weight_interpolation ')
 			particle.velocity.x = snapped(particle.velocity.x + (snapped((the_grid[other_particle]['velocity'].x * weight_interpolation),.01)),.01)
 			particle.velocity.y = snapped(particle.velocity.y + (snapped((the_grid[other_particle]['velocity'].y * weight_interpolation),.01)),.01)
-			#print(particle.velocity.x,' particle.velocity.x after')
-			#print(particle.velocity.y,' particle.velocity.y ')
+			print(particle.velocity.x,' particle.velocity.x after')
+			print(particle.velocity.y,' particle.velocity.y ')
 			#print()
 			c_flipped_velocity_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Vector2_by_Vector2_to_Matrix(the_grid[other_particle]['velocity'],false,particle.domain_relation_to_particle[other_particle],true)
 			c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_flipped_velocity_coefficient,weight_interpolation,true)
@@ -472,19 +472,17 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 		#print(particle.velocity,' velocity after')
 		
 		#particle.position = particle.get_position() + (time_passed * particle.velocity)
-		
 		particle.position.x = snapped((particle.position.x + snapped((time_passed * particle.velocity.x),.01)  ),.01)
 		
 		#if particle.position.x > ProjectSettings.get_setting('display/window/size/width'):
 		#	particle.position.x = clampf(particle.position.x,(0.0+(grid_domain/2.0)),(ProjectSettings.get_setting('display/window/size/width')-(grid_domain/2.0) ))
 		#particle.position.x = clampf(particle.position.x,(0.0+(grid_domain/2.0)),(ProjectSettings.get_setting('display/window/size/width')-(grid_domain/2.0) ))
 		##particle.position.x = clampf(particle.position.x,(0.0),(ProjectSettings.get_setting('display/window/size/width')-(grid_domain*2) ))
-		particle.position.y = snapped((particle.position.y + snapped((time_passed * particle.velocity.x),.01)  ),.01)
+		particle.position.y = snapped((particle.position.y + snapped((time_passed * particle.velocity.y),.01)  ),.01)
 		#particle.position.y = clampf(particle.position.y,(0.0+(grid_domain/2.0)),(ProjectSettings.get_setting('display/window/size/height')-(grid_domain/2.0) ))
 		#particle.position.y = clampf(particle.position.y,(0.0),(ProjectSettings.get_setting('display/window/size/height')-(grid_domain*2) ))
+		print(particle.position,' position')
 		
-		
-		#print(particle.position,' position after')
 		###deformation update...
 		#particle.F = (particle.I + time_passed * particle.C ) * particle.F
 		#print(particle.F,' deformation gradient before')
