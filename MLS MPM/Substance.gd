@@ -51,8 +51,8 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(48.0,42.0)
 	#domain_size = Vector2(35.0,30.0)
-	#domain_size = Vector2(25.0,25.0)
-	domain_size = Vector2(16.0,16.0)
+	domain_size = Vector2(25.0,25.0)
+	#domain_size = Vector2(16.0,16.0)
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(6.0,6.0)
@@ -175,12 +175,11 @@ func _on_Substance_ready():
 		
 		### alters how many particles ...
 		# one_particle is 1 particle no matter the domain size...
-		# default: Is using the greatest common factor between domain_size x and domain_size.y to acquire a number of particles/cell size..
-		# gathered_into_chunks: First a if both domain_size are a power of 2 , then square root is check , then to the default...
+		# default ::one_particle = false , gathered_into_chunks = true:: Is using the greatest common factor between domain_size x and domain_size.y to acquire a number of particles/cell size..
+		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one particle and gathered into chunks is false, number of particles is domain_size.x * domain_size.y
 		#one_particle = true
 		gathered_into_chunks = true
-		
 		
 		if one_particle == true:
 			
@@ -221,6 +220,7 @@ func _on_Substance_ready():
 			((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
 			((ProjectSettings.get_setting('display/window/size/height') / 2.0))
 			)
+			
 		else:
 			substance_starting_point = Vector2(
 			((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
@@ -260,19 +260,16 @@ func _on_Substance_ready():
 			
 			
 			#default_mass_of_particle = 1.00 #/ particle_limit
-			default_mass_of_particle = 1.00
+			default_mass_of_particle = 1.0
 			maintain_velocity = Vector2(0.0,0.0)
 			#maintain_velocity = Vector2(randf_range(-10.0,10.0),randf_range(-10.0,10.0))
-			#maintain_velocity = Vector2(5.0,0.0)
-			#maintain_velocity = Vector2(-0.0,0.0)
-			#maintain_velocity = Vector2(0.0,-10.0)
 			#maintain_velocity = Vector2(0.0,10.0)
 			particle.mass = default_mass_of_particle
 			particle.stress = [[1.0,1.0],[1.0,1.0]]
 			particle.velocity = maintain_velocity
 			#"""
 			# testing hyperelastic - neohookean
-			particle.coefficient_of_restitution = 1.0 #rubber
+			particle.coefficient_of_restitution = 0.70 #rubber
 			particle.coefficient_of_static_friction = 0.9 #rubber
 			particle.coefficient_of_kinetic_friction = 0.250 #rubber
 			particle.physical_state = 'solid'

@@ -2,7 +2,7 @@ extends Node
 
 var grid_nodes : Dictionary = {}
 var gravity : Vector2 = Vector2(0.00,9.80)
-#var gravity : Vector2 = Vector2(0.0,9.80)
+#var gravity : Vector2 = Vector2(9.80,0.0)
 #var gravity : Vector2 = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))
 var area_multiplier : float = 1.0 
 var kernel_distance : Vector2
@@ -95,8 +95,8 @@ func _on_Program_ready():
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.0
 		barriers['window outline'][wall]['coefficient of static friction'] = 1.0
 		barriers['window outline'][wall]['coefficient of kinetic friction'] = 1.0
-		#barriers['window outline'][wall]['mass'] = 1000.00
-		barriers['window outline'][wall]['mass'] = 1.00
+		barriers['window outline'][wall]['mass'] = 1000.00
+		#barriers['window outline'][wall]['mass'] = 1.00
 		
 		barriers['window outline'][wall]['velocity'] = Vector2(1.0,1.0)
 		
@@ -288,20 +288,28 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 	#Grid Update:
 	#print(' ')
 	#print('Grid Update')
-	for node in the_grid.keys():
-		if the_grid[node]['mass'] > 0.0:
+	for particle in the_grid.keys():
+		if the_grid[particle]['mass'] > 0.0:
 			#print(the_grid[node]['mass'],' mass check')
 			#the_grid[node]['momentum'] = the_grid[node]['momentum'].normalized() + (time_passed * ((the_grid[node]['mass'] * gravity) + the_grid[node]['force']))
 			#the_grid[node]['momentum'] = the_grid[node]['momentum'] + (time_passed * ((the_grid[node]['mass'] * gravity) + the_grid[node]['force']))
 			#the_grid[node]['momentum'] = the_grid[node]['momentum'] + (time_passed * ((the_grid[node]['mass'] * gravity) ))
 			#standby_momentum_x = snapped((the_grid[node]['momentum'].x + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.x),.01) + the_grid[node]['force'].x),.01)),.01)),.01)
 			#standby_momentum_y = snapped((the_grid[node]['momentum'].y + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.y),.01) + the_grid[node]['force'].y),.01)),.01)),.01)
+			
+			#standby_momentum_x = snapped((the_grid[node]['momentum'].x + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.x),.01)),.01)),.01)),.01)
+			#standby_momentum_y = snapped((the_grid[node]['momentum'].y + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.y),.01)),.01)),.01)),.01)
 			#the_grid[node]['momentum'] = Vector2(standby_momentum_x,standby_momentum_y)
 			
 			#the_grid[node]['velocity'] = (the_grid[node]['momentum'] / the_grid[node]['mass'])
-			placeholder_velocity_x = snapped(the_grid[node]['momentum'].x / the_grid[node]['mass'],.01)
-			placeholder_velocity_y = snapped(the_grid[node]['momentum'].y / the_grid[node]['mass'],.01)
-			the_grid[node]['velocity'] = Vector2(placeholder_velocity_x,placeholder_velocity_y)
+			placeholder_velocity_x = snapped(the_grid[particle]['momentum'].x / the_grid[particle]['mass'],.01)
+			placeholder_velocity_y = snapped(the_grid[particle]['momentum'].y / the_grid[particle]['mass'],.01)
+			the_grid[particle]['velocity'] = Vector2(placeholder_velocity_x,placeholder_velocity_y)
+			
+			### Forces from other objects.
+			#the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(randf_range(-10.0,10.0),randf_range(-10.0,10.0))
+			#the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(10.0,0.0)
+			
 			#print(node,' ',the_grid[node]['velocity'],' velocity ')
 		else:
 			###...
@@ -319,25 +327,27 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 	for particle in material:
 		
 		### if the particle has contacted the window outline....
-		if particle.surrounding_area.position.x < barriers['window outline']['left']['outline']:
+		#if particle.surrounding_area.end.x >= barriers['window outline']['right']['outline'] and  particle.surrounding_area.end.y >= barriers['window outline']['bottom']['outline']:
+		#	the_grid[particle]['velocity'] = Vector2(0.0,0.0)
+		if particle.surrounding_area.position.y < barriers['window outline']['top']['outline']:
 			### the particle left the window out line at the sides...
-			#print('breached left')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
+			#print('breached top')
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('top',particle,barriers,the_grid,grid_domain,gravity)
 		
 		elif particle.surrounding_area.end.x >= barriers['window outline']['right']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached right')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
-		
-		elif particle.surrounding_area.position.y < barriers['window outline']['top']['outline']:
-			### the particle left the window out line at the sides...
-			#print('breached top')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('right',particle,barriers,the_grid,grid_domain,gravity)
 		
 		elif particle.surrounding_area.end.y >= barriers['window outline']['bottom']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached bottom')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls(material,barriers,the_grid,grid_domain,gravity)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('bottom',particle,barriers,the_grid,grid_domain,gravity)
+			#the_grid[particle]['velocity'] = the_grid[particle]['velocity'] * 0.0
+		elif particle.surrounding_area.position.x < barriers['window outline']['left']['outline']:
+			### the particle left the window out line at the sides...
+			#print('breached left')
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('left',particle,barriers,the_grid,grid_domain,gravity)
 		else:
 			### the particle is within the window outline...
 			pass
@@ -438,8 +448,8 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 	for particle in material:
 		particle.mass = get_tree().get_root().get_node("Test Area/Simulation/Substance").default_mass_of_particle
 		#particle.velocity = get_tree().get_root().get_node("Test Area/Simulation/Substance").maintain_velocity
-		#particle.velocity = Vector2(0.0,0.0)
-		particle.velocity = Vector2(1.0,1.0)
+		particle.velocity = Vector2(0.0,0.0)
+		#particle.velocity = Vector2(1.0,1.0)
 	
 	for particle in material:
 		#print(particle,' ')
@@ -456,8 +466,8 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			#particle.C = D^1 * sum of the_grid['velocity'] * flipped_kernel_distance^T * weight_interpolation
 			# D^1 = (4/pow(cell_size,2)) * particle.I^-1 
 			
-			particle.velocity.x = snapped((particle.velocity.x + snapped((the_grid[other_particle]['velocity'].x * weight_interpolation),.01)),.01)
-			particle.velocity.y = snapped((particle.velocity.y + snapped((the_grid[other_particle]['velocity'].y * weight_interpolation),.01)),.01)
+			particle.velocity.x = snapped(particle.velocity.x + (snapped((the_grid[other_particle]['velocity'].x * weight_interpolation),.01)),.01)
+			particle.velocity.y = snapped(particle.velocity.y + (snapped((the_grid[other_particle]['velocity'].y * weight_interpolation),.01)),.01)
 			
 			c_flipped_velocity_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Vector2_by_Vector2_to_Matrix(the_grid[other_particle]['velocity'],false,particle.domain_relation_to_particle[other_particle],true)
 			c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_flipped_velocity_coefficient,weight_interpolation,true)

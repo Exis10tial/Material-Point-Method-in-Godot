@@ -75,349 +75,290 @@ func _on_handle_collisions_ready():
 
 
 
-func Collision_with_Walls(substance,baluster,structure,cell_size):
+func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force):
 	###...
+	if breach == 'top':
+		##print(' check top')
+		collision_restitution = baluster['window outline']['top']['coefficient of restitution'] * mote.coefficient_of_restitution
+		if collision_restitution >= 1.0 :
+			wall_center = Vector2(mote.position.x,0.0)
+			baluster['window outline']['top']['velocity'] = mote.velocity * 0.0
+			baluster['window outline']['top']['outline'] = 0 + (cell_size)# / 2.0)
+			
+			var normal_vector = Vector2(wall_center - mote.surrounding_area.get_center())
+			##print(normal_vector,' normal')
+			var unit_vector = normal_vector / (snapped(sqrt(pow(normal_vector.x,2.0)),.01) + snapped(sqrt(pow(normal_vector.y,2.0)),.01))
+			##print(unit_vector,' unit')
+			##print(structure[mote]['velocity'],' right after wall contact 1.0')
+			var unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
+			##print(unit_tangent,' unit_tangent')
+							
+			var dotted_unit_mote_velocity = unit_vector.dot(structure[mote]['velocity'])
+			var dotted_tangent_mote_velocity = unit_tangent.dot(structure[mote]['velocity'])
+			##print(dotted_unit_mote_velocity,' dot unit mote velocity')
+			##print(dotted_tangent_mote_velocity,' dotted_tangent_mote_velocity')
+			var dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['top']['velocity'])
+			var dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['top']['velocity'])
+			##print(dotted_unit_wall_velocity,' dotted_unit_wall_velocity')
+			##print(dotted_tangent_wall_velocity,' dotted_tangent_wall_velocity')
+							
+			var final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			var final_tangential_wall_velocity = dotted_tangent_wall_velocity
+							
+							
+			var final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure[mote]['mass'] - baluster['window outline']['top']['mass']) + 2.0 * baluster['window outline']['top']['mass'] * dotted_unit_wall_velocity ) / (structure[mote]['mass'] + baluster['window outline']['right']['mass'])
+			var final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['top']['mass'] - structure[mote]['mass']) + 2.0 * baluster['window outline']['top']['mass'] * dotted_unit_mote_velocity ) / (structure[mote]['mass'] + baluster['window outline']['right']['mass'])
+							
+			##print(final_normal_mote_velocity,' final_normal_mote_velocity')
+			##print(final_normal_wall_velocity,' final_normal_wall_velocity')
+							
+							
+			structure[mote]['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			#final_tangential_mote_velocity * unit_tangent
+							
+			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
+							
+				#
+			##print(structure[mote]['velocity']," structure[mote]['velocity']")
+		
+		
+		elif collision_restitution < 1.0 and collision_restitution > 0.0:
+			line_of_impact = wall_center
+			incoming_angle = rad_to_deg(mote.get_position().angle_to(line_of_impact))
+			outgoing_angle = rad_to_deg(atan(baluster['window outline']['top']['coefficient of restitution'] * incoming_angle ))
+			x_leg_of_particle_velocity = structure[mote]['velocity'].y * tan(outgoing_angle)
+			# determine which friction static or kinetic...
+			#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
+			if structure[mote]['velocity'].x in range(-cell_size,cell_size+1) and structure[mote]['velocity'].y in range(-cell_size,cell_size+1):
+				### using of static friction...
+				x_component = x_leg_of_particle_velocity * static_friction
+			else:
+				### use of kinetic friction...
+				x_component = x_leg_of_particle_velocity * kinetic_friction
+							
+			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+						
+			
+		elif collision_restitution == 0.0:
+			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['top']['mass'] * baluster['window outline']['top']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['top']['mass']) 
+						
+			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+						
+			
+	if breach == 'right':
+		##print(' check right')
+		collision_restitution = baluster['window outline']['right']['coefficient of restitution'] * mote.coefficient_of_restitution
+		wall_center = Vector2(baluster['window outline']['right']['outline'],mote.position.y)
+		if collision_restitution >= 1.0 :
+			
+			baluster['window outline']['right']['velocity'] = mote.velocity * 0.0
+			baluster['window outline']['right']['outline'] = ProjectSettings.get_setting('display/window/size/width') - (cell_size)# / 2.0)
+			
+			var normal_vector = Vector2(wall_center - mote.surrounding_area.get_center())
+			###print(normal_vector,' normal')
+			var unit_vector = normal_vector / (snapped(sqrt(pow(normal_vector.x,2.0)),.01) + snapped(sqrt(pow(normal_vector.y,2.0)),.01))
+			##print(unit_vector,' unit')
+			##print(structure[mote]['velocity'],' right after wall contact 1.0')
+			var unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
+			##print(unit_tangent,' unit_tangent')
+							
+			var dotted_unit_mote_velocity = unit_vector.dot(structure[mote]['velocity'])
+			var dotted_tangent_mote_velocity = unit_tangent.dot(structure[mote]['velocity'])
+			##print(dotted_unit_mote_velocity,' dot unit mote velocity')
+			#print(dotted_tangent_mote_velocity,' dotted_tangent_mote_velocity')
+			var dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['right']['velocity'])
+			var dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['right']['velocity'])
+			#print(dotted_unit_wall_velocity,' dotted_unit_wall_velocity')
+			#print(dotted_tangent_wall_velocity,' dotted_tangent_wall_velocity')
+							
+			var final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			var final_tangential_wall_velocity = dotted_tangent_wall_velocity
+							
+							
+			var final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure[mote]['mass'] - baluster['window outline']['right']['mass']) + 2.0 * baluster['window outline']['right']['mass'] * dotted_unit_wall_velocity ) / (structure[mote]['mass'] + baluster['window outline']['right']['mass'])
+			var final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['right']['mass'] - structure[mote]['mass']) + 2.0 * baluster['window outline']['right']['mass'] * dotted_unit_mote_velocity ) / (structure[mote]['mass'] + baluster['window outline']['right']['mass'])
+							
+			#print(final_normal_mote_velocity,' final_normal_mote_velocity')
+			#print(final_normal_wall_velocity,' final_normal_wall_velocity')
+							
+							
+			structure[mote]['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			#final_tangential_mote_velocity * unit_tangent
+							
+			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
+							
+				#
+			#print(structure[mote]['velocity']," structure[mote]['velocity']")
+		
+		elif collision_restitution < 1.0 and collision_restitution > 0.0:
+			line_of_impact = wall_center
+			incoming_angle = rad_to_deg(mote.get_position().angle_to(line_of_impact))
+			outgoing_angle = rad_to_deg(atan(baluster['window outline']['right']['coefficient of restitution'] * incoming_angle ))
+			x_leg_of_particle_velocity = structure[mote]['velocity'].y * tan(outgoing_angle)
+			# determine which friction static or kinetic...
+			#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
+			if structure[mote]['velocity'].x in range(-cell_size,cell_size+1) and structure[mote]['velocity'].y in range(-cell_size,cell_size+1):
+				### using of static friction...
+				x_component = x_leg_of_particle_velocity * static_friction
+			else:
+				### use of kinetic friction...
+				x_component = x_leg_of_particle_velocity * kinetic_friction
+							
+			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+						
+			
+		elif collision_restitution == 0.0:
+			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['right']['mass'] * baluster['window outline']['right']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['right']['mass']) 
+						
+			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+						
+			
+	if breach == 'bottom':
+		#print(' check bottom')
+		collision_restitution = baluster['window outline']['bottom']['coefficient of restitution'] * mote.coefficient_of_restitution
+		wall_center = Vector2(mote.position.x,baluster['window outline']['bottom']['outline'])
+		if collision_restitution >= 1.0 :
+			
+			baluster['window outline']['bottom']['velocity'] = mote.velocity * 0.0
+			baluster['window outline']['bottom']['outline'] = ProjectSettings.get_setting('display/window/size/height') - (cell_size)# / 2.0)
+			
+			var normal_vector = Vector2(wall_center - mote.surrounding_area.get_center())
+			#print(normal_vector,' normal')
+			var unit_vector = normal_vector / (snapped(sqrt(pow(normal_vector.x,2.0)),.01) + snapped(sqrt(pow(normal_vector.y,2.0)),.01))
+			#print(unit_vector,' unit')
+			##print(structure[mote]['velocity'],' right after wall contact 1.0')
+			var unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
+			#print(unit_tangent,' unit_tangent')
+							
+			var dotted_unit_mote_velocity = unit_vector.dot(structure[mote]['velocity'])
+			var dotted_tangent_mote_velocity = unit_tangent.dot(structure[mote]['velocity'])
+			#print(dotted_unit_mote_velocity,' dot unit mote velocity')
+			#print(dotted_tangent_mote_velocity,' dotted_tangent_mote_velocity')
+			var dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['bottom']['velocity'])
+			var dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['bottom']['velocity'])
+			#print(dotted_unit_wall_velocity,' dotted_unit_wall_velocity')
+			#print(dotted_tangent_wall_velocity,' dotted_tangent_wall_velocity')
+							
+			var final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			var final_tangential_wall_velocity = dotted_tangent_wall_velocity
+							
+							
+			var final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure[mote]['mass'] - baluster['window outline']['bottom']['mass']) + 2.0 * baluster['window outline']['bottom']['mass'] * dotted_unit_wall_velocity ) / (structure[mote]['mass'] + baluster['window outline']['bottom']['mass'])
+			var final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['bottom']['mass'] - structure[mote]['mass']) + 2.0 * baluster['window outline']['bottom']['mass'] * dotted_unit_mote_velocity ) / (structure[mote]['mass'] + baluster['window outline']['bottom']['mass'])
+							
+			#print(final_normal_mote_velocity,' final_normal_mote_velocity')
+			#print(final_normal_wall_velocity,' final_normal_wall_velocity')
+							
+							
+			structure[mote]['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			#final_tangential_mote_velocity * unit_tangent
+							
+			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
+							
+				#
+			#print(structure[mote]['velocity']," structure[mote]['velocity']")
+		
+		elif collision_restitution < 1.0 and collision_restitution > 0.0:
+			line_of_impact = wall_center
+			incoming_angle = rad_to_deg(mote.get_position().angle_to(line_of_impact))
+			outgoing_angle = rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * incoming_angle ))
+			x_leg_of_particle_velocity = structure[mote]['velocity'].y * tan(outgoing_angle)
+			# determine which friction static or kinetic...
+			#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
+			if structure[mote]['velocity'].x in range(-cell_size,cell_size+1) and structure[mote]['velocity'].y in range(-cell_size,cell_size+1):
+				### using of static friction...
+				x_component = x_leg_of_particle_velocity * static_friction
+			else:
+				### use of kinetic friction...
+				x_component = x_leg_of_particle_velocity * kinetic_friction
+							
+			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+						
+		elif collision_restitution == 0.0:
+			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['bottom']['mass'] * baluster['window outline']['bottom']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['bottom']['mass']) 
+						
+			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+						
 	
-	#"""
-	for particle in substance:
-		#print(particle,' particle')
+	if breach == 'left':
+		#print(' check left')
+		collision_restitution = baluster['window outline']['left']['coefficient of restitution'] * mote.coefficient_of_restitution
+		wall_center = Vector2(0.0,mote.position.y)
+		if collision_restitution >= 1.0 :
+			
+			baluster['window outline']['left']['velocity'] = mote.velocity * 0.0
+			baluster['window outline']['left']['outline'] = 0 + (cell_size)# / 2.0)
+			
+			var normal_vector = Vector2(wall_center - mote.surrounding_area.get_center())
+			#print(normal_vector,' normal')
+			var unit_vector = normal_vector / (snapped(sqrt(pow(normal_vector.x,2.0)),.01) + snapped(sqrt(pow(normal_vector.y,2.0)),.01))
+			#print(unit_vector,' unit')
+			##print(structure[mote]['velocity'],' right after wall contact 1.0')
+			var unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
+			#print(unit_tangent,' unit_tangent')
+							
+			var dotted_unit_mote_velocity = unit_vector.dot(structure[mote]['velocity'])
+			var dotted_tangent_mote_velocity = unit_tangent.dot(structure[mote]['velocity'])
+			#print(dotted_unit_mote_velocity,' dot unit mote velocity')
+			#print(dotted_tangent_mote_velocity,' dotted_tangent_mote_velocity')
+			var dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['left']['velocity'])
+			var dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['left']['velocity'])
+			#print(dotted_unit_wall_velocity,' dotted_unit_wall_velocity')
+			#print(dotted_tangent_wall_velocity,' dotted_tangent_wall_velocity')
+							
+			var final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			var final_tangential_wall_velocity = dotted_tangent_wall_velocity
+							
+							
+			var final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure[mote]['mass'] - baluster['window outline']['left']['mass']) + 2.0 * baluster['window outline']['left']['mass'] * dotted_unit_wall_velocity ) / (structure[mote]['mass'] + baluster['window outline']['left']['mass'])
+			var final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['left']['mass'] - structure[mote]['mass']) + 2.0 * baluster['window outline']['left']['mass'] * dotted_unit_mote_velocity ) / (structure[mote]['mass'] + baluster['window outline']['left']['mass'])
+							
+			#print(final_normal_mote_velocity,' final_normal_mote_velocity')
+			#print(final_normal_wall_velocity,' final_normal_wall_velocity')
+							
+							
+			structure[mote]['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			#final_tangential_mote_velocity * unit_tangent
+							
+			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
+							
+				#
+			#print(structure[mote]['velocity']," structure[mote]['velocity']")
 		
-		#print(particle,' ',structure[particle]['velocity'],' before collision')
-		#print(" ")
-		for wall in baluster['window outline'].keys():
-			# Determine if the particle breaches the a wall...
-			
-			
-			### suppose to be a wall where the particle hits...
-			
-			if wall == 'top':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
-				baluster['window outline'][wall]['outline'] = 0 + (cell_size)# / 2.0)
-			elif wall == 'right':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
-				baluster['window outline'][wall]['outline'] = ProjectSettings.get_setting('display/window/size/width') - (cell_size)# / 2.0)
-			elif wall == 'bottom':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
-				baluster['window outline'][wall]['outline'] = ProjectSettings.get_setting('display/window/size/height') - (cell_size)# / 2.0)
-			elif wall == 'left':
-				baluster['window outline'][wall]['velocity'] = particle.velocity * -100.0
-				baluster['window outline'][wall]['outline'] = 0 + (cell_size)# / 2.0)
-				
-			if wall == 'top' and particle.surrounding_area.position.y <= baluster['window outline']["top"]['outline']:
-				if typeof(baluster['window outline'][wall]['coefficient of restitution']) == TYPE_FLOAT:
-					###the wall impacts the particles (elastic explosion,perfect elastic,partial inelastic, total inelastic...
-					
-					collision_restitution = baluster['window outline'][wall]['coefficient of restitution'] * particle.coefficient_of_restitution
-					
-					wall_center = Vector2(int(particle.position.x),0.0)
-					#print('contact top')
-					if collision_restitution >= 1.0 :
-						### the collision is perfect elastic...
-						
-						elastic_term_1_of_vector_1 = 2.0 * baluster['window outline'][wall]['mass']
-						elastic_term_1_of_vector_2 = 2.0 * structure[particle]['mass']
-						
-						elastic_mass_addition = structure[particle]['mass'] + baluster['window outline'][wall]['mass']
-						
-						elastic_position_kernel_of_vector_1 = (particle.get_position() - wall_center) / cell_size
-						elastic_position_kernel_of_vector_2 = (wall_center - particle.get_position()) / cell_size
-						### find final-velocity 1::
-						elastic_velocity_kernel_of_vector_1 = structure[particle]['velocity'] - baluster['window outline'][wall]['velocity']
-						elastic_dot_vector_1 = elastic_velocity_kernel_of_vector_1.dot(elastic_position_kernel_of_vector_1)
-						
-						### find final-velocit 2::
-						elastic_velocity_kernel_of_vector_2  = baluster['window outline'][wall]['velocity'] - structure[particle]['velocity']
-						elastic_dot_vector_2 = elastic_velocity_kernel_of_vector_2.dot(elastic_position_kernel_of_vector_2)
-					
-						elastic_magnitude_kernel_of_vector_1 = sqrt( (pow(elastic_position_kernel_of_vector_1.x,2.0)+pow(elastic_position_kernel_of_vector_1.y,2.0)) )
-						elastic_magnitude_kernel_of_vector_2 = sqrt( (pow(elastic_position_kernel_of_vector_2.x,2.0)+pow(elastic_position_kernel_of_vector_2.y,2.0)) )
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 )
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution < 1.0 and collision_restitution > 0.0:
-						### ...
-						
-						line_of_impact = wall_center
-						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
-						x_leg_of_particle_velocity = structure[particle]['velocity'].y * tan(outgoing_angle)
-						# determine which friction static or kinetic...
-						#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
-						if structure[particle]['velocity'].x in range(-cell_size,cell_size+1) and structure[particle]['velocity'].y in range(-cell_size,cell_size+1):
-							### using of static friction...
-							x_component = x_leg_of_particle_velocity * static_friction
-						else:
-							### use of kinetic friction...
-							x_component = x_leg_of_particle_velocity * kinetic_friction
-							
-						structure[particle]['velocity'] = structure[particle]['velocity'] - Vector2(x_component,structure[particle]['velocity'].y)
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution == 0.0:
-						### Perfect Inelastic Collisions:::
-						# objects will stick together...
-						
-						### final_velocity = (Mass_1_i * Velocity_1_i) + (Mass_2_i * Velocity_2_i)) / (Mass_1 + Mass_2)
-						
-						final_velocity = ( (structure[particle]['mass'] * structure[particle]['velocity']) + (baluster['window outline'][wall]['mass'] * baluster['window outline'][wall]['velocity']) ) / (structure[particle]['mass'] * baluster['window outline'][wall]['mass']) 
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - final_velocity
-						
-						return structure[particle]['velocity']
-						
-				else:
-					### establish that there is no wall...### So two different aspect...
-					### None or Disappear...
-					if baluster['window outline'][wall]['coefficient of restitution'] == 'None':
-						### nothing happens no adjustments are made to the particle...
-						pass
-					elif baluster['window outline'][wall]['coefficient of restitution'] == 'Disappear':
-						### once the particle breaches the wall it will disappear from the simulation...
-						get_tree().get_root().get_node("Test Area/Simulation").adjust_particles = true
-						particle.to_remove = true
-				
-			elif wall == 'right' and particle.surrounding_area.end.x >= baluster['window outline']['right']['outline']:
-				if typeof(baluster['window outline'][wall]['coefficient of restitution']) == TYPE_FLOAT:
-					###the wall impacts the particles (pefect elastic,elastic,partial inelastic, perfect inelastic...
-					
-					collision_restitution = baluster['window outline'][wall]['coefficient of restitution'] * particle.coefficient_of_restitution
-					
-					wall_center = Vector2(baluster['window outline'][wall]['outline'],int(particle.position.y))
-					#print('contact right')
-					if collision_restitution >= 1.0 :
-						### the collision is perfect elastic...
-						
-						elastic_term_1_of_vector_1 = 2.0 * baluster['window outline'][wall]['mass']
-						elastic_term_1_of_vector_2 = 2.0 * structure[particle]['mass']
-						
-						elastic_mass_addition = structure[particle]['mass'] + baluster['window outline'][wall]['mass']
-						
-						elastic_position_kernel_of_vector_1 = (particle.get_position() - wall_center) / cell_size
-						elastic_position_kernel_of_vector_2 = (wall_center - particle.get_position()) / cell_size
-						### find final-velocity 1::
-						elastic_velocity_kernel_of_vector_1 = structure[particle]['velocity'] - baluster['window outline'][wall]['velocity']
-						elastic_dot_vector_1 = elastic_velocity_kernel_of_vector_1.dot(elastic_position_kernel_of_vector_1)
-						### find final-velocit 2::
-						elastic_velocity_kernel_of_vector_2  = baluster['window outline'][wall]['velocity'] - structure[particle]['velocity']
-						elastic_dot_vector_2 = elastic_velocity_kernel_of_vector_2.dot(elastic_position_kernel_of_vector_2)
-					
-						elastic_magnitude_kernel_of_vector_1 = sqrt( (pow(elastic_position_kernel_of_vector_1.x,2.0)+pow(elastic_position_kernel_of_vector_1.y,2.0)) )
-						elastic_magnitude_kernel_of_vector_2 = sqrt( (pow(elastic_position_kernel_of_vector_2.x,2.0)+pow(elastic_position_kernel_of_vector_2.y,2.0)) )
-						
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - ( ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 ) )
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution < 1.0 and collision_restitution > 0.0:
-						### ...
-						line_of_impact = wall_center
-						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
-						x_leg_of_particle_velocity = snapped((structure[particle]['velocity'].y * tan(outgoing_angle)),.01)
-						# determine which friction static or kinetic...
-						#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
-						#if structure[particle]['velocity'].x in range(-cell_size,cell_size+1) and structure[particle]['velocity'].y in range(-cell_size,cell_size+1):
-						if structure[particle]['velocity'].x in range(-cell_size,cell_size+1) and structure[particle]['velocity'].y in range(-cell_size,cell_size+1):
-							### using of static friction...
-							x_component = x_leg_of_particle_velocity * baluster['window outline'][wall]['coefficient of static friction']
-						else:
-							### use of kinetic friction...
-							x_component = x_leg_of_particle_velocity * baluster['window outline'][wall]['coefficient of kinetic friction']
-							
-						structure[particle]['velocity'] = structure[particle]['velocity'] - Vector2(x_component,structure[particle]['velocity'].y)
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution == 0.0:
-						### Perfect Inelastic Collisions:::
-						# objects will stick together...
-						
-						### final_velocity = (Mass_1_i * Velocity_1_i) + (Mass_2_i * Velocity_2_i)) / (Mass_1 + Mass_2)
-						
-						final_velocity = ( (structure[particle]['mass'] * structure[particle]['velocity']) + (baluster['window outline'][wall]['mass'] * baluster['window outline'][wall]['velocity']) ) / (structure[particle]['mass'] * baluster['window outline'][wall]['mass']) 
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - final_velocity
-						
-						return structure[particle]['velocity']
-						
-				else:
-					### establish that there is no wall...### So two different aspect...
-					### None or Disappear...
-					if baluster['window outline'][wall]['coefficient of restitution'] == 'None':
-						### nothing happens no adjustments are made to the particle...
-						pass
-					elif baluster['window outline'][wall]['coefficient of restitution'] == 'Disappear':
-						### once the particle breaches the wall it will disappear from the simulation...
-						get_tree().get_root().get_node("Test Area/Simulation").adjust_particles = true
-						particle.to_remove = true
-				
-				
-			elif wall == 'bottom' and particle.surrounding_area.end.y >= baluster['window outline']['bottom']['outline']:
-				if typeof(baluster['window outline'][wall]['coefficient of restitution']) == TYPE_FLOAT:
-					###the wall impacts the particles (pefect elastic,elastic,partial inelastic, perfect inelastic...
-					
-					collision_restitution = baluster['window outline'][wall]['coefficient of restitution'] * particle.coefficient_of_restitution
-					
-					wall_center = Vector2(int(particle.position.x),baluster['window outline'][wall]['outline'])
-					#print(wall_center,' wall center check')
-					#print('contact bottom')
-					if collision_restitution >= 1.0 :
-						### the collision is perfect elastic...
-						
-						elastic_term_1_of_vector_1 = 2.0 * baluster['window outline'][wall]['mass']
-						elastic_term_1_of_vector_2 = 2.0 * structure[particle]['mass']
-						
-						elastic_mass_addition = structure[particle]['mass'] + baluster['window outline'][wall]['mass']
-						
-						elastic_position_kernel_of_vector_1 = (particle.get_position() - wall_center) / cell_size
-						elastic_position_kernel_of_vector_2 = (wall_center - particle.get_position()) / cell_size
-						### find final-velocity 1::
-						elastic_velocity_kernel_of_vector_1 = structure[particle]['velocity'] - baluster['window outline'][wall]['velocity']
-						elastic_dot_vector_1 = elastic_velocity_kernel_of_vector_1.dot(elastic_position_kernel_of_vector_1)
-						### find final-velocit 2::
-						elastic_velocity_kernel_of_vector_2  = baluster['window outline'][wall]['velocity'] - structure[particle]['velocity']
-						elastic_dot_vector_2 = elastic_velocity_kernel_of_vector_2.dot(elastic_position_kernel_of_vector_2)
-					
-						elastic_magnitude_kernel_of_vector_1 = sqrt( (pow(elastic_position_kernel_of_vector_1.x,2.0)+pow(elastic_position_kernel_of_vector_1.y,2.0)) )
-						elastic_magnitude_kernel_of_vector_2 = sqrt( (pow(elastic_position_kernel_of_vector_2.x,2.0)+pow(elastic_position_kernel_of_vector_2.y,2.0)) )
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 )
-						
-						#print(structure[particle]['velocity'],' right after wall contact 1.0')
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution < 1.0 and collision_restitution > 0.0:
-						### impartial collisions...
-						
-						# determine which friction static or kinetic...
-						#print(structure[particle]['velocity'],' velocity before collision')
-						
-						line_of_impact = wall_center
-						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
-						y_leg_of_particle_velocity = structure[particle]['velocity'].y
-						x_leg_of_particle_velocity = y_leg_of_particle_velocity * tan(outgoing_angle)
-						
-						# determine which friction static or kinetic...
-						# if the particle is moving within a certain range...
-						#if structure[particle]['velocity'].x in range(-1.0,2.0) and structure[particle]['velocity'].y in range(-1.0,2.0):
-						if structure[particle]['velocity'].x in range(-cell_size,cell_size+1) and structure[particle]['velocity'].y in range(-cell_size,cell_size+1):
-							### using of static friction...
-							x_component = x_leg_of_particle_velocity * baluster['window outline'][wall]['coefficient of static friction']
-						else:
-							### use of kinetic friction...
-							x_component = x_leg_of_particle_velocity * baluster['window outline'][wall]['coefficient of kinetic friction']
-						
-						#print(Vector2(x_component,y_leg_of_particle_velocity),' check created velocity')
-						structure[particle]['velocity'] = structure[particle]['velocity'] - Vector2(x_component,y_leg_of_particle_velocity)
-						#print(structure[particle]['velocity'],' right after wall contact 0.5')
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution == 0.0:
-						### Perfect Inelastic Collisions:::
-						# objects will stick together...
-						
-						### final_velocity = (Mass_1_i * Velocity_1_i) + (Mass_2_i * Velocity_2_i)) / (Mass_1 + Mass_2)
-						
-						final_velocity = ( (structure[particle]['mass'] * structure[particle]['velocity']) + (baluster['window outline'][wall]['mass'] * baluster['window outline'][wall]['velocity']) ) / (structure[particle]['mass'] * baluster['window outline'][wall]['mass']) 
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - final_velocity
-						
-						return structure[particle]['velocity']
-						
-				else:
-					### establish that there is no wall...### So two different aspect...
-					### None or Disappear...
-					if baluster['window outline'][wall]['coefficient of restitution'] == 'None':
-						### nothing happens no adjustments are made to the particle...
-						pass
-					elif baluster['window outline'][wall]['coefficient of restitution'] == 'Disappear':
-						### once the particle breaches the wall it will disappear from the simulation...
-						get_tree().get_root().get_node("Test Area/Simulation").adjust_particles = true
-						particle.to_remove = true
-				
-			elif wall == 'left' and particle.surrounding_area.position.x <= baluster['window outline']['left']['outline']:
-				if typeof(baluster['window outline'][wall]['coefficient of restitution']) == TYPE_FLOAT:
-					###the wall impacts the particles (pefect elastic,elastic,partial inelastic, perfect inelastic...
-
-					collision_restitution = baluster['window outline'][wall]['coefficient of restitution'] * particle.coefficient_of_restitution
-					
-					wall_center = Vector2(0.0,int(particle.position.y))
-					#print('contact left')
-					if collision_restitution >= 1.0 :
-						### the collision is perfect elastic...
-						
-						elastic_term_1_of_vector_1 = 2.0 * baluster['window outline'][wall]['mass']
-						elastic_term_1_of_vector_2 = 2.0 * structure[particle]['mass']
-						
-						elastic_mass_addition = structure[particle]['mass'] + baluster['window outline'][wall]['mass']
-						
-						elastic_position_kernel_of_vector_1 = (particle.get_position() - wall_center) / cell_size
-						elastic_position_kernel_of_vector_2 = (wall_center - particle.get_position()) / cell_size
-						### find final-velocity 1::
-						elastic_velocity_kernel_of_vector_1 = structure[particle]['velocity'] - baluster['window outline'][wall]['velocity']
-						elastic_dot_vector_1 = elastic_velocity_kernel_of_vector_1.dot(elastic_position_kernel_of_vector_1)
-						### find final-velocit 2::
-						elastic_velocity_kernel_of_vector_2  = baluster['window outline'][wall]['velocity'] - structure[particle]['velocity']
-						elastic_dot_vector_2 = elastic_velocity_kernel_of_vector_2.dot(elastic_position_kernel_of_vector_2)
-					
-						elastic_magnitude_kernel_of_vector_1 = sqrt( (pow(elastic_position_kernel_of_vector_1.x,2.0)+pow(elastic_position_kernel_of_vector_1.y,2.0)) )
-						elastic_magnitude_kernel_of_vector_2 = sqrt( (pow(elastic_position_kernel_of_vector_2.x,2.0)+pow(elastic_position_kernel_of_vector_2.y,2.0)) )
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - ( elastic_term_1_of_vector_1 / elastic_mass_addition ) * ( elastic_dot_vector_1 / elastic_magnitude_kernel_of_vector_1 ) * ( elastic_position_kernel_of_vector_1 )
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution < 1.0 and collision_restitution > 0.0:
-						### ...
-						line_of_impact = wall_center
-						incoming_angle = rad_to_deg(particle.get_position().angle_to(line_of_impact))
-						outgoing_angle = rad_to_deg(atan(baluster['window outline'][wall]['coefficient of restitution'] * incoming_angle ))
-						x_leg_of_particle_velocity = structure[particle]['velocity'].y * tan(outgoing_angle)
-						# determine which friction static or kinetic...
-						#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
-						if structure[particle]['velocity'].x in range(-cell_size,cell_size+1) and structure[particle]['velocity'].y in range(-cell_size,cell_size+1):
-							### using of static friction...
-							x_component = x_leg_of_particle_velocity * baluster['window outline'][wall]['coefficient of static friction']
-						else:
-							### use of kinetic friction...
-							x_component = x_leg_of_particle_velocity * baluster['window outline'][wall]['coefficient of kinetic friction']
-							
-						structure[particle]['velocity'] = structure[particle]['velocity'] - Vector2(x_component,structure[particle]['velocity'].y)
-						
-						return structure[particle]['velocity']
-						
-					elif collision_restitution == 0.0:
-						### Perfect Inelastic Collisions:::
-						# objects will stick together...
-						
-						### final_velocity = (Mass_1_i * Velocity_1_i) + (Mass_2_i * Velocity_2_i)) / (Mass_1 + Mass_2)
-						
-						final_velocity = ( (structure[particle]['mass'] * structure[particle]['velocity']) + (baluster['window outline'][wall]['mass'] * baluster['window outline'][wall]['velocity']) ) / (structure[particle]['mass'] * baluster['window outline'][wall]['mass']) 
-						
-						structure[particle]['velocity'] = structure[particle]['velocity'] - final_velocity
-						
-						return structure[particle]['velocity']
-						
-				else:
-					### establish that there is no wall...### So two different aspect...
-					### None or Disappear...
-					if baluster['window outline'][wall]['coefficient of restitution'] == 'None':
-						### nothing happens no adjustments are made to the particle...
-						pass
-					elif baluster['window outline'][wall]['coefficient of restitution'] == 'Disappear':
-						### once the particle breaches the wall it will disappear from the simulation...
-						get_tree().get_root().get_node("Test Area/Simulation").adjust_particles = true
-						particle.to_remove = true
-				
 		
-	#"""
+		elif collision_restitution < 1.0 and collision_restitution > 0.0:
+			line_of_impact = wall_center
+			incoming_angle = rad_to_deg(mote.get_position().angle_to(line_of_impact))
+			outgoing_angle = rad_to_deg(atan(baluster['window outline']['left']['coefficient of restitution'] * incoming_angle ))
+			x_leg_of_particle_velocity = structure[mote]['velocity'].y * tan(outgoing_angle)
+			# determine which friction static or kinetic...
+			#if structure[particle]['velocity'].x in range(-1,2) and structure[particle]['velocity'].y in range(-1,2):
+			if structure[mote]['velocity'].x in range(-cell_size,cell_size+1) and structure[mote]['velocity'].y in range(-cell_size,cell_size+1):
+				### using of static friction...
+				x_component = x_leg_of_particle_velocity * static_friction
+			else:
+				### use of kinetic friction...
+				x_component = x_leg_of_particle_velocity * kinetic_friction
+							
+			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(x_component,structure[mote]['velocity'].y)
+						
+			
+		elif collision_restitution == 0.0:
+			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['left']['mass'] * baluster['window outline']['left']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['left']['mass']) 
+						
+			structure[mote]['velocity'] = structure[mote]['velocity'] - final_velocity
+						
+	
+	
+	
+	return structure[mote]['velocity']
+	
+	
+	
+	
+	
+	
+	
 	
 	
 func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_size):
@@ -453,13 +394,13 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		### collision is impartial inelastic...
 		#"""
 		# find the point of contact between particles...
-		#print(artifact.relation_to_domain[other_artifact],' distance between particles.')
+		##print(artifact.relation_to_domain[other_artifact],' distance between particles.')
 		### artifact....
 		#line_of_impact = artifact.get_position() + (artifact.relation_to_domain[other_artifact] / 2.0)
 		line_of_impact = (artifact.surrounding_area.intersection(other_artifact.surrounding_area)).get_center()
-		#print(line_of_impact,' artifact to other artifact')
+		##print(line_of_impact,' artifact to other artifact')
 		incoming_angle_of_artifact = rad_to_deg(artifact.get_position().angle_to(line_of_impact))
-		#print(incoming_angle_of_artifact,' incoming angle artifact to other artifact')
+		##print(incoming_angle_of_artifact,' incoming angle artifact to other artifact')
 		outgoing_angle_of_artifact = rad_to_deg(atan(other_artifact.coefficient_of_restitution * incoming_angle_of_artifact ))
 		x_leg_of_updated_artifact_velocity = snapped((grid_field[artifact]['velocity'].y * tan(outgoing_angle_of_artifact)),.01)
 		# determine which friction static or kinetic...
@@ -476,9 +417,9 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		
 		#"""
 		### the other artifact...
-		#print(other_artifact,' ',grid_field[other_artifact]['velocity'],' checking y value')
+		##print(other_artifact,' ',grid_field[other_artifact]['velocity'],' checking y value')
 		#line_of_impact = other_artifact.get_position() - (other_artifact.relation_to_domain[artifact] / 2.0)
-		#print(line_of_impact,' other artifact to artifact')
+		##print(line_of_impact,' other artifact to artifact')
 		incoming_angle_of_other_artifact = rad_to_deg(other_artifact.get_position().angle_to(line_of_impact))
 		outgoing_angle_of_other_artifact = rad_to_deg(atan(artifact.coefficient_of_restitution * incoming_angle_of_other_artifact ))
 		x_leg_of_updated_other_artifact_velocity = snapped((grid_field[other_artifact]['velocity'].y * tan(outgoing_angle_of_other_artifact)),.01)
