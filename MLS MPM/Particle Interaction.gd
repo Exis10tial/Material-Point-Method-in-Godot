@@ -265,15 +265,10 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 		
 		
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
-			print(mote.get_position(),' mote position')
-			print(wall_center,' wall center')
-			#incoming_angle = snapped(rad_to_deg(mote.get_position().angle_to_point(wall_center)),1)
+		
 			incoming_angle = snapped(rad_to_deg(wall_center.angle_to_point(mote.get_position())),1)
-			print(incoming_angle,' incoming angle')
 			outgoing_angle = snapped(collision_restitution * tan(incoming_angle),1)
-			print(outgoing_angle,' outgoing_angle')
 			y_leg_of_particle_velocity = snapped(structure[mote]['velocity'].x * tan(outgoing_angle),.01)
-			print(y_leg_of_particle_velocity,' y_leg_of_particle_velocity')
 			# determine which friction static or kinetic...
 			if structure[mote]['velocity'].x in range(-(cell_size/2.0),(cell_size/2.0)+1) and structure[mote]['velocity'].y in range(-(cell_size/2.0),(cell_size/2.0)+1):
 				### using of static friction...
@@ -284,7 +279,7 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 				y_component = y_leg_of_particle_velocity * collision_kinetic_friction
 				
 			structure[mote]['velocity'] = structure[mote]['velocity'] - Vector2(structure[mote]['velocity'].x,y_component)
-			print(structure[mote]['velocity'],' structure[mote][velocity]')
+			
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['left']['mass'] * baluster['window outline']['left']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['left']['mass']) 
 						
