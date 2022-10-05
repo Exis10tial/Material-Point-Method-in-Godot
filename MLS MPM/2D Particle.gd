@@ -12,6 +12,7 @@ var mass : float
 var velocity : Vector2
 var volume: float
 ###...
+var cell_size : float = 1.0
 var coefficient_of_restitution : float = 0.0
 var coefficient_of_static_friction : float = 0.0
 var coefficient_of_kinetic_friction : float = 0.0

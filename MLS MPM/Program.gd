@@ -184,7 +184,7 @@ func Weight_Interpolation(splines:String,version:int,kernel:Vector2,cell_size:fl
 	
 	return weight_interpolation
 	
-func Simulate(time_passed,grid_domain,material,the_grid):
+func Simulate(time_passed,material,the_grid):
 	### particle simulation...
 	
 	### reseting the grid data...
@@ -229,7 +229,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			#print(kernel_distance,' testing for floats')
 			#print(flipped_kernel_distance,' the flipped test')
 			### Weight Interpolation...
-			Weight_Interpolation(basis,basis_function_version,particle.relation_to_domain[other_particle],grid_domain)
+			Weight_Interpolation(basis,basis_function_version,particle.relation_to_domain[other_particle],particle.cell_size)
 			
 			#"""
 			if other_particle.physical_state == 'solid':
@@ -250,7 +250,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			
 			### gradient-weight : weight_interpolation * D ^-1 * flipped_kernel
 			#D **-1 = (4/pow(cell_size,2)) * other_particle.I^-1 
-			gradient_weight_term_1 = snapped((snapped((weight_interpolation * basis_coefficient),.01) / pow(grid_domain,2.0)),.01)
+			gradient_weight_term_1 = snapped((snapped((weight_interpolation * basis_coefficient),.01) / pow(particle.cell_size,2.0)),.01)
 			gradient_weight_term_2 =  get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(particle.I,gradient_weight_term_1,true)
 			gradient_weight_interpolation = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(gradient_weight_term_2,particle.domain_relation_to_particle[other_particle])
 			
@@ -336,25 +336,25 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 		if particle.surrounding_area.position.y < barriers['window outline']['top']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached top')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('top',particle,barriers,the_grid,grid_domain,gravity)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('top',particle,barriers,the_grid,particle.cell_size,gravity)
 		
 		if particle.surrounding_area.end.x >= barriers['window outline']['right']['outline']:
 			### the particle left the window out line at the sides...
 			#print(particle.surrounding_area.end.x,' particle.surrounding_area.end.x')
 			#print(barriers['window outline']['right']['outline']," barriers['window outline']['right']['outline']")
 			#print('breached right')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('right',particle,barriers,the_grid,grid_domain,gravity)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('right',particle,barriers,the_grid,particle.cell_size,gravity)
 			
 		if particle.surrounding_area.end.y >= barriers['window outline']['bottom']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached bottom')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('bottom',particle,barriers,the_grid,grid_domain,gravity)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('bottom',particle,barriers,the_grid,particle.cell_size,gravity)
 			#the_grid[particle]['velocity'] = the_grid[particle]['velocity'] * 0.0
 			
 		if particle.surrounding_area.position.x < barriers['window outline']['left']['outline']:
 			### the particle left the window out line at the sides...
 			#print('breached left')
-			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('left',particle,barriers,the_grid,grid_domain,gravity)
+			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('left',particle,barriers,the_grid,particle.cell_size,gravity)
 		else:
 			### the particle is within the window outline...
 			pass
@@ -390,13 +390,15 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			#particle.relation_to_domain[other_particle] = flipped_kernel_distance
 			#particle.domain_relation_to_particle[other_particle] = kernel_distance
 			#print(particle,' relation to ',other_particle,' is ',particle.relation_to_domain[other_particle],' check after update')
-			contact_with = kernel_distance / grid_domain
+			contact_with = kernel_distance / particle.get_node("shape").get_size().x
+			#print(contact_with, 'contact with')
 			#"""
 			if contact_with.x == 0 and contact_with.y == 0:
 				### always in contact with itself...
 				pass
 				
-			elif abs(contact_with.x) < grid_domain/grid_domain and abs(contact_with.y) < grid_domain/grid_domain:
+			#elif abs(contact_with.x) < 1.0 abs(contact_with.x) < 1.0and abs(contact_with.y) < 1.0:
+			elif contact_with.x in range(-1,2) and contact_with.y in range(-1,2):
 				### the particles come into contact with each other...
 			
 			#elif contact_with.x > -(grid_domain/grid_domain) or contact_with.x < grid_domain/grid_domain and contact_with.y > -(grid_domain/grid_domain) or contact_with.y < grid_domain/grid_domain:
@@ -416,7 +418,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 				#print('formed when the particles collide')
 				#print(test_intersectional.get_center(),' is the center of the instersectional')
 				### particles interaction with other particles...
-				the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_between_Other_Particles(particle,other_particle,the_grid,grid_domain)
+				the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_between_Other_Particles(particle,other_particle,the_grid,particle.cell_size)
 				#print(the_grid_field[particle])
 			else:
 				### doesn't come into contact with another... 
@@ -445,7 +447,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 		for other_particle in particle.within_range:
 			
 			### Weight Interpolation...
-			Weight_Interpolation(basis,basis_function_version,particle.relation_to_domain[other_particle],grid_domain)
+			Weight_Interpolation(basis,basis_function_version,particle.relation_to_domain[other_particle],particle.cell_size)
 			#print(weight_interpolation,' wip')
 			#MLS MPM 
 			#particle.velocity = sum of (the_grid[velocity] * weight_interpolation)
@@ -461,7 +463,7 @@ func Simulate(time_passed,grid_domain,material,the_grid):
 			c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_flipped_velocity_coefficient,weight_interpolation,true)
 			sum_of_c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Add_Matrix(sum_of_c_weighted_velocity_matrix,c_weighted_velocity_matrix)
 		
-		c_cell_coefficient =  snapped((basis_coefficient / pow(grid_domain,2.0)),.01)
+		c_cell_coefficient =  snapped((basis_coefficient / pow(particle.cell_size,2.0)),.01)
 		c_inverse_I_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(particle.I)
 		c_cell_inverse_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_inverse_I_coefficient,c_cell_coefficient,true)
 				

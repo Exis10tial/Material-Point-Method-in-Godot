@@ -49,7 +49,7 @@ func Initial_Collection_Of_Substance():
 	#x:1 y:1 = 1 particle
 	
 	#domain_size = Vector2(100.0,100.0)
-	#domain_size = Vector2(48.0,42.0)
+	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(35.0,30.0)
 	domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
@@ -269,7 +269,7 @@ func _on_Substance_ready():
 			particle.velocity = maintain_velocity
 			#"""
 			# testing hyperelastic - neohookean
-			particle.coefficient_of_restitution = 0.70 #rubber
+			particle.coefficient_of_restitution = 1.00 #rubber
 			particle.coefficient_of_static_friction = 0.9 #rubber
 			particle.coefficient_of_kinetic_friction = 0.250 #rubber
 			particle.physical_state = 'solid'

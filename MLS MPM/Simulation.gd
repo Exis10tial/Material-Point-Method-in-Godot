@@ -65,12 +65,12 @@ func _on_Simulation_ready():
 	#for particle in $"Substance".get_children():
 	#	print(particle.velocity,' before simulation')
 	
-	
 	set_process(true)
-
+	#set_physics_process(true)
 
 func _process(delta):
-	
+	pass
+	#"""
 	if check_time >= $'Substance'.dx:
 		
 		
@@ -82,10 +82,11 @@ func _process(delta):
 		#	$"Program".merge_particles = false
 		
 		#Particle Simulation....
-		$"Program".Simulate($"Substance".dx,$"Substance".cell_size,$"Substance".get_children(),$"Program".grid_nodes)
+		$"Program".Simulate($"Substance".dx,$"Substance".get_children(),$"Program".grid_nodes)
 		
 		### used if the particle travels past the window...
 		### and the window is set to 'disappear'...
+		#'''
 		if adjust_particles == true:
 			### if particles are to be removed..
 			for particle in $"Substance".get_children():
@@ -96,10 +97,11 @@ func _process(delta):
 			
 			### reset...
 			adjust_particles = false
+		#'''
 	else:
 		collect_time(delta)
-
+	#"""
 
 func collect_time(delta):
-	check_time += snapped(delta,.0001)
+	check_time += snapped(delta,.01)
 	return check_time
