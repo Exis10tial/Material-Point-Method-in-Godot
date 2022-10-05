@@ -136,7 +136,7 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['top']['mass'] * baluster['window outline']['top']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['top']['mass']) 
 				
-			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
+			structure[mote]['velocity'] = final_velocity
 			
 			
 	if breach == 'right':
@@ -185,14 +185,15 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['right']['mass'] * baluster['window outline']['right']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['right']['mass']) 
 					
-			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
+			structure[mote]['velocity'] = final_velocity
 				
 			
 	if breach == 'bottom':
+		baluster['window outline']['bottom']['velocity'] = Vector2(1.0,1.0)
 		collision_restitution = baluster['window outline']['bottom']['coefficient of restitution'] * mote.coefficient_of_restitution
 		collision_static_friction = baluster['window outline']['bottom']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['bottom']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
-		baluster['window outline']['bottom']['velocity'] = mote.velocity * 0.0
+		baluster['window outline']['bottom']['velocity'] = baluster['window outline']['bottom']['velocity'] * -mote.velocity
 		baluster['window outline']['bottom']['outline'] = ProjectSettings.get_setting('display/window/size/height')# - (cell_size)# / 2.0)
 		wall_center = Vector2(mote.position.x,baluster['window outline']['bottom']['outline'])
 		if collision_restitution >= 1.0 :
@@ -230,9 +231,11 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 			
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['bottom']['mass'] * baluster['window outline']['bottom']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['bottom']['mass']) 
-				
-			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
 			
+			structure[mote]['velocity'] = final_velocity
+			
+			#print(structure[mote]['velocity']," structure[mote]['velocity']")
+	
 	
 	if breach == 'left':
 		collision_restitution = baluster['window outline']['left']['coefficient of restitution'] * mote.coefficient_of_restitution
@@ -283,9 +286,9 @@ func Collision_with_Walls(breach,mote,baluster,structure,cell_size,gravity_force
 		elif collision_restitution == 0.0:
 			final_velocity = ( (structure[mote]['mass'] * structure[mote]['velocity']) + (baluster['window outline']['left']['mass'] * baluster['window outline']['left']['velocity']) ) / (structure[mote]['mass'] * baluster['window outline']['left']['mass']) 
 						
-			structure[mote]['velocity'] = structure[mote]['velocity'] + final_velocity
-						
-	
+			structure[mote]['velocity'] = final_velocity
+			
+			
 	return structure[mote]['velocity']
 	
 	
@@ -348,7 +351,7 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 		
 		final_velocity = ( (grid_field[artifact]['mass'] * grid_field[artifact]['velocity']) + (grid_field[other_artifact]['mass'] *grid_field[other_artifact]['velocity']) ) / (grid_field[artifact]['mass'] * grid_field[other_artifact]['mass']) 
 						
-		grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] - final_velocity
+		grid_field[artifact]['velocity'] = final_velocity
 		
 		#grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - final_velocity
 	
