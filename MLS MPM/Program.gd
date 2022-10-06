@@ -99,7 +99,10 @@ func _on_Program_ready():
 		barriers['window outline'][wall]['coefficient of kinetic friction'] = 1.0
 		barriers['window outline'][wall]['mass'] = 1000.00
 		#barriers['window outline'][wall]['mass'] = 1.00
-		
+		barriers['window outline']['top']['outline'] = 0.0
+		barriers['window outline']['right']['outline'] = ProjectSettings.get_setting('display/window/size/width')
+		barriers['window outline']['bottom']['outline'] = ProjectSettings.get_setting('display/window/size/height')
+		barriers['window outline']['left']['outline'] = 0.0
 		barriers['window outline'][wall]['velocity'] = Vector2(1.0,1.0)
 		
 		
@@ -108,10 +111,14 @@ func _notification(event):
 	if event == Node.NOTIFICATION_WM_CLOSE_REQUEST:
 		#print("Exit")
 		pass
-	if event == Node.NOTIFICATION_WM_SIZE_CHANGED:
-		#print('Window size change')
+	if event == Node.NOTIFICATION_WM_MOUSE_EXIT:
 		pass
-	
+	#if event == Node.NOTIFICATION_WM_MOUSE_ENTER:
+		#
+		#ProjectSettings.set_setting('display/window/size/width',get_tree().get_root().get_size().x)
+		#ProjectSettings.set_setting('display/window/size/width',get_tree().get_root().get_size().y)
+
+
 func Substance_Alignment():
 	pass
 
@@ -205,7 +212,7 @@ func Simulate(time_passed,material,the_grid):
 		#particle.surrounding_area = Rect2(Vector2(particle.position.x - ((particle.get_node("shape").get_size().x/2.0)*area_multiplier),particle.position.y - ((particle.get_node("shape").get_size().y/2.0)*area_multiplier)),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
 		
 		#particle.surrounding_area = Rect2(Vector2(particle.position.x,particle.position.y),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
-		particle.surrounding_area = Rect2(Vector2((particle.position.x+particle.get_node("shape").get_position().x),(particle.position.y+particle.get_node("shape").get_position().y)),Vector2(particle.get_node("shape").get_size().x*area_multiplier,particle.get_node("shape").get_size().y*area_multiplier))
+		particle.surrounding_area = Rect2(Vector2((particle.position.x+particle.get_node("shape").get_position().x),(particle.position.y+particle.get_node("shape").get_position().y)),Vector2(particle.get_node("shape").get_size().x,particle.get_node("shape").get_size().y))
 		
 		#print(particle.surrounding_area,' particle domain')
 		particle.F = particle.I.duplicate(true)
@@ -310,7 +317,7 @@ func Simulate(time_passed,material,the_grid):
 			
 			### Forces from other objects.
 			#the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(randf_range(-10.0,10.0),randf_range(-10.0,10.0))
-			the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(0.0,2.0)
+			the_grid[particle]['velocity']  = the_grid[particle]['velocity'] + Vector2(-1.0,0.0)
 			
 			#print(particle,' ',the_grid[particle]['velocity'],' velocity ')
 		else:
@@ -349,7 +356,7 @@ func Simulate(time_passed,material,the_grid):
 			### the particle left the window out line at the sides...
 			#print('breached bottom')
 			the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_with_Walls('bottom',particle,barriers,the_grid,particle.cell_size,gravity)
-			#the_grid[particle]['velocity'] = the_grid[particle]['velocity'] * 0.0
+			#print(particle,' ',the_grid[particle]['velocity'],' velocity ')
 			
 		if particle.surrounding_area.position.x < barriers['window outline']['left']['outline']:
 			### the particle left the window out line at the sides...
@@ -359,7 +366,7 @@ func Simulate(time_passed,material,the_grid):
 			### the particle is within the window outline...
 			pass
 		
-		#print(the_grid[particle]['velocity'],' checking updated grid velocity after collision')
+		
 		#print(' ')
 		#print(particle,' checking particle...')
 		### if the particle has contacted another particle....
@@ -390,17 +397,18 @@ func Simulate(time_passed,material,the_grid):
 			#particle.relation_to_domain[other_particle] = flipped_kernel_distance
 			#particle.domain_relation_to_particle[other_particle] = kernel_distance
 			#print(particle,' relation to ',other_particle,' is ',particle.relation_to_domain[other_particle],' check after update')
-			contact_with = kernel_distance / particle.get_node("shape").get_size().x
+			contact_with = kernel_distance / float(particle.get_node("shape").get_size().x)
 			#print(contact_with, 'contact with')
 			#"""
+			#print(range(-1.0,2.0))
 			if contact_with.x == 0 and contact_with.y == 0:
 				### always in contact with itself...
 				pass
 				
 			#elif abs(contact_with.x) < 1.0 abs(contact_with.x) < 1.0and abs(contact_with.y) < 1.0:
-			elif contact_with.x in range(-1,2) and contact_with.y in range(-1,2):
+			elif contact_with.x < -1.0 or  contact_with.x > 1.0 and contact_with.y < -1.0 or  contact_with.y > 1.0:
 				### the particles come into contact with each other...
-			
+				#print('touch other particle')
 			#elif contact_with.x > -(grid_domain/grid_domain) or contact_with.x < grid_domain/grid_domain and contact_with.y > -(grid_domain/grid_domain) or contact_with.y < grid_domain/grid_domain:
 				### come into some contact...
 				
@@ -426,6 +434,7 @@ func Simulate(time_passed,material,the_grid):
 				#reset...
 				particle.within_range = [particle]
 				other_particle.within_range = [other_particle]
+				#print('not touch other particle')
 			#"""
 		
 	# Grid to Particle...
@@ -476,16 +485,14 @@ func Simulate(time_passed,material,the_grid):
 		#print(particle.velocity,' velocity after')
 		
 		#particle.position = particle.get_position() + (time_passed * particle.velocity)
-		particle.position.x = snapped((particle.position.x + snapped((time_passed * particle.velocity.x),.01)  ),.01)
+		particle.position.x = snapped((particle.position.x + snapped((time_passed * particle.velocity.x),.001)  ),.001)
+		particle.position.y = snapped((particle.position.y + snapped((time_passed * particle.velocity.y),.001)  ),.001)
 		
-		#if particle.position.x > ProjectSettings.get_setting('display/window/size/width'):
-		#	particle.position.x = clampf(particle.position.x,(0.0+(grid_domain/2.0)),(ProjectSettings.get_setting('display/window/size/width')-(grid_domain/2.0) ))
-		#particle.position.x = clampf(particle.position.x,(0.0+(grid_domain/2.0)),(ProjectSettings.get_setting('display/window/size/width')-(grid_domain/2.0) ))
-		##particle.position.x = clampf(particle.position.x,(0.0),(ProjectSettings.get_setting('display/window/size/width')-(grid_domain*2) ))
-		particle.position.y = snapped((particle.position.y + snapped((time_passed * particle.velocity.y),.01)  ),.01)
-		#particle.position.y = clampf(particle.position.y,(0.0+(grid_domain/2.0)),(ProjectSettings.get_setting('display/window/size/height')-(grid_domain/2.0) ))
-		#particle.position.y = clampf(particle.position.y,(0.0),(ProjectSettings.get_setting('display/window/size/height')-(grid_domain*2) ))
+		#particle.position.x = clampf(particle.position.x,1.0,ProjectSettings.get_setting('display/window/size/width')-1)
+		#particle.position.y = clampf(particle.position.y,1.0,ProjectSettings.get_setting('display/window/size/height')-1)
 		
+		
+		#print(particle.position,' position after')
 		###deformation update...
 		#particle.F = (particle.I + time_passed * particle.C ) * particle.F
 		#print(particle.F,' deformation gradient before')
