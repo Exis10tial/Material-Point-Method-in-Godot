@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://r6g80a2g56u2"]
+
+[ext_resource type="Script" path="res://AlchemyLab.gd" id="1_v4lm3"]
+
+[node name="Alchemy Lab" type="Node"]
+script = ExtResource("1_v4lm3")
+
+[connection signal="ready" from="." to="." method="_on_alchemy_lab_ready"]

@@ -1,8 +1,8 @@
 extends Node
 
 
-var identify_substance : File
-var substance : Object
+var fund_chemistry : File
+var alchemy : Object
 var find_math_book : File
 var math_book : Object
 var build_program : File
@@ -14,18 +14,35 @@ var models : Object
 var check_time : float
 var adjust_particles : bool = false
 ###...
-
+var Particles : Dictionary = {}
+var rate : float
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #	pass
+func Establish_Rate():
+	### ...
+	#dx = snapped(1.0/float(particle_limit)*1.50,.001)
+	#dx = snapped(1.0/float(particle_limit)*5.00,.001)
+	rate = snapped(1.0/float(len($"Substance".particle_mechanics)),.001)
+	#dx = snapped(1.0/1.50,.001)
+	#dx = 1.50
+	#dx = 1.0
+	return rate
 
+#func _notification(event):
+	#print(event)
+	#if event == CanvasItem.NOTIFICATION_DRAW:
+	#	print('test')
+		#for particle in Particles:
+			#Particles[particle].draw_particle()
+	
 func _on_Simulation_ready():
 	###...
 	
-	identify_substance = File.new()
-	if identify_substance.file_exists("res://Substance.tscn"):
-		substance = load("res://Substance.tscn").instantiate()
+	fund_chemistry = File.new()
+	if fund_chemistry.file_exists("res://AlchemyLab.tscn"):
+		alchemy = load("res://AlchemyLab.tscn").instantiate()
 	else:
 		### file does not exists...
 		print(' substance.tscn does not exists...')
@@ -58,22 +75,21 @@ func _on_Simulation_ready():
 	add_child(math_book)
 	add_child(collisions)
 	add_child(models)
-	add_child(substance)
+	add_child(alchemy)
 	
 	### initial grid node data....
-	$"Program".grid_nodes = $"Substance".grid_nodes.duplicate(true)
+	#$"Program".grid_nodes = $"Substance".grid_nodes.duplicate(true)
 	#for particle in $"Substance".get_children():
 	#	print(particle.velocity,' before simulation')
+	Establish_Rate()
 	
 	set_process(true)
 	#set_physics_process(true)
-
+	
 func _process(delta):
-	pass
 	#"""
-	if check_time >= $'Substance'.dx:
-		
-		
+	if check_time >= rate:
+
 		### if particles ares set to merge...
 		#if $"Program".merge_particles == true:
 			
@@ -82,22 +98,28 @@ func _process(delta):
 		#	$"Program".merge_particles = false
 		
 		#Particle Simulation....
-		$"Program".Simulate($"Substance".dx,$"Substance".get_children(),$"Program".grid_nodes)
-		
+		#$"Program".Simulate($"Substance".dx,$"Substance".get_children(),$"Program".grid_nodes)
+		$"Program".Simulate(rate,$"Substance",$"Substance".grid)
 		### used if the particle travels past the window...
 		### and the window is set to 'disappear'...
 		#'''
 		if adjust_particles == true:
 			### if particles are to be removed..
-			for particle in $"Substance".get_children():
+			for particle in Particles.keys():
 				if particle.to_remove == true:
 					particle.to_remove = false
 					particle.free()
-					$"Program".grid_nodes.erase(particle)
-			
+					$"Substance".grid.erase(particle)
+				
 			### reset...
 			adjust_particles = false
 		#'''
+		
+		for particle in $"Substance".particle_lineation.keys():
+			print($"Substance".particle_lineation[particle],' end of cycle')
+		
+		### the particle/s position is updated...
+		$"Substance".queue_redraw()
 	else:
 		collect_time(delta)
 	#"""

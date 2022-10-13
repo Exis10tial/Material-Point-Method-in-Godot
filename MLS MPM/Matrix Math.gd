@@ -293,69 +293,69 @@ func Inverse_Matrix(m:Array):
 		pass
 	return new_matrix
 
-func Find_Eigenvectors(a:Array):
+#func Find_Eigenvectors(a:Array):
 	### Eigenvector formula : AV = evV
 	# A = square matrix, ev = eigenvalues, V = eigenvectors
 	### eigenvalues formula : | A - Iev |...
 	# A = sqare matrix , I = Identity Matrix of A,ev = eigenvalues
-	var eigenvectors_01 : Vector2
-	var eigenvectors_02 : Vector2
-	var solve_by_determinant : Array
+#	var eigenvectors_01 : Vector2
+	#var eigenvectors_02 : Vector2
+	#var solve_by_determinant : Array
 	#var find_eigenvector : Array
-	var eigen_identity : Array
+	#var eigen_identity : Array
 	#var quadratic_form 
-	var eigenvalues_01 : float
-	var eigenvalues_02 : float
+	#var eigenvalues_01 : float
+	#var eigenvalues_02 : float
 	
-	var quadratic_coefficient_a
-	var quadratic_coefficient_b
-	var quadratic_constant_c
+#	var quadratic_coefficient_a
+	#var quadratic_coefficient_b
+	#var quadratic_constant_c
 	
-	var helper_diagonalize_matrix
+	#var helper_diagonalize_matrix
 
-	if Identify_Rows(a) == Identify_Columns(a):
+	#if Identify_Rows(a) == Identify_Columns(a):
 		### It is a square matrix...
-		if Identify_Rows(a) == 2:
+		#if Identify_Rows(a) == 2:
 			
 			### Find Eigenvalues...
 			# I time v
 			# A minus Iv matrix
 			# determinant from A minus Iv 
-			eigen_identity = [['ev',0],[0,'ev']]
-			solve_by_determinant = [['{0}'.format({'0':a[0][0]}) + ' - ' + eigen_identity[0][0],a[0][1] - eigen_identity[0][1]],[a[1][0] - eigen_identity[1][0],'{0}'.format({'0':a[1][1]}) + ' - ' + eigen_identity[1][1] ]]
+			#eigen_identity = [['ev',0],[0,'ev']]
+			#solve_by_determinant = [['{0}'.format({'0':a[0][0]}) + ' - ' + eigen_identity[0][0],a[0][1] - eigen_identity[0][1]],[a[1][0] - eigen_identity[1][0],'{0}'.format({'0':a[1][1]}) + ' - ' + eigen_identity[1][1] ]]
 			
 			#print(solve_by_determinant,' solving')
 			
-			quadratic_coefficient_a = - 1.0 * -1.0
-			quadratic_coefficient_b = (a[0][0] * -1.0) + (a[1][1] * -1.0)
-			quadratic_constant_c = (a[0][0] * a[1][1]) + (solve_by_determinant[0][1] * solve_by_determinant[1][0])
+		#	quadratic_coefficient_a = - 1.0 * -1.0
+			#quadratic_coefficient_b = (a[0][0] * -1.0) + (a[1][1] * -1.0)
+			#quadratic_constant_c = (a[0][0] * a[1][1]) + (solve_by_determinant[0][1] * solve_by_determinant[1][0])
 			
 		
 			#solving quadratic equation
 			# x = -b +- square root ( power(b,2.0) - 4ac  ) / 2a
 			
-			eigenvalues_01 = (-1.0*quadratic_coefficient_b) + ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
+			#eigenvalues_01 = (-1.0*quadratic_coefficient_b) + ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
 			
-			eigenvalues_02 = (-1.0*quadratic_coefficient_b) - ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
+			#eigenvalues_02 = (-1.0*quadratic_coefficient_b) - ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
 	
 			#print(eigenvalues_01,' plus')
 			#print(eigenvalues_02,' minus')
 
 			# Find Eigenvectors...
-			eigenvectors_01.x = (a[0][0] - eigenvalues_01) / (-1.0 * (a[0][1] - eigenvalues_01))
-			eigenvectors_01.y = (a[1][0] - eigenvalues_01) / (-1.0 * (a[1][1] - eigenvalues_01))
+			#eigenvectors_01.x = (a[0][0] - eigenvalues_01) / (-1.0 * (a[0][1] - eigenvalues_01))
+			#eigenvectors_01.y = (a[1][0] - eigenvalues_01) / (-1.0 * (a[1][1] - eigenvalues_01))
 			
-			eigenvectors_02.x = (a[0][0] - eigenvalues_02) / (-1.0 * (a[0][1] - eigenvalues_02))
-			eigenvectors_02.y = (a[1][0] - eigenvalues_02) / (-1.0 * (a[1][1] - eigenvalues_02))
+			#eigenvectors_02.x = (a[0][0] - eigenvalues_02) / (-1.0 * (a[0][1] - eigenvalues_02))
+			#eigenvectors_02.y = (a[1][0] - eigenvalues_02) / (-1.0 * (a[1][1] - eigenvalues_02))
 			
 			# Eigenvectors form a mastrix...
-			helper_diagonalize_matrix = [[eigenvectors_01.x,eigenvectors_02.x ],[eigenvectors_01.y,eigenvectors_02.y ]]
+			#helper_diagonalize_matrix = [[eigenvectors_01.x,eigenvectors_02.x ],[eigenvectors_01.y,eigenvectors_02.y ]]
 			
-			return helper_diagonalize_matrix
-	else:
+			#return helper_diagonalize_matrix
+#	else:
 		
 		### not a square matrix...
-		print('not a square matrix')
+	#	print('not a square matrix')
 	
 
 
