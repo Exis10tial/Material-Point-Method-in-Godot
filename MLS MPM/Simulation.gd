@@ -1,15 +1,15 @@
 extends Node
 
 
-var fund_chemistry : File
+#var fund_chemistry : File
 var alchemy : Object
-var find_math_book : File
+#var find_math_book : File
 var math_book : Object
-var build_program : File
+#var build_program : File
 var program : Object
 var collisions : Object
-var contact_with_another : File
-var model_of_substance : File
+#var contact_with_another : File
+#var model_of_substance : File
 var models : Object
 var check_time : float
 var adjust_particles : bool = false
@@ -40,32 +40,32 @@ func Establish_Rate():
 func _on_Simulation_ready():
 	###...
 	
-	fund_chemistry = File.new()
-	if fund_chemistry.file_exists("res://AlchemyLab.tscn"):
+	#fund_chemistry = File.new()
+	if FileAccess.file_exists("res://AlchemyLab.tscn"):
 		alchemy = load("res://AlchemyLab.tscn").instantiate()
 	else:
 		### file does not exists...
 		print(' substance.tscn does not exists...')
-	build_program = File.new()
-	if build_program.file_exists("res://Program.tscn"):
+	#build_program = File.new()
+	if FileAccess.file_exists("res://Program.tscn"):
 		program = load("res://Program.tscn").instantiate()
 	else:
 		### file does not exists...
 		print(' program.tscn does not exists...')
-	find_math_book = File.new()
-	if find_math_book.file_exists("res://Matrix Math.tscn"):
+	#find_math_book = File.new()
+	if FileAccess.file_exists("res://Matrix Math.tscn"):
 		math_book = load("res://Matrix Math.tscn").instantiate()
 	else:
 		### file does not exists...
 		print(' matrix_math.tscn does not exists...')
-	contact_with_another = File.new()
-	if contact_with_another.file_exists("res://Particle Interaction.tscn"):
+	#contact_with_another = File.new()
+	if FileAccess.file_exists("res://Particle Interaction.tscn"):
 		collisions = load("res://Particle Interaction.tscn").instantiate()
 	else:
 		### file does not exists...
 		print('collisions are not there...')
-	model_of_substance = File.new()
-	if model_of_substance.file_exists("res://Constitutive Models.tscn"):
+	#model_of_substance = File.new()
+	if FileAccess.file_exists("res://Constitutive Models.tscn"):
 		models = load("res://Constitutive Models.tscn").instantiate()
 	else:
 		### file does not exists...

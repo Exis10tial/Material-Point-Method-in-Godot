@@ -1,7 +1,7 @@
 extends Node
 
 
-var pile_of_substances : File
+#var pile_of_substances : File
 var substance : Object
 var default_mass_of_substance : float
 var maintain_velocity : Vector2
@@ -158,10 +158,10 @@ func Cross_Section_Of_Substance(into_pieces:bool):
 
 func _on_alchemy_lab_ready():
 	### the building/construction of substance...
-	pile_of_substances = File.new()
+	#pile_of_substances = File.new()
 	
 	#if pile_of_substances.file_exists("res://Substance.tscn") or pile_of_substances.file_exists("res://Substance(thru_rigid_body).tscn"):
-	if pile_of_substances.file_exists("res://Substance.tscn"):
+	if FileAccess.file_exists("res://Substance.tscn"):
 	#if pile_of_substances.file_exists("res://Substance(thru_rigid_body).tscn"):
 	#if pile_of_substances.file_exists("res://Substance(thru sprite).tscn"):
 		Initial_Collection_Of_Substance()
