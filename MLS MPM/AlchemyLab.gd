@@ -57,10 +57,10 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(6.0,6.0)
-	#domain_size = Vector2(5.0,5.0)
+	domain_size = Vector2(5.0,5.0)
 	#domain_size = Vector2(4.0,4.0)
-	#domain_size = Vector2(1.0,2.0)
-	domain_size = Vector2(1.0,1.0)
+	#domain_size = Vector2(2.0,2.0)
+	#domain_size = Vector2(1.0,1.0)
 	#---------------------------------
 	# if substances size is always 1...
 	#domain_size = Vector2(2,10.0)
@@ -171,7 +171,7 @@ func _on_alchemy_lab_ready():
 		# default ::one_substance = false , gathered_into_chunks = true:: Is using the greatest common factor between domain_size x and domain_size.y to acquire a number of substances/cell size..
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
-		one_substance = true
+		#one_substance = true
 		#gathered_into_chunks = true
 		
 		if one_substance == true:
@@ -235,7 +235,7 @@ func _on_alchemy_lab_ready():
 			((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0))
 			)
 		
-		var substance = load("res://Substance.tscn").instantiate()
+		substance = load("res://Substance.tscn").instantiate()
 		
 		substance.default_mass_of_substance = 1.0
 		substance.maintain_velocity = Vector2(0.0,0.0)
@@ -305,14 +305,8 @@ func _on_alchemy_lab_ready():
 		# 
 		substance.Sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(diagonalize_helper,substance.F),get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(diagonalize_helper))
 		"""
-		
-		while len(substance.particle_lineation) < substance_limit:
-			###
-			
-			#var Template_Particles = load("res://Substance.tscn").instantiate()
-			#substance = load("res://Substance(thru_rigid_body).tscn").instantiate()
-			#substance = load("res://Substance(thru sprite).tscn").instantiate()
-			
+		#while len(substance.particle_mechanics) < substance_limit:
+		for x in range(substance_limit):
 			### for the position of the starting position of the substance drawn...
 			if location_x == domain_size.x/cell_size:
 				location_y =  location_y + 1
@@ -328,10 +322,8 @@ func _on_alchemy_lab_ready():
 				'3':digits_list[int(randi_range(0,len(digits_list)-1))],
 				'4':digits_list[int(randi_range(0,len(digits_list)-1))]
 				})
-			
 			#substance.set_name(substance_name)
 			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x-(substance.appearance/2.0) + (substance.appearance * location_x),substance_starting_point.y-(substance.appearance/2.0) + (substance.appearance * location_y)),Vector2(substance.appearance,substance.appearance))
-			
 			substance.particle_workings['mass'] = 1.0
 			substance.particle_workings['velocity'] = Vector2(0.0,0.0)
 			substance.particle_workings['stress'] = [[1.0,1.0],[1.0,1.0]]
@@ -341,21 +333,22 @@ func _on_alchemy_lab_ready():
 			substance.particle_workings['I'] = substance.I
 			substance.particle_workings['F'] = substance.F
 			substance.particle_workings['J'] = substance.J
-			### identify other substances with its domain ... itself always...
-			substance.particle_workings['within_range'].append(substance_particle_name)
-			#substance.particle_workings['relation_to_domain']
-			substance.particle_mechanics[substance_particle_name] = substance.particle_workings
+			#substance.particle_workings['within_range'].append(substance_particle_name)
+			#print(substance_particle_name,' name created')
+			### 
+			substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
+			substance.particle_mechanics[substance_particle_name]['within_range'] = [substance_particle_name]
 			###
 			substance.grid[substance_particle_name] = {'mass':0.0,'velocity':Vector2(0,0),'momentum':Vector2(0.0,0.0)}
 			substance.particle_lineation[substance_particle_name] = substance.surrounding_area
-			
+			#substance.particle_mechanics[substance_particle_name]['position'] = substance.particle_lineation[substance_particle_name].position
+			### 
 			location_x =  location_x + 1
 			
-			#add_child(substance)
 		
 		### establish substance relation to others...
-		for artifact in substance.particle_lineation.keys():
-			for other_artifact in substance.particle_lineation.keys():
+		for artifact in substance.particle_lineation:
+			for other_artifact in substance.particle_lineation:
 				
 				#kernel_distance = (substance.get_position() - other_substance.surrounding_area.get_center())# / cell_size
 				kernel_x = snapped(substance.particle_lineation[artifact].get_center().x - substance.particle_lineation[other_artifact].get_center().x,.01)
@@ -368,9 +361,21 @@ func _on_alchemy_lab_ready():
 				
 				substance.particle_mechanics[artifact]['relation_to_domain'][other_artifact] = kernel_distance
 				substance.particle_mechanics[other_artifact]['domain_relation_to_substance'][artifact] = flipped_kernel_distance
+				
+				#print(kernel_distance/substance.particle_lineation[artifact].size.x,' kernel distance')
+				#print(substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()),' distance_squared_to')
+				#	substance.particle_mechanics[artifact]['within_range'].append(artifact)
+				if  substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()) == 0:
+					# it is itself...
+					pass
+				elif substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()) < 1:
+					print(artifact,' collides with other_artifact,')
+				else:
+					# to far apart not in contact...
+					pass
+			
 				#substance.relation_to_domain[other_substance] =flipped_kernel_distance
 				#substance.domain_relation_to_substance[other_substance] =kernel_distance
-			
 		###
 		get_tree().get_root().get_node("Test Area/Simulation").add_child(substance)
 	else:

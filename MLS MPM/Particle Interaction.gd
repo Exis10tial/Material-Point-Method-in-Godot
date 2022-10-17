@@ -6,6 +6,7 @@ var collision_restitution : float = 0.0
 var collision_static_friction : float = 0.0
 var collision_kinetic_friction : float = 0.0
 var wall_center : Vector2
+var impact_center : Vector2
 var decimal_reminder : float
 ### particle merging...
 var length_covered_area : float 
@@ -89,7 +90,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_restitution = baluster['window outline']['top']['coefficient of restitution'] * mote.coefficient_of_restitution
 		collision_static_friction = baluster['window outline']['top']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['top']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
-		baluster['window outline']['top']['velocity'] = baluster['window outline']['top']['velocity'] * structure[refer]['velocity']
+		baluster['window outline']['top']['velocity'] = baluster['window outline']['top']['velocity'] * -structure[refer]['velocity']
 		wall_center = Vector2(particle_boundary.get_center().x,(0.0-ProjectSettings.get_setting('display/window/size/viewport_height')/2.0))
 		
 		if collision_restitution >= 1.0 :
@@ -307,45 +308,56 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 	
 	
 	
-func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_size):
+func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,other_artifact_name,other_artifact,other_artifact_zone,grid_field):
 	### Collision between the particles....
 	
 	collision_restitution = artifact.coefficient_of_restitution * other_artifact.coefficient_of_restitution
-	wall_center = artifact.surrounding_area.intersection(other_artifact.surrounding_area).get_center()
+	#print(collision_restitution,' collision_restitution')
+	impact_center = (artifact_zone.intersection(other_artifact_zone)).get_center()
+	#impact_center = artifact_zone.get_center() - other_artifact_zone.get_center()
+	#print(impact_center,' impact center')
 	if collision_restitution >= 1.0 :
 		
-		normal_vector = Vector2(wall_center - artifact.surrounding_area.get_center())
+		normal_vector = Vector2(impact_center - artifact_zone.get_center())
+		#print(normal_vector,' normal vector')
 		unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
+		#print(unit_vector,' unit_vector')
 		unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
-		dotted_unit_artifact_velocity = unit_vector.dot(grid_field[artifact]['velocity'])
-		dotted_tangent_artifact_velocity = unit_tangent.dot(grid_field[artifact]['velocity'])
-		dotted_unit_other_artifact_velocity = unit_vector.dot(grid_field[other_artifact]['velocity'])
-		dotted_tangent_other_artifact_velocity = unit_tangent.dot(grid_field[other_artifact]['velocity'])
+		#print(unit_tangent,' unit_tangent')
+		dotted_unit_artifact_velocity = unit_vector.dot(grid_field[artifact_name]['velocity'])
+		#print(dotted_unit_artifact_velocity,' dotted_unit_artifact_velocity')
+		dotted_tangent_artifact_velocity = unit_tangent.dot(grid_field[artifact_name]['velocity'])
+		#print(dotted_tangent_artifact_velocity,' dotted_tangent_artifact_velocity')
+		dotted_unit_other_artifact_velocity = unit_vector.dot(grid_field[other_artifact_name]['velocity'])
+		#print(dotted_unit_other_artifact_velocity,' dotted_unit_other_artifact_velocity')
+		dotted_tangent_other_artifact_velocity = unit_tangent.dot(grid_field[other_artifact_name]['velocity'])
+		#print(dotted_tangent_other_artifact_velocity,' dotted_tangent_other_artifact_velocity')
 		final_tangential_artifact_velocity = dotted_tangent_artifact_velocity
 		final_tangential_wall_velocity = dotted_tangent_other_artifact_velocity
-		final_normal_artifact_velocity = (dotted_unit_artifact_velocity * (grid_field[artifact]['mass'] - grid_field[other_artifact]['mass']) + 2.0 * grid_field[other_artifact]['mass'] * dotted_unit_other_artifact_velocity ) / (grid_field[artifact]['mass'] + grid_field[other_artifact]['mass'])
-		final_normal_other_artifact_velocity = (dotted_unit_other_artifact_velocity * (grid_field[other_artifact]['mass'] - grid_field[artifact]['mass']) + 2.0 * grid_field[other_artifact]['mass'] * dotted_unit_artifact_velocity ) / (grid_field[artifact]['mass'] + grid_field[other_artifact]['mass'])
+		final_normal_artifact_velocity = (dotted_unit_artifact_velocity * (grid_field[artifact_name]['mass'] - grid_field[other_artifact_name]['mass']) + 2.0 * grid_field[other_artifact_name]['mass'] * dotted_unit_other_artifact_velocity ) / (grid_field[artifact_name]['mass'] + grid_field[other_artifact_name]['mass'])
+		final_normal_other_artifact_velocity = (dotted_unit_other_artifact_velocity * (grid_field[other_artifact_name]['mass'] - grid_field[artifact_name]['mass']) + 2.0 * grid_field[other_artifact_name]['mass'] * dotted_unit_artifact_velocity ) / (grid_field[artifact_name]['mass'] + grid_field[other_artifact_name]['mass'])
 							
-		grid_field[artifact]['velocity'] = (final_normal_artifact_velocity * unit_vector) + (final_tangential_artifact_velocity * unit_tangent)
+		grid_field[artifact_name]['velocity'] = (final_normal_artifact_velocity * unit_vector) - (final_tangential_artifact_velocity * unit_tangent)
 		#final_tangential_mote_velocity * unit_tangent
 		#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
 		
-		#print(grid_field[artifact]['velocity']," grid_field[artifact]['velocity']")
+		#print(grid_field[artifact_name]['velocity']," grid_field[artifact]['velocity'] right after")
 		
 	elif collision_restitution < 1.0 and collision_restitution > 0.0:
 		### collision is impartial inelastic...
 		#"""
 		# find the point of contact between particles...
-		line_of_impact = (artifact.surrounding_area.intersection(other_artifact.surrounding_area)).get_center()
+		#line_of_impact = (artifact_zone.intersection(other_artifact_zone)).get_center()
+		line_of_impact = artifact_zone.get_center() - other_artifact_zone.get_center()
 		##print(line_of_impact,' artifact to other artifact')
-		incoming_angle_of_artifact = rad_to_deg(artifact.get_position().angle_to(line_of_impact))
+		incoming_angle_of_artifact = rad_to_deg(artifact_zone.get_center().angle_to(line_of_impact))
 		##print(incoming_angle_of_artifact,' incoming angle artifact to other artifact')
 		outgoing_angle_of_artifact = rad_to_deg(atan(other_artifact.coefficient_of_restitution * incoming_angle_of_artifact ))
-		x_leg_of_updated_artifact_velocity = snapped((grid_field[artifact]['velocity'].y * tan(outgoing_angle_of_artifact)),.01)
+		x_leg_of_updated_artifact_velocity = snapped((grid_field[artifact_name]['velocity'].y * tan(outgoing_angle_of_artifact)),.01)
 		# determine which friction static or kinetic...
 		#if grid_field[artifact]['velocity'].x in range(-1,2) and grid_field[artifact]['velocity'].y in range(-1,2):
 		#"""
-		if grid_field[artifact]['velocity'].x in range(-cell_size,cell_size+1) and grid_field[artifact]['velocity'].y in range(-cell_size,cell_size+1):
+		if grid_field[artifact_name]['velocity'].x in range(-artifact_zone.size.x,artifact_zone.size.x+1) and grid_field[artifact_name]['velocity'].y in range(-artifact_zone.size.y,artifact_zone.size.y+1):
 			### using of static friction...
 			updated_artifact_x_component = x_leg_of_updated_artifact_velocity * other_artifact.coefficient_of_static_friction
 			#print(updated_artifact_x_component,' coefficient_of_static_friction')
@@ -355,17 +367,17 @@ func Collision_between_Other_Particles(artifact,other_artifact,grid_field,cell_s
 			#print(updated_artifact_x_component,' coefficient_of_kinetic_friction')
 		#"""
 		#grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] + Vector2(updated_artifact_x_component,grid_field[artifact]['velocity'].y)
-		grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] - Vector2(x_leg_of_updated_artifact_velocity,grid_field[artifact]['velocity'].y)
+		grid_field[artifact_name]['velocity'] = grid_field[artifact_name]['velocity'] - Vector2(x_leg_of_updated_artifact_velocity,grid_field[artifact_name]['velocity'].y)
 		#"""
 		
 	elif collision_restitution == 0.0:
 		### Perfect Inelastic Collisions:::
 		# objects will stick together...
 		
-		final_velocity = ( (grid_field[artifact]['mass'] * grid_field[artifact]['velocity']) + (grid_field[other_artifact]['mass'] *grid_field[other_artifact]['velocity']) ) / (grid_field[artifact]['mass'] * grid_field[other_artifact]['mass']) 
+		final_velocity = ( (grid_field[artifact_name]['mass'] * grid_field[artifact_name]['velocity']) + (grid_field[other_artifact_name]['mass'] *grid_field[other_artifact_name]['velocity']) ) / (grid_field[artifact_name]['mass'] * grid_field[other_artifact_name]['mass']) 
 						
-		grid_field[artifact]['velocity'] = final_velocity
+		grid_field[artifact_name]['velocity'] = final_velocity
 		
 		#grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - final_velocity
 	
-	return grid_field[artifact]['velocity']
+	return grid_field[artifact_name]['velocity']
