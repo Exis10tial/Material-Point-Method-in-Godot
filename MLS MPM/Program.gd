@@ -1,6 +1,7 @@
 extends Node
 
 var grid_nodes : Dictionary = {}
+#var gravity : Vector2 = Vector2(0.00,0.00)
 var gravity : Vector2 = Vector2(0.00,9.80)
 #var gravity : Vector2 = Vector2(0.00,-9.80)
 #var gravity : Vector2 = Vector2(9.80,0.0)
@@ -100,8 +101,8 @@ func _on_Program_ready():
 		barriers['window outline'][wall]['mass'] = 1000.00
 		#barriers['window outline'][wall]['mass'] = 1.00
 		barriers['window outline']['top']['outline'] = 0.0
-		barriers['window outline']['right']['outline'] = ProjectSettings.get_setting('display/window/size/viewport_width')
-		barriers['window outline']['bottom']['outline'] = ProjectSettings.get_setting('display/window/size/viewport_height')
+		barriers['window outline']['right']['outline'] = ProjectSettings.get_setting('display/window/size/width')
+		barriers['window outline']['bottom']['outline'] = ProjectSettings.get_setting('display/window/size/height')
 		barriers['window outline']['left']['outline'] = 0.0
 		barriers['window outline'][wall]['velocity'] = Vector2(1.0,1.0)
 		
@@ -134,56 +135,26 @@ func Weight_Interpolation(splines:String,version:int,kernel:Vector2,cell_size:fl
 		elif version == 2:
 			if kernel.x > -((3.0 * cell_size) / 2.0) and kernel.x < -( (1.0*cell_size) / 2.0 ) and  kernel.y > -((3.0 * cell_size) / 2.0) and kernel.y < - ( (1.0*cell_size) / 2.0 ):
 			
-				#print( -((3.0 * cell_size) / 2.0),' limit of weights')
-				#print( -( (1.0*cell_size) / 2.0 ),' limit of weights' )
-				
-				#print(kernel,' is the kernel')
-				#print(snapped(((1.0 * pow(kernel.x,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ) ,' search of component A')
-				#print(snapped(((3.0 * kernel.x) / (2.0 * cell_size)),.01),' searching component b')
-				#print(snapped((9.0/8.0),.001),' searching component c')
-				
 				building_weights.x =  snapped( ((1.0 * pow(kernel.x,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ) + snapped(((3.0 * kernel.x) / (2.0 * cell_size)),.01) + snapped((9.0/8.0),.001)
 				building_weights.y =  snapped( ((1.0 * pow(kernel.y,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ) + snapped(((3.0 * kernel.y) / (2.0 * cell_size)),.01) + snapped((9.0/8.0),.001)
-				#print("1")
-				#print(building_weights.x,' finding weights of x')
-				#print(building_weights.y,' finding weights of y')
+
 				weight_interpolation = snapped(building_weights.x * building_weights.y,.01)
 				
 			elif kernel.x > -((1.0 * cell_size) / 2.0) and kernel.x <  ( (1.0*cell_size) / 2.0 ) and kernel.y > -((1.0 * cell_size) / 2.0) and kernel.y < ( (1.0*cell_size) / 2.0 ):
 			
-				#print( -((1.0 * cell_size) / 2.0),' limit of weights')
-				#print( ( (1.0*cell_size) / 2.0 ),' limit of weights' )
-				
-				#print(kernel,' is the kernel')
 				building_weights.x = snapped(((-1.0 * pow(kernel.x,2.0)) / (pow(cell_size,2.0))),.01) + snapped((3.0/4.0),.01)
 				building_weights.y = snapped(((-1.0 * pow(kernel.y,2.0)) / (pow(cell_size,2.0))),.01) + snapped((3.0/4.0),.01)
-				#print("2")
-				#print(building_weights.x,' finding weights of x')
-				#print(building_weights.y,' finding weights of y')
+
 				weight_interpolation = snapped(building_weights.x * building_weights.y,.01)
 				
 			elif kernel.x > ((1.0 * cell_size) / 2.0) and kernel.x <  ( (3.0*cell_size) / 2.0 ) and  kernel.y > ((1 * cell_size) / 2) and kernel.y <  ( (3.0*cell_size) / 2.0 ):
-			
-				#print( ((1.0 * cell_size) / 2.0),' mid of weights')
-				#print( ( (3.0*cell_size) / 2.0 ),' mid of weights' )
-				
-				#print(kernel,' is the kernel')
+
 				building_weights.x =  snapped( ((1.0 * pow(kernel.x,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ) - snapped(((3.0 * kernel.x) / (2.0 * cell_size)),.01) + snapped((9.0/8.0),.001)
 				building_weights.y =  snapped( ((1.0 * pow(kernel.y,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ) - snapped(((3.0 * kernel.y) / (2.0 * cell_size)),.01) + snapped((9.0/8.0),.001)
-				#print("3")
-				#print(kernel,' kernel ')
-				
-				#print(snapped( ((1.0 * pow(kernel.x,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ),' first coefficent')
-				#print(snapped(((3.0 * kernel.x) / (2.0 * cell_size)),.01),' second coefficent')
-				#print(snapped((9.0/8.0),.001),' third coefficent')
-				#print(building_weights.x,' finding weights of x')
-				#print(building_weights.y,' finding weights of y')
+
 				weight_interpolation = snapped(building_weights.x * building_weights.y,.01)
 			else:
 				building_weights = Vector2(0.0,0.0)
-				#print("4")
-				#print(building_weights.x,' finding weights of x')
-				#print(building_weights.y,' finding weights of y')
 				weight_interpolation = snapped(building_weights.x * building_weights.y,.01)
 				
 	elif splines == "cubic":
@@ -193,11 +164,10 @@ func Weight_Interpolation(splines:String,version:int,kernel:Vector2,cell_size:fl
 	
 func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 	### particle simulation...
-
 	### reseting the grid data...
 	for particle in the_grid.keys():
 		
-		the_grid[particle] = {'mass': material.default_mass_of_substance,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'force':Vector2(0.0,0.0)}
+		the_grid[particle] = {'mass': material.default_mass_of_substance,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
 		
 		material.particle_mechanics[particle]['F'] = material.particle_mechanics[particle]['I'].duplicate(true)
 		material.particle_mechanics[particle]['J']= get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Determinant(material.particle_mechanics[particle]['F'])
@@ -211,53 +181,57 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 		standby_momentum_y = 0
 		affine_momentum_fuse = Vector2(0.0,0.0)
 		
-		
-		for other_particle in material.particle_mechanics[particle]['within_range']:
-			### Weight Interpolation...
-			Weight_Interpolation(basis,basis_function_version,material.particle_mechanics[particle]['relation_to_domain'][other_particle],material.cell_size)
+		for other_particle in material.particle_mechanics.keys():
+		#for other_particle in material.particle_mechanics[particle]['within_range']:
 			
-			#"""
-			if material.physical_state == 'solid':
-				if material.constitutive_model == 'hyperelastic':
-					material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Neo_Hookean(particle,material)
-				if material.constitutive_model == 'fixed_corated':
-					material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Fixed_Corotated(particle,material)
-				if material.constitutive_model == 'drucker_prager_elasticity':
-					material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Drucker_Prager_Elasticity(particle,material)
-			elif material.physical_state == 'liquid':
-				if material.constitutive_model == 'water':
-					material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Model_of_Water(particle,material)
-					#print(other_particle.stress,' checking stress')
-			elif material.physical_state == 'gas':
+			if material.particle_lineation[particle].intersects(material.particle_lineation[other_particle]) == true:
+				### Weight Interpolation...
+				Weight_Interpolation(basis,basis_function_version,material.particle_mechanics[particle]['relation_to_domain'][other_particle],material.cell_size)
+			
+				#"""
+				if material.physical_state == 'solid':
+					if material.constitutive_model == 'hyperelastic':
+						material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Neo_Hookean(particle,material)
+					if material.constitutive_model == 'fixed_corated':
+						material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Fixed_Corotated(particle,material)
+					if material.constitutive_model == 'drucker_prager_elasticity':
+						material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Drucker_Prager_Elasticity(particle,material)
+				elif material.physical_state == 'liquid':
+					if material.constitutive_model == 'water':
+						material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Test Area/Simulation/Constitutive Models").Model_of_Water(particle,material)
+						#print(other_particle.stress,' checking stress')
+				elif material.physical_state == 'gas':
+					pass
+				
+				#"""
+				### gradient-weight : weight_interpolation * D ^-1 * flipped_kernel
+				#D **-1 = (4/pow(cell_size,2)) * other_particle.I^-1 
+				gradient_weight_term_1 = snapped((snapped((weight_interpolation * basis_coefficient),.01) / pow(material.cell_size,2.0)),.01)
+				gradient_weight_term_2 =  get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['I'],gradient_weight_term_1,true)
+				gradient_weight_interpolation = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(gradient_weight_term_2,material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle])
+				
+				q_timed_volume_coefficient = time_passed * material.particle_mechanics[other_particle]['volume']
+				q_stressed_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(material.particle_mechanics[other_particle]['stress'],q_timed_volume_coefficient,true)
+				q_gradient_weighted_stressed = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(q_stressed_coefficient,gradient_weight_interpolation)
+				q_gravity_weighted_stressed = (q_gradient_weighted_stressed + gravity)
+				
+				mass_c_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(material.particle_mechanics[other_particle]['C'],material.particle_mechanics[other_particle]['mass'],true)
+				flipped_mass_c_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(mass_c_coefficient,material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle])
+				
+				#affine_momentum_fuse = -affine_momentum_fuse + (q_gravity_weighted_stressed + flipped_mass_c_coefficient)
+				#affine_momentum_fuse = affine_momentum_fuse + (-1 * (q_gravity_weighted_stressed + flipped_mass_c_coefficient))
+				affine_momentum_fuse = affine_momentum_fuse + (q_gravity_weighted_stressed + flipped_mass_c_coefficient)
+				
+				
+				transfer_momentum =  (material.particle_mechanics[other_particle]['mass'] * material.particle_mechanics[other_particle]['velocity'])
+				
+				standby_momentum_x = standby_momentum_x + (snapped((weight_interpolation  *  (snapped((transfer_momentum.x + affine_momentum_fuse.x),.01)) ),.01))
+				standby_momentum_y = standby_momentum_y + (snapped((weight_interpolation  *  (snapped((transfer_momentum.y + affine_momentum_fuse.y),.01)) ),.01))
+				
+			
+			else:
 				pass
 			
-			#"""
-			### gradient-weight : weight_interpolation * D ^-1 * flipped_kernel
-			#D **-1 = (4/pow(cell_size,2)) * other_particle.I^-1 
-			gradient_weight_term_1 = snapped((snapped((weight_interpolation * basis_coefficient),.01) / pow(material.cell_size,2.0)),.01)
-			gradient_weight_term_2 =  get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['I'],gradient_weight_term_1,true)
-			gradient_weight_interpolation = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(gradient_weight_term_2,material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle])
-			
-			q_timed_volume_coefficient = time_passed * material.particle_mechanics[other_particle]['volume']
-			q_stressed_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(material.particle_mechanics[other_particle]['stress'],q_timed_volume_coefficient,true)
-			q_gradient_weighted_stressed = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(q_stressed_coefficient,gradient_weight_interpolation)
-			q_gravity_weighted_stressed = (q_gradient_weighted_stressed + gravity)
-			
-			mass_c_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(material.particle_mechanics[other_particle]['C'],material.particle_mechanics[other_particle]['mass'],true)
-			flipped_mass_c_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Vector2_to_Vector2(mass_c_coefficient,material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle])
-			
-			affine_momentum_fuse = -affine_momentum_fuse + (q_gravity_weighted_stressed + flipped_mass_c_coefficient)
-			#affine_momentum_fuse = affine_momentum_fuse + (-1 * (q_gravity_weighted_stressed + flipped_mass_c_coefficient))
-			
-			transfer_momentum =  (material.particle_mechanics[other_particle]['mass'] * material.particle_mechanics[other_particle]['velocity'])
-			
-			#print(flipped_mass_c_coefficient,' flipped_mass_c_coefficient')
-			#standby_momentum_x = standby_momentum_x + weight_interpolation * ((other_particle.mass * other_particle.velocity) + (time_passed * other_particle.volume * other_particle.stress * gradient_weight_interpolation + gravity.x + (the_grid[other_particle]['mass']*other_particle.C * flipped_kernel_x)))
-			#standby_momentum_x = standby_momentum_x + (snapped((weight_interpolation  *  (snapped((transfer_momentum.x + q_gravity_weighted_stressed.x + flipped_mass_c_coefficient.x),.01)) ),.01))
-			#standby_momentum_y = standby_momentum_y + (snapped((weight_interpolation  *  (snapped((transfer_momentum.y + q_gravity_weighted_stressed.y + flipped_mass_c_coefficient.y),.01)) ),.01))
-			standby_momentum_x = standby_momentum_x + (snapped((weight_interpolation  *  (snapped((transfer_momentum.x + affine_momentum_fuse.x),.01)) ),.01))
-			standby_momentum_y = standby_momentum_y + (snapped((weight_interpolation  *  (snapped((transfer_momentum.y + affine_momentum_fuse.y),.01)) ),.01))
-		
 		the_grid[particle]['momentum'] = Vector2(standby_momentum_x,standby_momentum_y)
 			
 		
@@ -266,25 +240,13 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 	for particle in the_grid.keys():
 		if the_grid[particle]['mass'] > 0.0:
 			
-			#the_grid[node]['momentum'] = the_grid[node]['momentum'].normalized() + (time_passed * ((the_grid[node]['mass'] * gravity) + the_grid[node]['force']))
-			#the_grid[node]['momentum'] = the_grid[node]['momentum'] + (time_passed * ((the_grid[node]['mass'] * gravity) + the_grid[node]['force']))
-			#the_grid[node]['momentum'] = the_grid[node]['momentum'] + (time_passed * ((the_grid[node]['mass'] * gravity) ))
-			#standby_momentum_x = snapped((the_grid[node]['momentum'].x + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.x),.01) + the_grid[node]['force'].x),.01)),.01)),.01)
-			#standby_momentum_y = snapped((the_grid[node]['momentum'].y + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.y),.01) + the_grid[node]['force'].y),.01)),.01)),.01)
-			
-			#standby_momentum_x = snapped((the_grid[node]['momentum'].x + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.x),.01)),.01)),.01)),.01)
-			#standby_momentum_y = snapped((the_grid[node]['momentum'].y + snapped((time_passed * snapped((snapped((the_grid[node]['mass'] * gravity.y),.01)),.01)),.01)),.01)
-			#the_grid[node]['momentum'] = Vector2(standby_momentum_x,standby_momentum_y)
-			
-			#the_grid[node]['velocity'] = (the_grid[node]['momentum'] / the_grid[node]['mass'])
-			
 			placeholder_velocity_x = snapped(the_grid[particle]['momentum'].x / the_grid[particle]['mass'],.01)
 			placeholder_velocity_y = snapped(the_grid[particle]['momentum'].y / the_grid[particle]['mass'],.01)
 			the_grid[particle]['velocity'] = Vector2(placeholder_velocity_x,placeholder_velocity_y)
 			
 			### Forces from other objects.
 			#the_grid[particle]['velocity']  = the_grid[particle]['velocity']  + Vector2(randf_range(-10.0,10.0),randf_range(-10.0,10.0))
-			#the_grid[particle]['velocity']  = the_grid[particle]['velocity'] + Vector2(0.0,0.0)
+			#the_grid[particle]['velocity']  = the_grid[particle]['velocity'] + Vector2(0.0,5.0)
 			
 		else:
 			###...
@@ -319,8 +281,11 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 			### the particle is within the window outline...
 			pass
 	#var touching_others = []
+	var collection_of_velocities = []
 	for particle in material.particle_lineation.keys():
 		### if the particle has contacted another particle....
+		collection_of_velocities = []
+		#for other_particle in material.particle_mechanics[particle]['within_range']:
 		for other_particle in material.particle_lineation.keys():
 			
 			kernel_x = snapped(material.particle_lineation[particle].get_center().x - material.particle_lineation[other_particle].get_center().x,.01)
@@ -337,23 +302,25 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 				# it is itself...
 			#	print('a')
 				pass
-			elif material.particle_lineation[particle].get_center().distance_squared_to(material.particle_lineation[other_particle].get_center()) < 1:
+			#elif material.particle_lineation[particle].get_center().distance_squared_to(material.particle_lineation[other_particle].get_center()) < 1:
+			elif material.particle_lineation[particle].intersects(material.particle_lineation[other_particle]) == true:
 				#print('b')
 				#print(particle,' collides with other_artifact, ',other_particle)
 				if material.particle_mechanics[particle]['within_range'].has(other_particle):
 					pass
 				else:
 					material.particle_mechanics[particle]['within_range'].append(other_particle)
-				the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid)
 				
+				#the_grid[particle]['velocity'] = the_grid[particle]['velocity'] + get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid)
+				#the_grid[particle]['velocity'] = get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid)
+				collection_of_velocities.append(get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid))
 			else:
-				#print('c')
-				# to far apart not in contact...
-				if material.particle_mechanics[particle]['within_range'].has(other_particle):
-					material.particle_mechanics[particle]['within_range'].erase(other_particle)
-			
-			#the_grid[particle]['velocity'] = Vector2(randf_range(-5.0,5.00),randf_range(-5.00,5.00))
-			the_grid[particle]['velocity'] = Vector2(5.0,2.5)
+				pass
+		for velocity in collection_of_velocities:
+			#print(particle,' in coming velocity ',velocity)
+			the_grid[particle]['velocity'] = the_grid[particle]['velocity'] + velocity
+		
+		#print(material.particle_mechanics[particle]['within_range'],' still in contact.')
 	# Grid to Particle...
 	for particle in material.particle_mechanics.keys():
 		### particle is reset...
@@ -365,24 +332,26 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 		#### sum of aspects reset...
 		sum_of_c_weighted_velocity_matrix = [[0.0,0.0],[0.0,0.0]]
 		
-		for other_particle in material.particle_mechanics[particle]['within_range']:
-			
-			### Weight Interpolation...
-			Weight_Interpolation(basis,basis_function_version,material.particle_mechanics[particle]['relation_to_domain'][other_particle],material.cell_size)
-			#print(weight_interpolation,' wip')
-			#MLS MPM 
-			#particle.velocity = sum of (the_grid[velocity] * weight_interpolation)
-			#particle.C = D^1 * sum of the_grid['velocity'] * flipped_kernel_distance^T * weight_interpolation
-			# D^1 = (4/pow(cell_size,2)) * particle.I^-1
-			
-			material.particle_mechanics[particle]['velocity'].x = snapped(material.particle_mechanics[particle]['velocity'].x + (snapped((the_grid[other_particle]['velocity'].x * weight_interpolation),.01)),.01)
-			material.particle_mechanics[particle]['velocity'].y = snapped(material.particle_mechanics[particle]['velocity'].y + (snapped((the_grid[other_particle]['velocity'].y * weight_interpolation),.01)),.01)
-			
-			#print()
-			c_flipped_velocity_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Vector2_by_Vector2_to_Matrix(the_grid[other_particle]['velocity'],false,material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle],true)
-			c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_flipped_velocity_coefficient,weight_interpolation,true)
-			sum_of_c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Add_Matrix(sum_of_c_weighted_velocity_matrix,c_weighted_velocity_matrix)
 		
+		for other_particle in material.particle_mechanics.keys():
+		#for other_particle in material.particle_mechanics[particle]['within_range']:
+			if material.particle_lineation[particle].intersects(material.particle_lineation[other_particle]) == true:
+				### Weight Interpolation...
+				Weight_Interpolation(basis,basis_function_version,material.particle_mechanics[particle]['relation_to_domain'][other_particle],material.cell_size)
+				#print(weight_interpolation,' wip')
+				#MLS MPM 
+				#particle.velocity = sum of (the_grid[velocity] * weight_interpolation)
+				#particle.C = D^1 * sum of the_grid['velocity'] * flipped_kernel_distance^T * weight_interpolation
+				# D^1 = (4/pow(cell_size,2)) * particle.I^-1
+				
+				material.particle_mechanics[particle]['velocity'].x = snapped(material.particle_mechanics[particle]['velocity'].x + (snapped((the_grid[other_particle]['velocity'].x * weight_interpolation),.01)),.01)
+				material.particle_mechanics[particle]['velocity'].y = snapped(material.particle_mechanics[particle]['velocity'].y + (snapped((the_grid[other_particle]['velocity'].y * weight_interpolation),.01)),.01)
+
+				c_flipped_velocity_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Vector2_by_Vector2_to_Matrix(the_grid[other_particle]['velocity'],false,material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle],true)
+				c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_flipped_velocity_coefficient,weight_interpolation,true)
+				sum_of_c_weighted_velocity_matrix = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Add_Matrix(sum_of_c_weighted_velocity_matrix,c_weighted_velocity_matrix)
+			else:
+				pass
 		c_cell_coefficient =  snapped((basis_coefficient / pow(material.cell_size,2.0)),.01)
 		c_inverse_I_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(material.particle_mechanics[particle]['I'])
 		c_cell_inverse_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(c_inverse_I_coefficient,c_cell_coefficient,true)
@@ -390,7 +359,7 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 		material.particle_mechanics[particle]['C'] = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(c_cell_inverse_coefficient,sum_of_c_weighted_velocity_matrix)
 		
 		###particle position update...
-		
+		#print(material.particle_mechanics[particle]['velocity'],' velocity check')
 		material.particle_lineation[particle].position.x = snapped((material.particle_lineation[particle].position.x + snapped((time_passed * material.particle_mechanics[particle]['velocity'].x),.01)  ),.01)
 		material.particle_lineation[particle].position.y = snapped((material.particle_lineation[particle].position.y + snapped((time_passed * material.particle_mechanics[particle]['velocity'].y),.01)  ),.01)
 		#print(material.particle_lineation[particle].position,' material.particle_lineation[particle].position')

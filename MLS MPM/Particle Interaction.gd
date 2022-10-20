@@ -44,7 +44,7 @@ var x_leg_of_particle_velocity : float
 ### used for perfect inelastic collisions > 0.0 ...
 var final_velocity : Vector2
 ### particles colliding with other particle at elastic collisions...
-var dotted_unit_artifact_velocity : float
+var dotted_unit_artifact_velocity# : float
 var dotted_tangent_artifact_velocity : float
 var dotted_unit_other_artifact_velocity: float
 var dotted_tangent_other_artifact_velocity: float
@@ -313,31 +313,31 @@ func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,othe
 	
 	collision_restitution = artifact.coefficient_of_restitution * other_artifact.coefficient_of_restitution
 	#print(collision_restitution,' collision_restitution')
-	impact_center = (artifact_zone.intersection(other_artifact_zone)).get_center()
+	#impact_center = (artifact_zone.intersection(other_artifact_zone)).get_center()
 	#impact_center = artifact_zone.get_center() - other_artifact_zone.get_center()
 	#print(impact_center,' impact center')
 	if collision_restitution >= 1.0 :
 		
-		normal_vector = Vector2(impact_center - artifact_zone.get_center())
-		#print(normal_vector,' normal vector')
-		unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
-		#print(unit_vector,' unit_vector')
+		normal_vector = other_artifact_zone.get_center() - artifact_zone.get_center()
+
+		unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.0001) + snapped(pow(normal_vector.y,2.0),.0001))),.0001)
+		#unit_vector = normal_vector / sqrt((pow(normal_vector.x,2.0) + pow(normal_vector.y,2.0)))
 		unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
-		#print(unit_tangent,' unit_tangent')
+		
 		dotted_unit_artifact_velocity = unit_vector.dot(grid_field[artifact_name]['velocity'])
-		#print(dotted_unit_artifact_velocity,' dotted_unit_artifact_velocity')
 		dotted_tangent_artifact_velocity = unit_tangent.dot(grid_field[artifact_name]['velocity'])
-		#print(dotted_tangent_artifact_velocity,' dotted_tangent_artifact_velocity')
+		
 		dotted_unit_other_artifact_velocity = unit_vector.dot(grid_field[other_artifact_name]['velocity'])
-		#print(dotted_unit_other_artifact_velocity,' dotted_unit_other_artifact_velocity')
 		dotted_tangent_other_artifact_velocity = unit_tangent.dot(grid_field[other_artifact_name]['velocity'])
-		#print(dotted_tangent_other_artifact_velocity,' dotted_tangent_other_artifact_velocity')
+		
 		final_tangential_artifact_velocity = dotted_tangent_artifact_velocity
-		final_tangential_wall_velocity = dotted_tangent_other_artifact_velocity
-		final_normal_artifact_velocity = (dotted_unit_artifact_velocity * (grid_field[artifact_name]['mass'] - grid_field[other_artifact_name]['mass']) + 2.0 * grid_field[other_artifact_name]['mass'] * dotted_unit_other_artifact_velocity ) / (grid_field[artifact_name]['mass'] + grid_field[other_artifact_name]['mass'])
-		final_normal_other_artifact_velocity = (dotted_unit_other_artifact_velocity * (grid_field[other_artifact_name]['mass'] - grid_field[artifact_name]['mass']) + 2.0 * grid_field[other_artifact_name]['mass'] * dotted_unit_artifact_velocity ) / (grid_field[artifact_name]['mass'] + grid_field[other_artifact_name]['mass'])
+		#final_tangential_wall_velocity = dotted_tangent_other_artifact_velocity
+		final_normal_artifact_velocity = ( (dotted_unit_artifact_velocity * (grid_field[artifact_name]['mass'] - grid_field[other_artifact_name]['mass']) )+( 2.0 * grid_field[other_artifact_name]['mass'] * dotted_unit_other_artifact_velocity ) )/ (grid_field[artifact_name]['mass'] + grid_field[other_artifact_name]['mass'])
+		
+		#final_normal_other_artifact_velocity = (dotted_unit_other_artifact_velocity * (grid_field[other_artifact_name]['mass'] - grid_field[artifact_name]['mass']) + 2.0 * grid_field[other_artifact_name]['mass'] * dotted_unit_artifact_velocity ) / (grid_field[artifact_name]['mass'] + grid_field[other_artifact_name]['mass'])
 							
-		grid_field[artifact_name]['velocity'] = (final_normal_artifact_velocity * unit_vector) - (final_tangential_artifact_velocity * unit_tangent)
+		grid_field[artifact_name]['velocity'] = (final_normal_artifact_velocity * unit_vector) + (final_tangential_artifact_velocity * unit_tangent)
+		
 		#final_tangential_mote_velocity * unit_tangent
 		#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
 		

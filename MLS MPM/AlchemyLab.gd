@@ -57,8 +57,9 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(6.0,6.0)
-	domain_size = Vector2(5.0,5.0)
+	#domain_size = Vector2(5.0,5.0)
 	#domain_size = Vector2(4.0,4.0)
+	domain_size = Vector2(3.0,3.0)
 	#domain_size = Vector2(2.0,2.0)
 	#domain_size = Vector2(1.0,1.0)
 	#---------------------------------
@@ -337,7 +338,7 @@ func _on_alchemy_lab_ready():
 			#print(substance_particle_name,' name created')
 			### 
 			substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
-			substance.particle_mechanics[substance_particle_name]['within_range'] = [substance_particle_name]
+			#substance.particle_mechanics[substance_particle_name]['within_range'] = [substance_particle_name]
 			###
 			substance.grid[substance_particle_name] = {'mass':0.0,'velocity':Vector2(0,0),'momentum':Vector2(0.0,0.0)}
 			substance.particle_lineation[substance_particle_name] = substance.surrounding_area
@@ -369,7 +370,7 @@ func _on_alchemy_lab_ready():
 					# it is itself...
 					pass
 				elif substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()) < 1:
-					print(artifact,' collides with other_artifact,')
+					pass
 				else:
 					# to far apart not in contact...
 					pass
