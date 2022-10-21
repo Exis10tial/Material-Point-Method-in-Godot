@@ -378,7 +378,7 @@ func _on_alchemy_lab_ready():
 				#substance.relation_to_domain[other_substance] =flipped_kernel_distance
 				#substance.domain_relation_to_substance[other_substance] =kernel_distance
 		###
-		get_tree().get_root().get_node("Test Area/Simulation").add_child(substance)
+		get_tree().get_root().get_node("Simulation").add_child(substance)
 	else:
 		print('substances Does not exists')
 		pass

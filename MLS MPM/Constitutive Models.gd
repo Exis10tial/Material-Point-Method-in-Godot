@@ -28,7 +28,7 @@ func Model_of_Water(speck,nub):
 	#print(deteminant_coefficient,' deteminant coefficient')
 	var p_coefficient = 2.1 * (deteminant_coefficient - 1.0 )
 	#print(p_coefficient,' p')
-	resulted_stress = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(nub.particle_mechanics[speck]['I'],-p_coefficient,true)
+	resulted_stress = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(nub.particle_mechanics[speck]['I'],-p_coefficient,true)
 	#print(resulted_stress)
 	return resulted_stress
 	
@@ -41,7 +41,7 @@ func Neo_Hookean(speck,nub):
 	var lambda
 	#var pk_stress
 	
-	#var F_transposed = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
+	#var F_transposed = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
 	
 	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
 	lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
@@ -50,18 +50,18 @@ func Neo_Hookean(speck,nub):
 	# note ln() = log()
 	# or
 	# P = u*(F - F^-T) + n*log (J)*F^-T ; mpm course pg. 19,equation 48
-	var f_coefficient =  get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Subtract_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])))
-	var pk_mu_coefficient =  get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(f_coefficient,mu,true)
+	var f_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Subtract_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])))
+	var pk_mu_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(f_coefficient,mu,true)
 	
 	var lambda_log_cofficient = lambda * log(nub.particle_mechanics[speck]['J']) # snapped(n * snapped(log(nub.particle_mechanics[speck]['J']),.001),.001)
-	var pk_lambda_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])),lambda_log_cofficient,true)
+	var pk_lambda_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])),lambda_log_cofficient,true)
 	
-	var P = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
+	var P = get_tree().get_root().get_node("Simulation/Matrix Math").Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
 	#stress = 1 / J * P * F^T
 	var j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
-	var stress_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
-	var f_transposed_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
-	resulted_stress = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
+	var stress_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
+	var f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
+	resulted_stress = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
 	
 	#print(resulted_stress)
 	return resulted_stress
@@ -81,26 +81,26 @@ func Fixed_Corotated(speck,nub):
 	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
 	lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
 	
-	var F_inverse = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(nub.particle_mechanics[speck]['F'])
+	var F_inverse = get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(nub.particle_mechanics[speck]['F'])
 	R = nub.particle_mechanics[speck]['stress'].duplicate(true)
 	var e = harden_coefficient * (snapped((1.0 - nub.particle_mechanics[speck]['J']),.01))
 	mu_hardened = mu * e
 	lambda_hardened = lambda * e
 	# P = 2 * mu_hardened * ( F - R ) + lambda_hardened * ( J - 1 ) * J * F ^-1 ; mpm course pg 20 eq 52
 	
-	var f_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Subtract_Matrix(nub.particle_mechanics[speck]['F'],R)
+	var f_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Subtract_Matrix(nub.particle_mechanics[speck]['F'],R)
 	var mu_harded_coefficient = snapped((2.0 * mu_hardened),.01)
-	var mu_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(f_coefficient,mu_harded_coefficient,true)
+	var mu_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(f_coefficient,mu_harded_coefficient,true)
 	
 	var lambda_harded_coefficient = snapped(snapped(lambda_hardened * (snapped((nub.particle_mechanics[speck]['J'] - 1.0),.01)),.01) * nub.particle_mechanics[speck]['J'],.01)
-	var lambda_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(F_inverse,lambda_harded_coefficient,true)
+	var lambda_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(F_inverse,lambda_harded_coefficient,true)
 	
-	var P = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Add_Matrix(mu_coefficient,lambda_coefficient)
+	var P = get_tree().get_root().get_node("Simulation/Matrix Math").Add_Matrix(mu_coefficient,lambda_coefficient)
 	#stress = 1 / J * P * F^T
 	var j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
-	var stress_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
-	var f_transposed_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
-	resulted_stress = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
+	var stress_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
+	var f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
+	resulted_stress = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
 	
 	return resulted_stress
 
@@ -124,14 +124,14 @@ func Drucker_Prager_Elasticity(speck,nub):
 	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
 	lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
 	
-	var FFtransposed = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F']))
-	nub.particle_mechanics[speck]['U'] = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Eigenvectors(FFtransposed)
-	var FtransposedF = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F']))
-	nub.particle_mechanics[speck]['V'] = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Eigenvectors(FtransposedF)
+	var FFtransposed = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F']))
+	nub.particle_mechanics[speck]['U'] = get_tree().get_root().get_node("Simulation/Matrix Math").Find_Eigenvectors(FFtransposed)
+	var FtransposedF = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F']))
+	nub.particle_mechanics[speck]['V'] = get_tree().get_root().get_node("Simulation/Matrix Math").Find_Eigenvectors(FtransposedF)
 	#Diagonalize SIGMA = PAP^-1... P = diagonalize_helper ,A = nub.particle_mechanics[speck]['F']
-	var diagonalize_helper = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Eigenvectors(nub.particle_mechanics[speck]['F'])
+	var diagonalize_helper = get_tree().get_root().get_node("Simulation/Matrix Math").Find_Eigenvectors(nub.particle_mechanics[speck]['F'])
 	# 
-	nub.particle_mechanics[speck]['Sigma'] = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(diagonalize_helper,nub.particle_mechanics[speck]['F']),get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(diagonalize_helper))
+	nub.particle_mechanics[speck]['Sigma'] = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(diagonalize_helper,nub.particle_mechanics[speck]['F']),get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(diagonalize_helper))
 			
 	### if any is less than or equal to 0...
 	if nub.particle_mechanics[speck]['Sigma'][0][0] <= 0.0 or nub.particle_mechanics[speck]['Sigma'][0][1] <= 0.0 or nub.particle_mechanics[speck]['Sigma'][1][0] <= 0.0 or nub.particle_mechanics[speck]['Sigma'][1][1] <= 0.0:
@@ -162,8 +162,8 @@ func Drucker_Prager_Elasticity(speck,nub):
 	
 	else:
 		logged_sigma = [[ snapped(log(nub.particle_mechanics[speck]['Sigma'][0][0]),.001), snapped(log(nub.particle_mechanics[speck]['Sigma'][0][1]),.001) ],[ snapped(log(nub.particle_mechanics[speck]['Sigma'][1][0]),.001), snapped(log(nub.particle_mechanics[speck]['Sigma'][1][1]),.001) ]]
-	var V_transposed = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['V'])
-	var SIGMA_inverse = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(nub.particle_mechanics[speck]['Sigma'])
+	var V_transposed = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['V'])
+	var SIGMA_inverse = get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(nub.particle_mechanics[speck]['Sigma'])
 	##print( logged_sigma,' logged sigma')
 	#print(V_transposed, ' V^T')
 	#print(SIGMA_inverse,' sigma^-1')
@@ -171,13 +171,13 @@ func Drucker_Prager_Elasticity(speck,nub):
 	### Plasticity Defining...
 	### e_sigma = logged_sigma - (trace(logged_sigma)/d*I
 	#d : is dimensions, I : Identity Matrix
-	var trace_log_sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Trace(logged_sigma)
-	var trace_identity = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(nub.particle_mechanics[speck]['I'],(trace_log_sigma / 2.0),true)
-	var e_sigma =  get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Subtract_Matrix(logged_sigma,trace_identity)
+	var trace_log_sigma = get_tree().get_root().get_node("Simulation/Matrix Math").Trace(logged_sigma)
+	var trace_identity = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(nub.particle_mechanics[speck]['I'],(trace_log_sigma / 2.0),true)
+	var e_sigma =  get_tree().get_root().get_node("Simulation/Matrix Math").Subtract_Matrix(logged_sigma,trace_identity)
 	
 	### amount_of_plastic_deformation = deteminant(e_sigma) + ( d*lambda +2*mu / 2 *mu * trace(log_sigma) )*yield_surface_size
 	
-	var amount_of_plastic_deformation = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Determinant(e_sigma) + (snapped(((( snapped(2.0 * lambda,.01) )  + ( snapped(2.0 * mu,.01) )) / ( snapped((snapped(2.0 * mu,.01) ) * trace_log_sigma,.001) )) * nub.yield_surface,.001))
+	var amount_of_plastic_deformation = get_tree().get_root().get_node("Simulation/Matrix Math").Find_Determinant(e_sigma) + (snapped(((( snapped(2.0 * lambda,.01) )  + ( snapped(2.0 * mu,.01) )) / ( snapped((snapped(2.0 * mu,.01) ) * trace_log_sigma,.001) )) * nub.yield_surface,.001))
 	
 	### Hardening...
 	# updated_hardening_state = hardening_state + alter_hardening_state (amount_of_plastic_deformation)
@@ -198,24 +198,24 @@ func Drucker_Prager_Elasticity(speck,nub):
 	
 	
 	# P = U * (2*mu*sigma^-1*log(sigma) + lambda * trace( log(sigma))*sigma^-1)*V^T
-	mu_cofficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(SIGMA_inverse,(2.0*mu),true)
-	#var trace_log_sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Trace(logged_sigma)
-	lambda_cofficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(SIGMA_inverse,(lambda*trace_log_sigma),true)
+	mu_cofficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(SIGMA_inverse,(2.0*mu),true)
+	#var trace_log_sigma = get_tree().get_root().get_node("Simulation/Matrix Math").Trace(logged_sigma)
+	lambda_cofficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(SIGMA_inverse,(lambda*trace_log_sigma),true)
 	
-	mu_lambda_sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Add_Matrix(mu_cofficient,lambda_cofficient)
+	mu_lambda_sigma = get_tree().get_root().get_node("Simulation/Matrix Math").Add_Matrix(mu_cofficient,lambda_cofficient)
 	#print(mu_lambda_sigma,' completed')
-	var U_mu_lambda_sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(nub.particle_mechanics[speck]['U'],mu_lambda_sigma)
-	P = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(U_mu_lambda_sigma,V_transposed)
+	var U_mu_lambda_sigma = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(nub.particle_mechanics[speck]['U'],mu_lambda_sigma)
+	P = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(U_mu_lambda_sigma,V_transposed)
 	#print(P,' P ')
 	#stress = 1 / J * P * F^T
 	var j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
-	var stress_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
-	var f_transposed_coefficient = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
-	resulted_stress = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
+	var stress_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
+	var f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
+	resulted_stress = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
 	#print(resulted_stress,' stress')
 	return resulted_stress
 	
-func Update_Plasticity(speck,case,resurface,nub):
+func Update_Plasticity(case,resurface,nub):
 	### .
 	if case == 'snow':
 		### snow plasicity...
@@ -238,7 +238,7 @@ func Update_Plasticity(speck,case,resurface,nub):
 		#if nub.particle_mechanics[speck]['I']s_wet == true:
 			#pass
 		### if any is less than or equal to 0...
-		nub = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix_by_Scalar(nub,resurface,true)
+		nub = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(nub,resurface,true)
 	
 	
 	return nub

@@ -1,5 +1,6 @@
 extends Node
 
+class_name ParticleInteraction
 
 ### determine the type of collision...
 var collision_restitution : float = 0.0
@@ -91,7 +92,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_static_friction = baluster['window outline']['top']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['top']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		baluster['window outline']['top']['velocity'] = baluster['window outline']['top']['velocity'] * -structure[refer]['velocity']
-		wall_center = Vector2(particle_boundary.get_center().x,(0.0-ProjectSettings.get_setting('display/window/size/viewport_height')/2.0))
+		wall_center = Vector2(particle_boundary.get_center().x,(0.0-ProjectSettings.get_setting('display/window/size/height')/2.0))
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
@@ -196,12 +197,10 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_kinetic_friction = baluster['window outline']['bottom']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		baluster['window outline']['bottom']['velocity'] = baluster['window outline']['bottom']['velocity'] * structure[refer]['velocity']
 		wall_center = Vector2(particle_boundary.get_center().x,baluster['window outline']['bottom']['outline']+baluster['window outline']['bottom']['outline']/2.0)
-		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			#print(unit_vector,' unit_vector')

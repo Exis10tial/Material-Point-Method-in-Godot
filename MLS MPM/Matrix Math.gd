@@ -14,43 +14,6 @@ func _on_Matrix_Math_ready():
 	pass
 
 
-func Double_Distribute_Property(a,b,c,d):
-	var property_ac
-	var property_ad
-	var property_bc
-	var property_bd
-	var double_distribute_result
-	### (a %s b)(c %s d); %s can be +,-,*,/ 
-	# (a * c) + (a * d) +(b * c) + (b * d)
-	double_distribute_result = (a * c) + (a * d) +(b * c) + (b * d)
-	if typeof(a) == TYPE_STRING or typeof(b) == TYPE_STRING or typeof(c) == TYPE_STRING or typeof(d) == TYPE_STRING:
-		### contains an variable of an unknown...
-		a = String(a)
-		b = String(b)
-		c = String(c)
-		d = String(d)
-		
-		# (a * c) + (a * d) +(b * c) + (b * d)
-		if a.match(c):
-			### both contain the same variable
-			# so it becomes variable squared...
-			
-			property_ac = a + c
-			property_ad = a + d
-			property_bc = b + c
-			property_bd = b + d
-			
-			print(property_ac,' ac')
-			print(property_ad,' ad')
-			print(property_bc,' bc')
-			print(property_bd,' bd')
-	else:
-		### each is a known number ...
-		double_distribute_result = (a * c) + (a * d) + (b * c) + (b * d)
-	
-	return double_distribute_result
-
-
 func Sum_Of(cumulate):
 	return cumulate
 	

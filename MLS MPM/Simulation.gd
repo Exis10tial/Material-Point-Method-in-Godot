@@ -17,9 +17,8 @@ var adjust_particles : bool = false
 var Particles : Dictionary = {}
 var rate : float
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+
+
 func Establish_Rate():
 	### ...
 	#dx = snapped(1.0/float(particle_limit)*1.50,.001)
@@ -38,8 +37,6 @@ func Establish_Rate():
 			#Particles[particle].draw_particle()
 	
 func _on_Simulation_ready():
-	###...
-	
 	#fund_chemistry = File.new()
 	if FileAccess.file_exists("res://AlchemyLab.tscn"):
 		alchemy = load("res://AlchemyLab.tscn").instantiate()
@@ -76,7 +73,7 @@ func _on_Simulation_ready():
 	add_child(collisions)
 	add_child(models)
 	add_child(alchemy)
-	
+
 	### initial grid node data....
 	#$"Program".grid_nodes = $"Substance".grid_nodes.duplicate(true)
 	#for particle in $"Substance".get_children():
@@ -98,26 +95,21 @@ func _process(delta):
 		#	$"Program".merge_particles = false
 		
 		#Particle Simulation....
-		#$"Program".Simulate($"Substance".dx,$"Substance".get_children(),$"Program".grid_nodes)
 		$"Program".Simulate(rate,$"Substance",$"Substance".grid)
 		### used if the particle travels past the window...
 		### and the window is set to 'disappear'...
 		#'''
-		if adjust_particles == true:
+		#if adjust_particles == true:
 			### if particles are to be removed..
-			for particle in Particles.keys():
-				if particle.to_remove == true:
-					particle.to_remove = false
-					particle.free()
-					$"Substance".grid.erase(particle)
+		#	for particle in Particles.keys():
+		#		if particle.to_remove == true:
+		#			particle.to_remove = false
+			#		particle.free()
+			#		$"Substance".grid.erase(particle)
 				
 			### reset...
-			adjust_particles = false
+		#	adjust_particles = false
 		#'''
-		
-		for particle in $"Substance".particle_lineation.keys():
-			print($"Substance".particle_lineation[particle],' end of cycle')
-		
 		### the particle/s position is updated...
 		$"Substance".queue_redraw()
 	else:
