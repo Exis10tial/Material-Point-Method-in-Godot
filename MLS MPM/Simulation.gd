@@ -16,18 +16,34 @@ var adjust_particles : bool = false
 ###...
 var Particles : Dictionary = {}
 var rate : float
-
+var mechanics_processing : bool
+var lore_processing : bool
 
 
 func Establish_Rate():
 	### ...
-	#dx = snapped(1.0/float(particle_limit)*1.50,.001)
-	#dx = snapped(1.0/float(particle_limit)*5.00,.001)
 	rate = snapped(1.0/float(len($"Substance".particle_mechanics)),.001)
-	#dx = snapped(1.0/1.50,.001)
-	#dx = 1.50
-	#dx = 1.0
+	#rate = snapped(1.0/1.50,.001)
+	#rate = 1.0
 	return rate
+
+
+func Switch_Protocol():
+	
+	if lore_processing == true and mechanics_processing == false:
+		lore_processing = false
+		mechanics_processing = true
+		set_process(lore_processing)
+		set_physics_process(mechanics_processing)
+		
+	elif lore_processing == false and mechanics_processing == true:
+		lore_processing = true
+		mechanics_processing = false
+		set_process(lore_processing)
+		set_physics_process(mechanics_processing)
+		
+
+
 
 #func _notification(event):
 	#print(event)
@@ -74,48 +90,32 @@ func _on_Simulation_ready():
 	add_child(models)
 	add_child(alchemy)
 
-	### initial grid node data....
-	#$"Program".grid_nodes = $"Substance".grid_nodes.duplicate(true)
-	#for particle in $"Substance".get_children():
-	#	print(particle.velocity,' before simulation')
+
 	Establish_Rate()
+	#$"Substance".establish_boundary()
 	
 	set_process(true)
-	#set_physics_process(true)
+	set_physics_process(false)
 	
+
 func _process(delta):
-	#"""
-	if check_time >= rate:
+	$"Program".Simulate(delta,$"Substance",$"Substance".grid)
 
-		### if particles ares set to merge...
-		#if $"Program".merge_particles == true:
-			
-		#	get_tree().get_root().get_node("Test Area/Simulation/Particle Interaction").Merge_Particles($"Program".cycle_of_mergin_particles,$"Program".grid_nodes,$"Substance".cell_size)
-			### reset....
-		#	$"Program".merge_particles = false
-		
-		#Particle Simulation....
-		$"Program".Simulate(rate,$"Substance",$"Substance".grid)
-		### used if the particle travels past the window...
-		### and the window is set to 'disappear'...
-		#'''
-		#if adjust_particles == true:
-			### if particles are to be removed..
-		#	for particle in Particles.keys():
-		#		if particle.to_remove == true:
-		#			particle.to_remove = false
-			#		particle.free()
-			#		$"Substance".grid.erase(particle)
-				
-			### reset...
-		#	adjust_particles = false
-		#'''
-		### the particle/s position is updated...
-		$"Substance".queue_redraw()
-	else:
-		collect_time(delta)
-	#"""
+	$"Substance".queue_redraw()
 
+	$"Substance".establish_boundary()
+	#$"Substance".identify_collisions()
+
+func _physics_process(delta):
+	#if check_time >= rate:
+	#	#Particle Simulation....
+	$"Program".Simulate(delta,$"Substance",$"Substance".grid)
+
+	$"Substance".queue_redraw()
+	#else:
+	#	collect_time(delta)
+	#"""
+	pass
 func collect_time(delta):
-	check_time += snapped(delta,.01)
+	check_time += snapped(delta,.0001)
 	return check_time

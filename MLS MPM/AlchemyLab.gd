@@ -54,12 +54,12 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(35.0,30.0)
 	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
-	#domain_size = Vector2(10.0,10.0)
+	domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(6.0,6.0)
 	#domain_size = Vector2(5.0,5.0)
 	#domain_size = Vector2(4.0,4.0)
-	domain_size = Vector2(3.0,3.0)
+	#domain_size = Vector2(3.0,3.0)
 	#domain_size = Vector2(2.0,2.0)
 	#domain_size = Vector2(1.0,1.0)
 	#---------------------------------
@@ -250,7 +250,7 @@ func _on_alchemy_lab_ready():
 		else:
 			substance.appearance = cell_size
 		
-		substance.coefficient_of_restitution = 1.00 #rubber
+		substance.coefficient_of_restitution = .80 #rubber
 		substance.coefficient_of_static_friction = 0.9 #rubber
 		substance.coefficient_of_kinetic_friction = 0.250 #rubber
 		substance.physical_state = 'solid'
@@ -327,18 +327,18 @@ func _on_alchemy_lab_ready():
 			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x-(substance.appearance/2.0) + (substance.appearance * location_x),substance_starting_point.y-(substance.appearance/2.0) + (substance.appearance * location_y)),Vector2(substance.appearance,substance.appearance))
 			substance.particle_workings['mass'] = 1.0
 			substance.particle_workings['velocity'] = Vector2(0.0,0.0)
-			substance.particle_workings['stress'] = [[1.0,1.0],[1.0,1.0]]
+			substance.particle_workings['stress'] = [[1.0,1.0],[1.0,1.0]].duplicate(true)
+			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
 			substance.particle_workings['volume'] = 1.0
-			substance.particle_workings['B'] = substance.B
-			substance.particle_workings['C'] = substance.C
-			substance.particle_workings['I'] = substance.I
-			substance.particle_workings['F'] = substance.F
+			substance.particle_workings['B'] = substance.B.duplicate(true)
+			substance.particle_workings['C'] = substance.C.duplicate(true)
+			substance.particle_workings['I'] = substance.I.duplicate(true)
+			substance.particle_workings['F'] = substance.F.duplicate(true)
 			substance.particle_workings['J'] = substance.J
-			#substance.particle_workings['within_range'].append(substance_particle_name)
-			#print(substance_particle_name,' name created')
+			
+			substance.particle_workings['within_range'] = [substance_particle_name].duplicate(true)
 			### 
 			substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
-			#substance.particle_mechanics[substance_particle_name]['within_range'] = [substance_particle_name]
 			###
 			substance.grid[substance_particle_name] = {'mass':0.0,'velocity':Vector2(0,0),'momentum':Vector2(0.0,0.0)}
 			substance.particle_lineation[substance_particle_name] = substance.surrounding_area
@@ -347,37 +347,6 @@ func _on_alchemy_lab_ready():
 			location_x =  location_x + 1
 			
 		
-		### establish substance relation to others...
-		for artifact in substance.particle_lineation:
-			for other_artifact in substance.particle_lineation:
-				
-				#kernel_distance = (substance.get_position() - other_substance.surrounding_area.get_center())# / cell_size
-				kernel_x = snapped(substance.particle_lineation[artifact].get_center().x - substance.particle_lineation[other_artifact].get_center().x,.01)
-				kernel_y = snapped(substance.particle_lineation[artifact].get_center().y - substance.particle_lineation[other_artifact].get_center().y,.01)
-				kernel_distance = Vector2(kernel_x,kernel_y)
-				#flipped_kernel_distance = (other_substance.surrounding_area.get_center() - substance.get_position())# / cell_size
-				flipped_kernel_x = snapped(substance.particle_lineation[other_artifact].get_center().x - substance.particle_lineation[artifact].get_center().x,.01)
-				flipped_kernel_y = snapped(substance.particle_lineation[other_artifact].get_center().y - substance.particle_lineation[artifact].get_center().y,.01)
-				flipped_kernel_distance = Vector2(flipped_kernel_x,flipped_kernel_y)
-				
-				substance.particle_mechanics[artifact]['relation_to_domain'][other_artifact] = kernel_distance
-				substance.particle_mechanics[other_artifact]['domain_relation_to_substance'][artifact] = flipped_kernel_distance
-				
-				#print(kernel_distance/substance.particle_lineation[artifact].size.x,' kernel distance')
-				#print(substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()),' distance_squared_to')
-				#	substance.particle_mechanics[artifact]['within_range'].append(artifact)
-				if  substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()) == 0:
-					# it is itself...
-					pass
-				elif substance.particle_lineation[artifact].get_center().distance_squared_to(substance.particle_lineation[other_artifact].get_center()) < 1:
-					pass
-				else:
-					# to far apart not in contact...
-					pass
-			
-				#substance.relation_to_domain[other_substance] =flipped_kernel_distance
-				#substance.domain_relation_to_substance[other_substance] =kernel_distance
-		###
 		get_tree().get_root().get_node("Simulation").add_child(substance)
 	else:
 		print('substances Does not exists')
