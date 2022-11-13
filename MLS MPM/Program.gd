@@ -215,7 +215,7 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 				
 				#Weight_Interpolation(basis,basis_function_version,material.particle_mechanics[particle]['relation_to_domain'][other_particle],material.cell_size)
 				Weight_Interpolation(basis,basis_function_version,relation_between_particles,material.cell_size)
-				"""
+				#"""
 				if material.physical_state == 'solid':
 					if material.constitutive_model == 'hyperelastic':
 						material.particle_mechanics[other_particle].stress = get_tree().get_root().get_node("Simulation/Constitutive Models").Neo_Hookean(particle,material)
@@ -320,63 +320,37 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 		#for velocity in collection_of_velocities:
 			#print(particle,' in coming velocity ',velocity)
 			#the_grid[particle]['velocity'] = the_grid[particle]['velocity'] + velocity
-	"""
+	
+	
+	### Collision between Particles...
 	identify_number = 0
 	particle = 'null'
-	var particle_boundary
-	#particle_boundary = PackedVector2Array()
 	while true:
 		if identify_number >= len(material.particle_mechanics.keys()):
 			break
-		
+	
 		particle = material.particle_mechanics.keys()[identify_number]
-		particle_boundary = [
-			Vector2(material.particle_lineation[particle].position.x,material.particle_lineation[particle].position.y),
-			Vector2(material.particle_lineation[particle].end.x,material.particle_lineation[particle].position.y),
-			Vector2(material.particle_lineation[particle].position.x,material.particle_lineation[particle].end.y),
-			Vector2(material.particle_lineation[particle].end.x,material.particle_lineation[particle].end.y)
-			]
-
-	#for particle in material.particle_lineation.keys():
-		### if the particle has contacted another particle....
+	
 		#collection_of_velocities = []
-		#for other_particle in material.particle_mechanics[particle]['within_range']:
-		for other_particle in material.particle_body.keys():
-			
-			
-			if particle_boundary == material.particle_body[other_particle] == true:
-				#itself
+		for other_particle in material.particle_mechanics[particle]['within_range']:
+			if particle.match(other_particle):
+				#### it is itself..
 				pass
-			elif  Geometry2D.intersect_polygons(particle_boundary,material.particle_body[other_particle]) != []:
-				print('collided')
-
-			kernel_x = snapped(material.particle_lineation[particle].get_center().x - material.particle_lineation[other_particle].get_center().x,.01)
-			kernel_y = snapped(material.particle_lineation[particle].get_center().y - material.particle_lineation[other_particle].get_center().y,.01)
-			kernel_distance = Vector2(kernel_x,kernel_y)
-			flipped_kernel_x = snapped(material.particle_lineation[other_particle].get_center().x - material.particle_lineation[particle].get_center().x,.01)
-			flipped_kernel_y = snapped(material.particle_lineation[other_particle].get_center().y - material.particle_lineation[particle].get_center().y,.01)
-			flipped_kernel_distance = Vector2(flipped_kernel_x,flipped_kernel_y)
-			
-			material.particle_mechanics[particle]['relation_to_domain'][other_particle] = kernel_distance
-			material.particle_mechanics[particle]['domain_relation_to_substance'][other_particle] = flipped_kernel_distance
-			#print(particle,' ',material.particle_mechanics[particle]['within_range'],' within range')
-			#if material.particle_lineation[particle].get_center().distance_squared_to(material.particle_lineation[other_particle].get_center()) == 0:
-				# it is itself...
-			#	pass
-			#elif material.particle_lineation[particle].get_center().distance_squared_to(material.particle_lineation[other_particle].get_center()) < 1:
-			#elif material.particle_lineation[particle].intersects(material.particle_lineation[other_particle]) == true:
-				#the_grid[particle]['velocity'] = the_grid[particle]['velocity'] + get_tree().get_root().get_node("Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid)
+			else:
+				the_grid[particle]['velocity'] = the_grid[particle]['velocity'] + get_tree().get_root().get_node("Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid)
 				#the_grid[particle]['velocity'] = get_tree().get_root().get_node("Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid)
-			#	collection_of_velocities.append(get_tree().get_root().get_node("Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid))
-			#else:
-			#	### particles is not in contact...
-			#	pass
+				#collection_of_velocities.append(get_tree().get_root().get_node("Simulation/Particle Interaction").Collision_between_Other_Particles(particle,material,material.particle_lineation[particle],other_particle,material,material.particle_lineation[other_particle],the_grid))
+			
 		#for velocity in collection_of_velocities:
 			#print(particle,' in coming velocity ',velocity)
 		#	the_grid[particle]['velocity'] = the_grid[particle]['velocity'] + velocity
 	
+	
+		### loop counter...
 		identify_number = wrapi(identify_number+1,0,len(material.particle_mechanics.keys())+1)
-	#"""
+	
+
+
 #func Grid_to_Particle(time_passed:float,material:Object,the_grid:Dictionary):
 	# Grid to Particle...
 	#for particle in PackedStringArray(material.particle_mechanics.keys()):

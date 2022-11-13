@@ -1,8 +1,18 @@
 extends Node
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
+
+
+
+### Neo-Hookean...
+var f_coefficient : Array
+var pk_mu_coefficient : Array
+var lambda_log_cofficient : float 
+var pk_lambda_coefficient : Array
+var P : Array
+var j_coefficient : float
+var stress_coefficient : Array
+var f_transposed_coefficient : Array 
+###
 
 
 func _on_constitutive_models_ready():
@@ -50,17 +60,17 @@ func Neo_Hookean(speck,nub):
 	# note ln() = log()
 	# or
 	# P = u*(F - F^-T) + n*log (J)*F^-T ; mpm course pg. 19,equation 48
-	var f_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Subtract_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])))
-	var pk_mu_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(f_coefficient,mu,true)
+	f_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Subtract_Matrix(nub.particle_mechanics[speck]['F'],get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])))
+	pk_mu_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(f_coefficient,mu,true)
 	
-	var lambda_log_cofficient = lambda * log(nub.particle_mechanics[speck]['J']) # snapped(n * snapped(log(nub.particle_mechanics[speck]['J']),.001),.001)
-	var pk_lambda_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])),lambda_log_cofficient,true)
+	lambda_log_cofficient = lambda * log(nub.particle_mechanics[speck]['J']) # snapped(n * snapped(log(nub.particle_mechanics[speck]['J']),.001),.001)
+	pk_lambda_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])),lambda_log_cofficient,true)
 	
-	var P = get_tree().get_root().get_node("Simulation/Matrix Math").Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
+	P = get_tree().get_root().get_node("Simulation/Matrix Math").Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
 	#stress = 1 / J * P * F^T
-	var j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
-	var stress_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
-	var f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
+	j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
+	stress_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(P,j_coefficient,true)
+	f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
 	resulted_stress = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
 	
 	#print(resulted_stress)
