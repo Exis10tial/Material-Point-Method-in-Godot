@@ -4,6 +4,9 @@ extends Node
 var new_matrix : Array = []
 var check_matrix : String
 var matrix_toolbox  : Dictionary
+var matrix_row_element : int
+var matrix_column_element :int
+var dot_index :int
 var new_vector : Vector2
 var new_scalar : float
 var converted_vector : Array
@@ -21,6 +24,7 @@ func Make_Matrix(m:int,n:int):
 	### Construct an Matrix M x N....
 	var placeholder : Array = []
 	new_matrix = []
+
 	
 	for row in range(m):
 		for column in range(n):
@@ -65,36 +69,14 @@ func Convert_to_Scalar(m:Array):
 
 func Convert_Vector_2_to_Matrix(n:Vector2,transpose:bool):
 	#Converts a Vector2 into a  2x1-Matrix"
-	
-	if transpose == false:
-		check_matrix = "{m} by {n}".format({'m':2,'n':1})
-	
-		### storing a template of a created matrix...
-		if matrix_toolbox.has(check_matrix) == true:
-			### Matrix templated exists...
-			new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-		else:
-			### create a placeholding matrix.
-			Make_Matrix(2,1)
-		new_matrix = [[n.x],[n.y]]
-	else:
-		check_matrix = "{m} by {n}".format({'m':1,'n':2})
-	
-		### storing a template of a created matrix...
-		if matrix_toolbox.has(check_matrix) == true:
-			### Matrix templated exists...
-			new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-		else:
-			### create a placeholding matrix.
-			Make_Matrix(1,2)
-		
-		new_matrix = [[n.x,n.y]]
+	pass
+	#new_matrix = [[n.x,n.y]][[n.x],[n.y]]
 	
 	return new_matrix
 	
 
 func Convert_Vector_3_to_Matrix(n:Vector3,transpose:bool):
-	#Converts a Vector2 into a  2x1-Matrix"
+	#Converts a Vector2 into a  2x1-Matrix"...
 	
 	if transpose == false:
 		check_matrix = "{m} by {n}".format({'m':3,'n':1})
@@ -139,21 +121,13 @@ func Trace(m:Array):
 	return new_scalar
 
 func Find_Determinant(m:Array):
+
 	### a number calculated from a square matrix( rows == columns ):
-	if len(m) == len(m[0]):
-		
-		if len(m) == 2:
-			### if the square-matrix is 2...
-			# | Determinant | = (a*d) - (b*c)
-			new_determinant = snapped(((m[0][0] * m[1][1]) - (m[0][1] * m[1][0])),.01)
-		elif len(m) == 3:
-			pass
-		elif len(m) == 4:
-			pass
-		pass
-	else:
-		###
-		print('Not a square matrix...')
+	#if len(m) == len(m[0]):
+	if len(m) ==4:
+
+		new_determinant = snapped(((m[0] * m[3]) - (m[1] * m[2])),.01)
+
 	
 	return new_determinant
 	
@@ -161,22 +135,18 @@ func Find_Determinant(m:Array):
 func Transposed_Matrix(m:Array):
 	#a transposed matrix is a flipped verison of the original matrix... "
 	#To flip the matrix between its rows and columns..."
-	new_matrix = []
 	
-	check_matrix = "{m} by {n}".format({'m':len(m[0]),'n':len(m)})
+	#new_matrix = [[0,0],[0,0]]
+	#new_matrix[0][0] = m[0][0]
+	#new_matrix[0][1] = m[1][0]
+	#new_matrix[1][0] = m[0][1]
+	#new_matrix[1][1] = m[1][1]
+	new_matrix = [0,0,0,0]
+	new_matrix[0] = m[0]
+	new_matrix[1] = m[2]
+	new_matrix[2] = m[1]
+	new_matrix[3] = m[3]
 	
-	### storing a template of a created matrix...
-	if matrix_toolbox.has(check_matrix) == true:
-		### Matrix templated exists...
-		new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-	
-	else:
-		### create a placeholding matrix.
-		Make_Matrix(len(m[0]),len(m))
-	
-	for row in range(0,len(m)):
-		for column in range(0,len(m[row])):
-			new_matrix[column][row] = m[row][column]
 	
 	return new_matrix
 
@@ -192,69 +162,81 @@ func Inverse_Matrix(m:Array):
 	var placeholder2x2_4 = 0.0
 	var determinant_scalar = 0.0
 	
+	var updated_new_matrix
 	
-	if len(m[0]) == len(m):
+	#if len(m[0]) == len(m):
 		### checks if the matrix is a square matrix...
-		if len(m[0]) == 2:
-			### a 2x2 square matrix...
-			
-			#new_scalar = stepify( float( ( m[0][0]*m[1][1] ) ) - float( ( m[0][1]*m[1][0] ) ),.01)
-			check_matrix = "{m} by {n}".format({'m':len(m),'n':len(m[0])})
-	
-			### storing a template of a created matrix...
-			if matrix_toolbox.has(check_matrix) == true:
-				### Matrix templated exists...
-				new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-			else:
-				### create a placeholding matrix.
-				Make_Matrix(len(m),len(m[0]))
-			
+		#if len(m[0]) == 2:
+	if len(m) == 4:
+		### a 2x2 square matrix...
+			#new_matrix = [[0,0],[0,0]]
+		new_matrix = [0,0,0,0]
 			### place holding the matrix info...
-			placeholder2x2_1 = m[0][0]
-			placeholder2x2_2 = m[0][1]
-			placeholder2x2_3 = m[1][0]
-			placeholder2x2_4 = m[1][1]
+			#placeholder2x2_1 = m[0][0]
+			#placeholder2x2_2 = m[0][1]
+			#placeholder2x2_3 = m[1][0]
+			#placeholder2x2_4 = m[1][1]
+		placeholder2x2_1 = m[0]
+		placeholder2x2_2 = m[1]
+		placeholder2x2_3 = m[2]
+		placeholder2x2_4 = m[3]
 			
-			new_matrix[0][0] = float(placeholder2x2_4)
-			if placeholder2x2_2 >= 1:
-				### the number is positive...
-				new_matrix[0][1] = -float(placeholder2x2_2)
-			elif placeholder2x2_2 <= -1:
-				### the number is negative...
-				new_matrix[0][1] = float(placeholder2x2_2)
-			else:
-				### number is 0
-				new_matrix[0][1] = float(placeholder2x2_2)
-			if placeholder2x2_3 >= 1:
-				### the number is positive...
-				new_matrix[0][1] = -float(placeholder2x2_3)
-			elif placeholder2x2_3 <= -1:
-				### the number is negative...
-				new_matrix[0][1] = float(placeholder2x2_3)
-			else:
-				### number is 0
-				new_matrix[0][1] = float(placeholder2x2_3)
-			new_matrix[1][1] = float(placeholder2x2_1)
+		new_matrix[0] = float(placeholder2x2_4)
+		if placeholder2x2_2 >= 1:
+			### the number is positive...
+			new_matrix[1] = -float(placeholder2x2_2)
+		elif placeholder2x2_2 <= -1:
+			### the number is negative...
+			new_matrix[1] = float(placeholder2x2_2)
+		else:
+			### number is 0
+			new_matrix[1] = float(placeholder2x2_2)
+		if placeholder2x2_3 >= 1:
+			### the number is positive...
+			new_matrix[2] = -float(placeholder2x2_3)
+		elif placeholder2x2_3 <= -1:
+			### the number is negative...
+			new_matrix[2] = float(placeholder2x2_3)
+		else:
+			### number is 0
+			new_matrix[2] = float(placeholder2x2_3)
+		new_matrix[3] = float(placeholder2x2_1)
 			
-			if (new_matrix[0][0] * new_matrix[1][1]) - (new_matrix[0][1] * new_matrix[1][0]) > 0:
+		#if (new_matrix[0][0] * new_matrix[1][1]) - (new_matrix[0][1] * new_matrix[1][0]) > 0:
+		if (new_matrix[0] * new_matrix[3]) - (new_matrix[1] * new_matrix[2]) > 0:
+			#determinant_scalar = snapped(1.0 / snapped((new_matrix[0][0] * new_matrix[1][1]) - (new_matrix[0][1] * new_matrix[1][0]),.001),.001)
+			determinant_scalar = snapped(1.0 / snapped((new_matrix[0] * new_matrix[3]) - (new_matrix[1] * new_matrix[2]),.001),.001)
 				
-				determinant_scalar = 1.0 / (new_matrix[0][0] * new_matrix[1][1]) - (new_matrix[0][1] * new_matrix[1][0])
-				Multiply_Matrix_by_Scalar(new_matrix,determinant_scalar,true)
+			#Multiply_Matrix_by_Scalar(new_matrix,determinant_scalar,true)
 			
-			else:
-				#print('The matrix does not have an Inverse.')
-				pass
-		elif len(m[0]) == 3:
+			#updated_new_matrix = [[0,0],[0,0]]
+			#updated_new_matrix[0][0] = snapped((new_matrix[0][0] * determinant_scalar),.01)
+			#updated_new_matrix[0][1] = snapped((new_matrix[0][1] * determinant_scalar),.01)
+			#updated_new_matrix[1][0] = snapped((new_matrix[1][0] * determinant_scalar),.01)
+			#updated_new_matrix[1][1] = snapped((new_matrix[1][1] * determinant_scalar),.01)
+				
+			updated_new_matrix = [0,0,0,0]
+			updated_new_matrix[0] = snapped((new_matrix[0] * determinant_scalar),.01)
+			updated_new_matrix[1] = snapped((new_matrix[1] * determinant_scalar),.01)
+			updated_new_matrix[2] = snapped((new_matrix[2] * determinant_scalar),.01)
+			updated_new_matrix[3] = snapped((new_matrix[3] * determinant_scalar),.01)
+				
+
+		else:
+			#print('The matrix does not have an Inverse.')
+			pass
+		#elif len(m[0]) == 3:
 			### a 3x3 square matrix...
-			pass
-		elif len(m[0]) == 4:
+		#	pass
+		#elif len(m[0]) == 4:
 			### a 4x4 square matrix...
-			pass
+		#	pass
 	else:
 		#print('to find the inverse matrix the original matrix has to be square')
 		#print('m by n where m = n')
 		pass
-	return new_matrix
+	
+	return updated_new_matrix
 
 #func Find_Eigenvectors(a:Array):
 	### Eigenvector formula : AV = evV
@@ -326,207 +308,191 @@ func Add_Matrix(m:Array,n:Array):
 	#Add two matrices if they are the same shape(rows) and size(columns)."""
 	new_matrix = []
 
+	#if len(m) == len(n) and len(m[0]) == len(n[0]):
 	if len(m) == len(n):
-		### rows check...
-		if len(m[0]) == len(n[0]):
-			### columns check...
-			
-			check_matrix = "{m} by {n}".format({'m':len(m),'n':len(m[0])})
-	
-			### storing a template of a created matrix...
-			if matrix_toolbox.has(check_matrix) == true:
-				### Matrix templated exists...
-				new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-			else:
-				### create a placeholding matrix.
-				Make_Matrix(len(m),len(m[0]))
-				
-			### The Math happens...
-			for shape in range(0,len(m)):
-				for size in range(0,len(m[shape])):
-					#new_matrix[shape][size] = stepify(m[shape][size] + n[shape][size],.001)
-					new_matrix[shape][size] = m[shape][size] + n[shape][size]
-			
-			return new_matrix
-		else:
-			#print('not the same size')
-			pass
+		### rows check...### columns check...
+		#new_matrix = [[0,0],[0,0]]
+		#new_matrix[0][0] = snapped(m[0][0] + n[0][0],.01)
+		#new_matrix[0][1] = snapped(m[0][1] + n[0][1],.01)
+		#new_matrix[1][0] = snapped(m[1][0] + n[1][0],.01)
+		#new_matrix[1][1] = snapped(m[1][1] + n[1][1],.01)
+		
+		new_matrix = [0,0,0,0]
+		new_matrix[0] = snapped(m[0] + n[0],.01)
+		new_matrix[1] = snapped(m[1] + n[1],.01)
+		new_matrix[2] = snapped(m[2] + n[2],.01)
+		new_matrix[3] = snapped(m[3] + n[3],.01)
+		
+		
+		return new_matrix
 	
 	else:
-		#print('not the same shape')
+		#print('not the same shape or same size')
 		pass
 
 func Subtract_Matrix(m:Array,n:Array):
 	#Add two matrices if they are the same shape(rows) and size(columns)."""
 	new_matrix = []
 
+	#if len(m) == len(n) and len(m[0]) == len(n[0]):
 	if len(m) == len(n):
-		### rows check...
-		if len(m[0]) == len(n[0]):
-			### columns check...
-			
-			check_matrix = "{m} by {n}".format({'m':len(m),'n':len(m[0])})
-	
-			### storing a template of a created matrix...
-			if matrix_toolbox.has(check_matrix) == true:
-				### Matrix templated exists...
-				new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-			else:
-				### create a placeholding matrix.
-				Make_Matrix(len(m),len(m[0]))
-				
-			### The Math happens...
-			for shape in range(0,len(m)):
-				for size in range(0,len(m[shape])):
-					#new_matrix[shape][size] = stepify(m[shape][size] - n[shape][size],.001)
-					new_matrix[shape][size] = m[shape][size] - n[shape][size]
-			
-			return new_matrix
-		else:
-			#print('not the same size')
-			pass
-	
+		#new_matrix = [[0,0],[0,0]]
+		#new_matrix[0][0] = snapped(m[0][0]- n[0][0],.01)
+		#new_matrix[0][1] = snapped(m[0][1] - n[0][1],.01)
+		#new_matrix[1][0] = snapped(m[1][0] - n[1][0],.01)
+		#new_matrix[1][1] = snapped(m[1][1] - n[1][1],.01)
+		new_matrix = [0,0,0,0]
+		new_matrix[0] = snapped(m[0] - n[0],.01)
+		new_matrix[1] = snapped(m[1] - n[1],.01)
+		new_matrix[2] = snapped(m[2] - n[2],.01)
+		new_matrix[3] = snapped(m[3] - n[3],.01)
+		
+		
+		return new_matrix
+
 	else:
-		#print('not the same shape')
+		#print('not the same shape or same size')
 		pass
 
 
 func Add_Matrix_by_Scalar(m:Array,n,is_float:bool):
 	#you add a matrix (ab) by a (n) number, 
 	#you add every element in the matrix (ab) by the (n) number """
-	if is_float == true:
-		n = float(n)
-	else:
-		n = int(n)
-		
-	check_matrix = "{m} by {n}".format({'m':len(m),'n':len(m[0])})
 	
-	### storing a template of a created matrix...
-	if matrix_toolbox.has(check_matrix) == true:
-		### Matrix templated exists...
-		new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-	else:
-		### create a placeholding matrix.
-		
-		Make_Matrix(len(m),len(m[0]))
+	#new_matrix = [[0,0],[0,0]]
+	#new_matrix[0][0] = snapped((m[0][0] + n),.01)
+	#new_matrix[0][1] = snapped((m[0][1] + n),.01)
+	#new_matrix[1][0] = snapped((m[1][0] + n),.01)
+	#new_matrix[1][1] = snapped((m[1][1] + n),.01)
+	new_matrix =[0,0,0,0]
+	new_matrix[0] = snapped((m[0] + n),.01)
+	new_matrix[1] = snapped((m[1] + n),.01)
+	new_matrix[2] = snapped((m[2] + n),.01)
+	new_matrix[3] = snapped((m[3] + n),.01)
 	
-	### The Math happens...
-	for shape in range(0,len(m)):
-		for size in range(0,len(m[shape])):
-			#new_matrix[shape][size] = stepify(m[shape][size] + n,.001)
-			new_matrix[shape][size] = m[shape][size] + n
-			
+	
 	return new_matrix
 
 func Multiply_Matrix_by_Scalar(m:Array,n,is_float:bool):
+	
 	#you multiply a matrix (ab) by a (n) number, 
 	#you multiply every element in the matrix (ab) by the (n) number """
-	if is_float == true:
-		n = float(n)
-	else:
-		n = int(n)
-		
-	check_matrix = "{m} by {n}".format({'m':len(m),'n':len(m[0])})
+	#new_matrix = [[0,0],[0,0]]
+	#new_matrix[0][0] = snapped((m[0][0] * n),.01)
+	#new_matrix[0][1] = snapped((m[0][1] * n),.01)
+	#new_matrix[1][0] = snapped((m[1][0] * n),.01)
+	#new_matrix[1][1] = snapped((m[1][1] * n),.01)
+	new_matrix =[0,0,0,0]
+	new_matrix[0] = snapped((m[0] - n),.01)
+	new_matrix[1] = snapped((m[1] - n),.01)
+	new_matrix[2] = snapped((m[2] - n),.01)
+	new_matrix[3] = snapped((m[3] - n),.01)
 	
-	### storing a template of a created matrix...
-	if matrix_toolbox.has(check_matrix) == true:
-		### Matrix templated exists...
-		new_matrix = matrix_toolbox[check_matrix].duplicate(true)
+
+	#if len(new_matrix) == 2 and len(new_matrix[0]) == 1:
+	if len(new_matrix) == 2:
+		var new_vector = Vector2(0,0)
+		#new_vector = Vector2(new_matrix[0][0],new_matrix[1][0])
+		new_vector = Vector2(new_matrix[0],new_matrix[1])
+		return new_vector
 	else:
-		### create a placeholding matrix.
-		
-		Make_Matrix(len(m),len(m[0]))
-				
-	
-	### The Math happens...
-	for shape in range(0,len(m)):
-		for size in range(0,len(m[shape])):
-			#new_matrix[shape][size] = stepify(m[shape][size] * n,.001)
-			new_matrix[shape][size] = snapped((m[shape][size] * n),.001)
-			
-	return new_matrix
+		return new_matrix
 
 
 func Divide_Matrix_by_Scalar(m:Array,n,is_float:bool):
 	#you divide a matrix (ab) by a (n) number, 
 	#you divide every element in the matrix (ab) by the (n) number """
-	if is_float == true:
-		n = float(n)
-	else:
-		n = int(n)
-		
-	check_matrix = "{m} by {n}".format({'m':len(m),'n':len(m[0])})
+	#new_matrix = [[0,0],[0,0]]
+	#new_matrix[0][0] = snapped((m[0][0] / n),.01)
+	#new_matrix[0][1] = snapped((m[0][1] / n),.01)
+	#new_matrix[1][0] = snapped((m[1][0] / n),.01)
+	#new_matrix[1][1] = snapped((m[1][1] / n),.01)
+	new_matrix =[0,0,0,0]
+	new_matrix[0] = snapped((m[0] / n),.01)
+	new_matrix[1] = snapped((m[1] / n),.01)
+	new_matrix[2] = snapped((m[2] / n),.01)
+	new_matrix[3] = snapped((m[3] / n),.01)
 	
-	### storing a template of a created matrix...
-	if matrix_toolbox.has(check_matrix) == true:
-		### Matrix templated exists...
-		new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-	else:
-		### create a placeholding matrix.
-		
-		Make_Matrix(len(m),len(m[0]))
-				
-
-	### The Math happens...
-	for shape in range(0,len(m)):
-		for size in range(0,len(m[shape])):
-			#new_matrix[shape][size] = stepify(m[shape][size] / n,.001)
-			new_matrix[shape][size] = snapped((m[shape][size] / n),.001)
-			
 	return new_matrix
 
 func Multiply_Matrix(m:Array,n:Array):
 	#In order to multiply two matrices A and B to get AB the number of
 	#columns of A must equal the number of rows of B"""
-	#The Matrix AB size will be the row size of A by column size of B
-
-	#new_matrix = []
+	#The Matrix AB size will be the row size of A with column size of B
 	
-	if len(m[0]) == len(n):
-		
-		check_matrix = "{m} by {n}".format({'m':len(m),'n':len(n[0])})
-		
-		### storing a template of a created matrix...
-		if matrix_toolbox.has(check_matrix) == true:
-			### Matrix templated exists...
-			new_matrix = matrix_toolbox[check_matrix].duplicate(true)
-		else:
-			### create a placeholding matrix.
-			
-			Make_Matrix(len(m),len(n[0]))
-		
-		#### The Math happens
-		for product_row in range(0,len(new_matrix)):
-			for product_column in range(0,len(new_matrix[0])):
-				for add_index in range(0,len(n)):
-					
-					new_matrix[product_row][product_column] = snapped(new_matrix[product_row][product_column] + snapped((m[product_row][add_index] * n[add_index][product_column]),.001),.001)
-		
-		# Dot Product...
-		# the resulted matrix will be the number of rows by the number of columns...
-		# the row will pair off the corresponding column...
-		# the index of the row is multiplied to each index of the column
-		# each of the resulted index are added together...
-		# the result from that added-index will go in the resulted matrix[corresponding_row][corresponding_column] 
-		# the row will procede to the next column and repeat the process until no more columns.
-		# the next row will follow the same procedure as the previous...
-		
-		return new_matrix
-		
-	else:
-		#print('Columns of A must equal the number of rows of B
-		#	The Matrix AB size will be the row size of A by column size of B')
+	if len(m) == 2 and len(n) == 1:
+		## 2x1* 1x1
+		### results in a 2x1 matrix...
 		pass
-
+	elif len(m) == 2 and len(n) == 2:
+		## 2x1 * 1x2
+		### results in a 2x2 matrix...
+		new_matrix = [0,0,0,0]
+		new_matrix[0] = snapped( (m[0] * n[0]) ,.01)
+		new_matrix[1] = snapped( (m[0] * n[1]) ,.01)
+		new_matrix[2] = snapped( (m[1] * n[0]) ,.01)
+		new_matrix[3] = snapped( (m[1] * n[1]) ,.01)
+		
+	elif len(m) == 4 and len(n) == 2:
+		## 2x2 * 2x1
+		### results in a 2x1 matrix...
+		new_matrix = [0,0,0,0]
+		new_matrix[0] = snapped( ( (m[0] * n[0]) + (m[1]*n[1]) ),.01)
+		new_matrix[1] = snapped( ( (m[2] * n[0]) + (m[3]*n[1]) ),.01)
+	
+	elif len(m) == 4 and len(n) == 4:
+		## 2x2 * 2x2
+		### results in a 2x2 matrix...
+		new_matrix = [0,0,0,0]
+		new_matrix[0] = snapped( ( (m[0] * n[0]) + (m[1]*n[2]) ),.01)
+		new_matrix[1] = snapped( ( (m[0] * n[1]) + (m[1]*n[3]) ),.01)
+		new_matrix[2] = snapped( ( (m[2] * n[0]) + (m[3]*n[2]) ),.01)
+		new_matrix[3] = snapped( ( (m[2] * n[1]) + (m[3]*n[3]) ),.01)
+		
+		
+	return new_matrix
+	
 func Multiply_Matrix_by_Vector2_to_Vector2(m:Array,v:Vector2):
 	# a matrix is multipled by a vector2 and a vector is return.
 
 	### matrices of any sizes...
-	converted_vector = [[v.x],[v.y]]
+	#converted_vector = [[v.x],[v.y]]
+	#converted_vector = [[0],[0]]
+	#converted_vector[0][0] = v.x
+	#converted_vector[1][0] = v.y
+	converted_vector = [v.x,v.y]
 	
-	Multiply_Matrix(m,converted_vector)
+	#Multiply_Matrix(m,converted_vector)
+	if len(m) == 2 and len(converted_vector) == 1:
+		## 2x1* 1x1
+		### results in a 2x1 matrix...
+		pass
+	#elif len(m) == 2 and len(converted_vector) == 2:
+		## 2x1 * 1x2
+		### results in a 2x2 matrix...
+	#	new_matrix = [0,0,0,0]
+	#	new_matrix[0] = snapped( (m[0] * converted_vector[0]) ,.01)
+	#	new_matrix[1] = snapped( (m[0] * converted_vector[1]) ,.01)
+	#	new_matrix[2] = snapped( (m[1] * converted_vector[0]) ,.01)
+	#	new_matrix[3] = snapped( (m[1] * converted_vector[1]) ,.01)
+		
+	elif len(m) == 4 and len(converted_vector) == 2:
+		## 2x2 * 2x1
+		### results in a 2x1 matrix...
+		new_matrix = [0,0]
+		new_matrix[0] = snapped( ( (m[0] * converted_vector[0]) + (m[1]*converted_vector[1]) ),.01)
+		new_matrix[1] = snapped( ( (m[2] * converted_vector[0]) + (m[3]*converted_vector[1]) ),.01)
 	
-	new_vector = Vector2(new_matrix[0][0],new_matrix[1][0])
+	#elif len(m) == 4 and len(converted_vector) == 4:
+	#	## 2x2 * 2x2
+		### results in a 2x2 matrix...
+	#	new_matrix = [0,0,0,0]
+	#	new_matrix[0] = snapped( ( (m[0] * converted_vector[0]) + (m[1]*converted_vector[2]) ),.01)
+	#	new_matrix[1] = snapped( ( (m[0] * converted_vector[1]) + (m[1]*converted_vector[3]) ),.01)
+	#	new_matrix[2] = snapped( ( (m[2] * converted_vector[0]) + (m[3]*converted_vector[2]) ),.01)
+	#	new_matrix[3] = snapped( ( (m[2] * converted_vector[1]) + (m[3]*converted_vector[3]) ),.01)
+	
+	new_vector = Vector2(new_matrix[0],new_matrix[1])
 	
 	return new_vector
 
@@ -535,16 +501,62 @@ func Multiply_Matrix_by_Vector2_to_Matrix(m:Array,v:Vector2,vector_transposed:bo
 	#Result into a New Matrix..."'''
 
 	if vector_transposed == true:
-		converted_vector = [[v.x,v.y]]
+		#converted_vector = [[v.x,v.y]]
+		converted_vector = [v.x,v.y]
 	else:
 		### matrices of any sizes...
-		converted_vector = [[v.x],[v.y]]
-	
-	if flip == false:
-		Multiply_Matrix(m,converted_vector)
-	elif flip == true:
-		Multiply_Matrix(converted_vector,m)
+		#converted_vector = [[v.x],[v.y]]
+		converted_vector = [v.x,v.y]
 		
+	if flip == false:
+		#Multiply_Matrix(m,converted_vector)
+		
+		if len(m) == 2 and len(converted_vector) == 2 and vector_transposed == true:
+			## 2x1 * 1x2
+			### results in a 2x2 matrix...
+			new_matrix = [0,0,0,0]
+			
+			new_matrix[0] = snapped( (m[0] * converted_vector[0]) ,.01)
+			new_matrix[1] = snapped( (m[0] * converted_vector[1]) ,.01)
+			new_matrix[2] = snapped( (m[1] * converted_vector[0]) ,.01)
+			new_matrix[3] = snapped( (m[1] * converted_vector[1]) ,.01)
+						
+		elif len(m) == 4 and len(converted_vector) == 2 and vector_transposed == false:
+			## 2x2 * 2x1
+			### results in a 2x1 matrix...
+			new_matrix = [0,0,0,0]
+			new_matrix[0] = snapped( ( (m[0] * converted_vector[0]) + (m[1]*converted_vector[1]) ),.01)
+			new_matrix[1] = snapped( ( (m[2] * converted_vector[0]) + (m[3]*converted_vector[1]) ),.01)
+						
+	elif flip == true:
+		#Multiply_Matrix(converted_vector,m)
+		if vector_transposed == true:
+			if len(m) == 4 and len(converted_vector) == 2:
+				## 1x2  2x1
+				### results in a 1x1 matrix...
+				pass
+			elif len(converted_vector) == 2 and len(m) == 4 :
+				## 1x2 2x2 
+				### results in a 1x2 matrix...
+				pass
+		if vector_transposed == false:
+			if len(converted_vector) == 2 and len(m) == 1:
+				### 2x1 1x1
+				### results in a 2x1 matrix...
+				new_matrix = [0,0,0,0]
+				new_matrix[0] = snapped( ( (converted_vector[0] * m[0]) + (converted_vector[1]*m[1]) ),.01)
+				new_matrix[1] = snapped( ( (converted_vector[2] * m[0]) + (converted_vector[3]*m[1]) ),.01)
+				
+			elif len(converted_vector) == 2 and len(m) == 2:
+				### 2x1 1x2
+				### results in a 2x2 matrix...
+				new_matrix = [0,0,0,0]
+			
+				new_matrix[0] = snapped( (converted_vector[0] * m[0]) ,.01)
+				new_matrix[1] = snapped( (converted_vector[0] * m[1]) ,.01)
+				new_matrix[2] = snapped( (converted_vector[1] * m[0]) ,.01)
+				new_matrix[3] = snapped( (converted_vector[1] * m[1]) ,.01) 
+			
 	return new_matrix
 
 func Multiply_Vector2_by_Vector2_to_Matrix(m:Vector2,m_transposed:bool,n:Vector2,n_transposed:bool):
@@ -555,19 +567,33 @@ func Multiply_Vector2_by_Vector2_to_Matrix(m:Vector2,m_transposed:bool,n:Vector2
 	var matrix_b
 	
 	#both vectors is converted to a Matrix.
-	if m_transposed == true:
-		matrix_a = Convert_Vector_2_to_Matrix(m,true).duplicate(true)
-	else:
-		matrix_a = Convert_Vector_2_to_Matrix(m,false).duplicate(true)
-	if n_transposed == true:
-		matrix_b = Convert_Vector_2_to_Matrix(n,true).duplicate(true)
-	else:
-		matrix_b = Convert_Vector_2_to_Matrix(n,false).duplicate(true)
-	
-	# find if the columns of A and the rows of B are the same...
-	if len(matrix_a[0]) == len(matrix_b):
-		Multiply_Matrix(matrix_a,matrix_b)
-	elif len(matrix_a) == len(matrix_b[0]):
-		Multiply_Matrix(matrix_b,matrix_a)
-	
+	#if m_transposed == true:
+	#	matrix_a = [[m.x,m.y]]
+	#else:
+	#	matrix_a = [[m.x],[m.y]]
+	#if n_transposed == true:
+	#	matrix_b = [[n.x,n.y]]
+	#else:
+	#	matrix_b = [[n.x],[n.y]]
+	matrix_a = [m.x,m.y]
+	matrix_b = [n.x,n.y]
+	### 2x1 2x1
+	if m_transposed == true and n_transposed == true:
+		pass
+	elif m_transposed == true and n_transposed == false:
+		###1x2 2x1
+		### results in a 1x1 matrix...
+		pass
+	elif m_transposed == false and n_transposed == true:
+		###2x1 1x2
+		### results in a 2x2 matrix...
+		new_matrix = [0,0,0,0]
+			
+		new_matrix[0] = snapped( (matrix_a[0] * matrix_b[0]) ,.01)
+		new_matrix[1] = snapped( (matrix_a[0] * matrix_b[1]) ,.01)
+		new_matrix[2] = snapped( (matrix_a[1] * matrix_b[0]) ,.01)
+		new_matrix[3] = snapped( (matrix_a[1] * matrix_b[1]) ,.01) 
+			
+	elif m_transposed == false and n_transposed == false:
+		pass
 	return new_matrix

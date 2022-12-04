@@ -5,6 +5,8 @@ extends Node
 var alchemy : Object
 #var find_math_book : File
 var math_book : Object
+var math_book_chapter
+var matrix_math_page
 #var build_program : File
 var program : Object
 var collisions : Object
@@ -22,9 +24,9 @@ var lore_processing : bool
 
 func Establish_Rate():
 	### ...
-	rate = snapped(1.0/float(len($"Substance".particle_mechanics)),.001)
+	#rate = snapped(1.0/float(len($"Substance".particle_mechanics)),.001)
 	#rate = snapped(1.0/1.50,.001)
-	#rate = 1.0
+	rate = 1.0
 	return rate
 
 
@@ -43,7 +45,8 @@ func Switch_Protocol():
 		set_physics_process(mechanics_processing)
 		
 
-
+func Otside_Force():
+	return
 
 #func _notification(event):
 	#print(event)
@@ -92,30 +95,51 @@ func _on_Simulation_ready():
 
 
 	Establish_Rate()
-	#$"Substance".establish_boundary()
 	
 	set_process(true)
 	set_physics_process(false)
 	
 
 func _process(delta):
-	$"Program".Simulate(delta,$"Substance",$"Substance".grid)
+	#$"Program".Simulate(delta,$"Substance",$"Substance".grid)
 
-	$"Substance".queue_redraw()
+	#$"Substance".queue_redraw()
 
+	#$"Substance".establish_boundary()
+	
 	$"Substance".establish_boundary()
-	#$"Substance".identify_collisions()
-
-func _physics_process(delta):
-	#if check_time >= rate:
-	#	#Particle Simulation....
-	$"Program".Simulate(delta,$"Substance",$"Substance".grid)
-
+	$"Program".Grid_Reset($"Substance",$"Substance".grid)
+	
+	$"Program".Particles_to_Grid(delta,$"Substance",$"Substance".grid)
+	
+	$"Program".Grid_Update($"Substance",$"Substance".grid)#,Vector2(randf_range(-9.8,9.8),randf_range(9.8,14.3)) )
+	$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
+	$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
+	
+	$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
+	
 	$"Substance".queue_redraw()
 	#else:
 	#	collect_time(delta)
-	#"""
-	pass
+	
+	
+	
+	
+func _physics_process(delta):
+	#if check_time >= rate:
+		#Particle Simulation....
+	$"Program".Grid_Reset($"Substance",$"Substance".grid)
+	#$"Program".Particles_to_Grid(check_time,$"Substance",$"Substance".grid)
+
+	$"Program".Grid_Update($"Substance",$"Substance".grid)
+	$"Program".Collision_Detection($"Substance",$"Substance".grid)
+	$"Substance".establish_boundary()
+	#$"Program".Grid_to_Particle(check_time,$"Substance",$"Substance".grid)
+		
+	$"Substance".queue_redraw()
+#	else:
+	#	collect_time(delta)
+	
 func collect_time(delta):
 	check_time += snapped(delta,.0001)
 	return check_time

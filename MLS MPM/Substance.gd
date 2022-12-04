@@ -32,17 +32,17 @@ var identify_number
 
 
 ### cauchy stress
-var stress : Array = [[1.0,1.0],[1.0,1.0]]
-#var stress : Array = [1.0,1.0,1.0]
+#var stress : Array = [[1.0,1.0],[1.0,1.0]]
+var stress : Array = [1.0,1.0,1.0,1.0]
 ###.
-var B : Array = [[0.0,0.0],[0.0,0.0]]
-#var B : Array = [0.0,0.0,0.0,0.0]
+#var B : Array = [[0.0,0.0],[0.0,0.0]]
+var B : Array = [0.0,0.0,0.0,0.0]
 ### Affine
-var C : Array = [[0.0,0.0],[0.0,0.0]]
-#var C : Array = [0.0,0.0,0.0,0.0]
+#var C : Array = [[0.0,0.0],[0.0,0.0]]
+var C : Array = [0.0,0.0,0.0,0.0]
 ### Deformation Identity
-var I : Array = [[1.0,0.0],[0.0,1.0]]
-#var I : Array = [1.0,0.0,0.0,1.0]
+#var I : Array = [[1.0,0.0],[0.0,1.0]]
+var I : Array = [1.0,0.0,0.0,1.0]
 ### Polar SVD: mainly used for drucker_prager model...
 var Sigma : Array
 var U : Array
@@ -86,6 +86,7 @@ func _on_substance_draw():
 func establish_boundary():
 	var copy_lineation 
 	var total
+	var contact
 	var results
 	var rotations 
 	var switch
@@ -94,19 +95,23 @@ func establish_boundary():
 	copy_lineation = particle_lineation.keys().duplicate(true)
 	rotations = 0
 	identify_number = 0
+
 	while true:
 		if len(copy_lineation) == 0:
 			#print(len(copy_lineation),' copy len')
 			break
-		if identify_number >= len(copy_lineation):
+		#if identify_number >= len(copy_lineation):
+		if identify_number <= len(copy_lineation):
 		#	results = []
 			identify_number = 0
+
 		#	switch = copy_lineation.pop_at(0)
 			#rotations = rotations + 1
 		#print(rotations,' rotations')
-		
+		#print(identify_number,' identify')
 		#particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center())
-		var contact = snapped(particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center()),.01)
+		contact = snapped(particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center()),.01)
+		#"""
 		if contact <= 1:
 			###
 			if contact == 0:
@@ -137,65 +142,11 @@ func establish_boundary():
 				### ...
 				pass
 		#print(particle_mechanics[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]]['within_range'],' within check')
+		#"""
+		
 		copy_lineation.pop_at(0)
 		
-		identify_number = wrapi(identify_number+1,0,len(copy_lineation)+1)
-	
+		identify_number = wrapi(identify_number-1,0,len(copy_lineation)+1)
+	#print(' ')
 	#print(particle_mechanics[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]]['within_range'],' within check')
 	return
-
-
-
-func identify_collisions():
-	var copy_lineation 
-	var total
-	var results
-	var rotations 
-	var switch
-	
-	total = []
-	copy_lineation = particle_lineation.keys().duplicate(true)
-	rotations = 0
-	while rotations < len(copy_lineation):
-		
-		#"""
-		results = []
-		identify_number = 0
-		while true:
-			if identify_number >= len(copy_lineation):
-				break
-			
-			#results = particle_lineation[particle_lineation.keys()[identify_number]].get_center() - particle_lineation[copy_lineation[identify_number]].get_center()
-			#results = particle_lineation[particle_lineation.keys()[identify_number]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center())
-			#results.append(Vector2(snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().x - particle_lineation[copy_lineation[identify_number]].get_center().x,.01),snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().y - particle_lineation[copy_lineation[identify_number]].get_center().y,.01)))
-			
-			#particle_mechanics[particle_lineation.keys()[identify_number]]['relation_to_domain'][copy_lineation[identify_number]] = Vector2(snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().x - particle_lineation[copy_lineation[identify_number]].get_center().x,.01),snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().y - particle_lineation[copy_lineation[identify_number]].get_center().y,.01))
-			#particle_mechanics[copy_lineation[identify_number]]['domain_relation_to_substance'][particle_lineation.keys()[identify_number]] = Vector2(snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().x - particle_lineation[copy_lineation[identify_number]].get_center().x,.01),snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().y - particle_lineation[copy_lineation[identify_number]].get_center().y,.01))
-			
-			if particle_lineation.keys()[identify_number] == copy_lineation[identify_number] and Vector2(snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().x - particle_lineation[copy_lineation[identify_number]].get_center().x,.01),snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().y - particle_lineation[copy_lineation[identify_number]].get_center().y,.01)).is_equal_approx(Vector2(0.0,0.0)):
-				### it is itself...
-				if particle_mechanics[particle_lineation.keys()[identify_number]]['within_range'].has(copy_lineation[identify_number]):
-					pass
-				else:
-					particle_mechanics[particle_lineation.keys()[identify_number]]['within_range'].append(particle_lineation.keys()[identify_number])
-				
-			elif snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().x - particle_lineation[copy_lineation[identify_number]].get_center().x,.01) in range(-0.5,0.6) or snapped(particle_lineation[particle_lineation.keys()[identify_number]].get_center().y - particle_lineation[copy_lineation[identify_number]].get_center().y,.01) in range(-0.5,-0.6):
-				### comes in comtact with another particle...
-				if particle_mechanics[particle_lineation.keys()[identify_number]]['within_range'].has(copy_lineation[identify_number]):
-					pass
-				else:
-					particle_mechanics[particle_lineation.keys()[identify_number]]['within_range'].append(particle_lineation.keys()[identify_number])
-				
-			else:
-				### the particles are not in contact with each other...
-				if particle_mechanics[particle_lineation.keys()[identify_number]]['within_range'].has(copy_lineation[identify_number]):
-					particle_mechanics[particle_lineation.keys()[identify_number]]['within_range'].erase(copy_lineation[identify_number])
-				else:
-					pass
-			
-			identify_number = wrapi(identify_number+1,0,len(copy_lineation)+1)
-			#"""
-		#total.append(results)
-		switch = copy_lineation.pop_at(0)
-		copy_lineation.append(switch)
-		rotations = rotations + 1

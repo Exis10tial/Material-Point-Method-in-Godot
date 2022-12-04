@@ -49,8 +49,10 @@ func Initial_Collection_Of_Substance():
 	#x:4 y:4 = 2 substances
 	#x:1 y:1 = 1 substance
 	
+	#domain_size = Vector2(1000.0,1000.0)
 	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
+	#domain_size = Vector2(50.0,50.0)
 	#domain_size = Vector2(35.0,30.0)
 	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
@@ -176,7 +178,7 @@ func _on_alchemy_lab_ready():
 		#gathered_into_chunks = true
 		
 		if one_substance == true:
-			
+			gathered_into_chunks = false
 			defined_columns = int(domain_size.x / domain_size.x)
 			defined_rows = int(domain_size.y / domain_size.y)
 			
@@ -184,6 +186,7 @@ func _on_alchemy_lab_ready():
 			cell_size = 1
 			
 		else:
+			one_substance = false
 			cell_size = Cross_Section_Of_Substance(gathered_into_chunks)
 			#print(cell_size,' cell size check')
 			
@@ -201,13 +204,13 @@ func _on_alchemy_lab_ready():
 			##print(defined_rows,' checking rows')
 				
 			### determines the size/shape of substances...
-			if gathered_into_chunks == false:
+			#if gathered_into_chunks == false:
 				### use if substances to be size 1 always...
-				substance_limit = int(defined_columns * defined_rows)
+			#	substance_limit = int(defined_columns * defined_rows)
 					
-			else:
-				### the substance will end up as power of two or square root cut...
-				substance_limit = int(defined_columns * defined_rows)# / 2
+			#else:
+			### the substance will end up as power of two or square root cut...
+			substance_limit = int(defined_columns * defined_rows)# / 2
 		
 		#var n = 0
 		#for x in range(1,defined_rows+1):
@@ -250,7 +253,7 @@ func _on_alchemy_lab_ready():
 		else:
 			substance.appearance = cell_size
 		
-		substance.coefficient_of_restitution = .80 #rubber
+		substance.coefficient_of_restitution = 1.0 #rubber
 		substance.coefficient_of_static_friction = 0.9 #rubber
 		substance.coefficient_of_kinetic_friction = 0.250 #rubber
 		substance.physical_state = 'solid'
