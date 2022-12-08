@@ -21,7 +21,6 @@ var rate : float
 var mechanics_processing : bool
 var lore_processing : bool
 
-
 func Establish_Rate():
 	### ...
 	#rate = snapped(1.0/float(len($"Substance".particle_mechanics)),.001)
@@ -93,7 +92,6 @@ func _on_Simulation_ready():
 	add_child(models)
 	add_child(alchemy)
 
-
 	Establish_Rate()
 	
 	set_process(true)
@@ -102,20 +100,19 @@ func _on_Simulation_ready():
 
 func _process(delta):
 	#$"Program".Simulate(delta,$"Substance",$"Substance".grid)
-
-	#$"Substance".queue_redraw()
-
 	#$"Substance".establish_boundary()
+	
+	
 	
 	$"Substance".establish_boundary()
 	$"Program".Grid_Reset($"Substance",$"Substance".grid)
 	
 	$"Program".Particles_to_Grid(delta,$"Substance",$"Substance".grid)
 	
-	$"Program".Grid_Update($"Substance",$"Substance".grid)#,Vector2(randf_range(-9.8,9.8),randf_range(9.8,14.3)) )
+	$"Program".Grid_Update($"Substance",$"Substance".grid)#,test_outside_forces )
 	$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
 	$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
-	
+	$"Program".Particle_Reset($"Substance")
 	$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
 	
 	$"Substance".queue_redraw()
@@ -132,7 +129,7 @@ func _physics_process(delta):
 	#$"Program".Particles_to_Grid(check_time,$"Substance",$"Substance".grid)
 
 	$"Program".Grid_Update($"Substance",$"Substance".grid)
-	$"Program".Collision_Detection($"Substance",$"Substance".grid)
+	#$"Program".Collision_Detection($"Substance",$"Substance".grid)
 	$"Substance".establish_boundary()
 	#$"Program".Grid_to_Particle(check_time,$"Substance",$"Substance".grid)
 		

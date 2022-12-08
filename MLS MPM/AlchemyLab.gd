@@ -29,7 +29,7 @@ var find_x_factors : Array = []
 var find_y_factors : Array = []
 var defined_rows : int
 var defined_columns : int
-var substance_limit : int
+var number_of_particles : int
 var cell_size : float 
 var substance_starting_point : Vector2
 var grid_nodes : Dictionary
@@ -182,7 +182,7 @@ func _on_alchemy_lab_ready():
 			defined_columns = int(domain_size.x / domain_size.x)
 			defined_rows = int(domain_size.y / domain_size.y)
 			
-			substance_limit = int(defined_columns * defined_rows)
+			number_of_particles = int(defined_columns * defined_rows)
 			cell_size = 1
 			
 		else:
@@ -210,7 +210,7 @@ func _on_alchemy_lab_ready():
 					
 			#else:
 			### the substance will end up as power of two or square root cut...
-			substance_limit = int(defined_columns * defined_rows)# / 2
+			number_of_particles = int(defined_columns * defined_rows)# / 2
 		
 		#var n = 0
 		#for x in range(1,defined_rows+1):
@@ -223,7 +223,7 @@ func _on_alchemy_lab_ready():
 		#			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x + (cell_size * y),substance_starting_point.y + (cell_size * x)),Vector2(cell_size,cell_size) )
 		#		n += 1
 			
-		if one_substance == true or substance_limit == 1:
+		if one_substance == true or number_of_particles == 1:
 			substance_starting_point = Vector2(
 			((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
 			((ProjectSettings.get_setting('display/window/size/height') / 2.0))
@@ -238,21 +238,14 @@ func _on_alchemy_lab_ready():
 			((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ),
 			((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0))
 			)
-		
+		###
+		###...
 		substance = load("res://Substance.tscn").instantiate()
-		
-		substance.default_mass_of_substance = 1.0
-		substance.maintain_velocity = Vector2(0.0,0.0)
-		
-		#substance.mass = default_mass_of_substance
-		#substance.velocity = maintain_velocity
-		#substance.stress = [[1.0,1.0],[1.0,1.0]]
-		
 		if one_substance == true:
 			substance.appearance = domain_size.x
 		else:
 			substance.appearance = cell_size
-		
+		#"""
 		substance.coefficient_of_restitution = 1.0 #rubber
 		substance.coefficient_of_static_friction = 0.9 #rubber
 		substance.coefficient_of_kinetic_friction = 0.250 #rubber
@@ -261,7 +254,9 @@ func _on_alchemy_lab_ready():
 		substance.poisson_ratio = 0.5 #rubber
 		substance.youngs_modulus = 0.1 #rubber
 		substance.volume = 1.0
-		
+		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
+		#substance.maintain_velocity = Vector2(0.0,0.0)
+		#"""
 		"""
 		# testing water model
 		substance.coefficient_of_restitution = 0.2
@@ -272,9 +267,9 @@ func _on_alchemy_lab_ready():
 		#var flow = randf_range(-10.0,10.0)
 		var flow = 100.0
 		#maintain_velocity = Vector2(flow,flow)
-		maintain_velocity = Vector2(0.0,flow)
+		substance.maintain_velocity = Vector2(0.0,flow)
 		substance.volume = 1.0
-		"""
+		#"""
 		"""
 		# testing fixed-corated model - snow...
 		substance.coefficient_of_restitution = randf_range(0.53,1.76) # dry snow:(0.53-1.76) , wet snow:.30-.60 , 
@@ -283,11 +278,11 @@ func _on_alchemy_lab_ready():
 		substance.physical_state = 'solid'
 		substance.constitutive_model = 'fixed_corated'
 		substance.type_of_substance = 'snow'
-		substance.poisson_ratio = 0.5
+		substance.poisson_ratio = 0.2#0.5
 		substance.youngs_modulus = snapped((1.4 * pow(10.0,5.0)),.1)
 		substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
 		#
-		"""
+		#"""
 		"""
 		# testing fixed-corated model - sand...
 		substance.coefficient_of_restitution = randf_range(0.88,0.98) # wet sand (0.05,0.70)
@@ -309,8 +304,16 @@ func _on_alchemy_lab_ready():
 		# 
 		substance.Sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(diagonalize_helper,substance.F),get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(diagonalize_helper))
 		"""
+		
+		###
+		### Mechanics of the substance...
+		substance.default_mass_of_substance = 1.0
+		substance.substance_limit = number_of_particles 
+		substance.mass_in_pieces = substance.default_mass_of_substance / substance.substance_limit
+		substance.volume_in_pieces =  substance.volume / substance.substance_limit
+
 		#while len(substance.particle_mechanics) < substance_limit:
-		for x in range(substance_limit):
+		for x in range(substance.substance_limit):
 			### for the position of the starting position of the substance drawn...
 			if location_x == domain_size.x/cell_size:
 				location_y =  location_y + 1
@@ -328,11 +331,12 @@ func _on_alchemy_lab_ready():
 				})
 			#substance.set_name(substance_name)
 			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x-(substance.appearance/2.0) + (substance.appearance * location_x),substance_starting_point.y-(substance.appearance/2.0) + (substance.appearance * location_y)),Vector2(substance.appearance,substance.appearance))
-			substance.particle_workings['mass'] = 1.0
-			substance.particle_workings['velocity'] = Vector2(0.0,0.0)
-			substance.particle_workings['stress'] = [[1.0,1.0],[1.0,1.0]].duplicate(true)
+			
+			substance.particle_workings['mass'] = substance.mass_in_pieces
+			substance.particle_workings['velocity'] = substance.maintain_velocity
+			substance.particle_workings['volume'] = substance.volume_in_pieces
+			substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0].duplicate(true)
 			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
-			substance.particle_workings['volume'] = 1.0
 			substance.particle_workings['B'] = substance.B.duplicate(true)
 			substance.particle_workings['C'] = substance.C.duplicate(true)
 			substance.particle_workings['I'] = substance.I.duplicate(true)
