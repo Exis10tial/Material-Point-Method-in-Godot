@@ -7,11 +7,11 @@ var constitutive_models
 
 var grid_nodes : Dictionary = {}
 #var gravity : Vector2
-var gravity : Vector2 = Vector2(0.00,9.80)
+#var gravity : Vector2 = Vector2(0.00,9.80)
 #var gravity : Vector2 = Vector2(0.00,-9.80)
 #var gravity : Vector2 = Vector2(9.80,0.0)
 #var gravity : Vector2 = Vector2(-9.80,0.0)
-#var gravity : Vector2 = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))
+var gravity : Vector2 = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))
 #var apply_outside_forces
 var identify_number : int
 var particle : String
@@ -187,20 +187,30 @@ func Simulate(time_passed:float,material:Object,the_grid:Dictionary):
 	#constitutive_models = get_tree().get_root().get_node("Simulation/Constitutive Models")
 	pass
 	#"""
+
 func Grid_Reset(material:Object,the_grid:Dictionary):
 	#particle_interaction = get_tree().get_root().get_node("Simulation/Particle Interaction")
 	matrix_math = get_tree().get_root().get_node("Simulation/Matrix Math")
 	constitutive_models = get_tree().get_root().get_node("Simulation/Constitutive Models")
 	### particle simulation...
 	### reseting the grid data...
-	for particle in the_grid.keys():
+	#for particle in the_grid.keys():
+	identify_number = 0
+	particle = 'null'
+	while true:
+		if identify_number >= len(material.particle_mechanics.keys()):
+			break
+		
+		particle = material.particle_mechanics.keys()[identify_number]
 		
 		the_grid[particle] = {'mass': material.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
 		
 		#material.particle_mechanics[particle]['F'] = material.particle_mechanics[particle]['I'].duplicate(true)
-		
 		material.particle_mechanics[particle]['J'] = matrix_math.Find_Determinant(material.particle_mechanics[particle]['F'])
 		material.particle_mechanics[particle]['volume'] = material.volume_in_pieces * material.particle_mechanics[particle]['J']
+		
+		
+		identify_number = wrapi(identify_number+1,0,len(material.particle_mechanics.keys())+1)
 
 func Particles_to_Grid(time_passed:float,material:Object,the_grid:Dictionary):
 	#particle_interaction = get_tree().get_root().get_node("Simulation/Particle Interaction")
@@ -278,12 +288,12 @@ func Grid_Update(material:Object,the_grid:Dictionary):#,outside_forces:Vector2):
 	
 	#Grid Update:
 	for particle in the_grid.keys():
-		if the_grid[particle]['mass'] > 0.01:
+		if the_grid[particle]['mass'] > 0.00001:
 			
-			placeholder_velocity_x = snapped(the_grid[particle]['momentum'].x / the_grid[particle]['mass'],.01)
-			placeholder_velocity_y = snapped(the_grid[particle]['momentum'].y / the_grid[particle]['mass'],.01)
-			the_grid[particle]['velocity'] = Vector2(placeholder_velocity_x,placeholder_velocity_y)
+			the_grid[particle]['velocity'].x = snapped(the_grid[particle]['momentum'].x / the_grid[particle]['mass'],.01)
+			the_grid[particle]['velocity'].y = snapped(the_grid[particle]['momentum'].y / the_grid[particle]['mass'],.01)
 			
+			#print(the_grid[particle]['velocity'],' after update')
 		else:
 			###...
 			##print('the particle has no mass.')
@@ -301,6 +311,7 @@ func Collision_with_Wall(material:Object,the_grid:Dictionary):
 	collection_of_velocities = []
 	for particle in material.particle_lineation.keys():
 		### if the particle has contacted the window outline...
+		#print(the_grid[particle]['velocity'],' incoming')
 		if material.particle_lineation[particle].position.y < barriers['window outline']['top']['outline']:
 			### the particle left the window out line at the sides...
 			
@@ -355,7 +366,8 @@ func Collision_with_Other_Particles(material:Object,the_grid:Dictionary):
 
 func Particle_Reset(material:Object):
 	### particle is reset...
-	
+	identify_number = 0
+	particle = 'null'
 	while true:
 		if identify_number >= len(material.particle_mechanics.keys()):
 			break
