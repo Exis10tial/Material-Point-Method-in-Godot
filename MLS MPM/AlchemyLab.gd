@@ -3,7 +3,6 @@ extends Node
 
 #var pile_of_substances : File
 var substance : Object
-var default_mass_of_substance : float
 var maintain_velocity : Vector2
 var substance_particle_name : String = ''
 var letters_list : Array = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -21,6 +20,7 @@ var domain : Rect2
 var domain_size : Vector2
 var gathered_into_chunks : bool = false
 var one_substance : bool = false
+var appearance : Vector2
 var x_ : int
 var y_ : int
 var prime_set_of_numbers : Array = []
@@ -41,13 +41,13 @@ func Initial_Collection_Of_Substance():
 	# Initial Shape of the substance also determine the number of total number of substances of the substance...
 	#
 	
-	#x:100 y:100 = 100 substances
-	#x:35 y:30 = 42 substances
-	#x:25 y:30 = 30 substances
-	#x:140 y:80 = 28 substances
-	#x:60 y:80 = 12 substances
-	#x:4 y:4 = 2 substances
-	#x:1 y:1 = 1 substance
+	#x:100 y:100 : 10000 substances 
+	#x:35 y:30 : 42 substances
+	#x:25 y:30 : 30 substances
+	#x:140 y:80 : 28 substances
+	#x:60 y:80 : 12 substances
+	#x:4 y:4 : 2 substances
+	#x:1 y:1: 1 substance
 	
 	#domain_size = Vector2(1000.0,1000.0)
 	#domain_size = Vector2(100.0,100.0)
@@ -72,87 +72,83 @@ func Initial_Collection_Of_Substance():
 	return domain_size
 
 
-func Cross_Section_Of_Substance(into_pieces:bool):
+func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 	### the size of the substance is parsed into evenly cut squares/cubes = (Length == Width)
 	
 	###if code require into_pieces == false you will get substance at domain size.
-	if domain_size.x == domain_size.y and domain_size.x != 1 and domain_size.y != 1 and into_pieces == true :
+	if substance_size.x == substance_size.y and substance_size.x != 1 and substance_size.y != 1 and into_pieces == true :
 		
 		### Powers of 2 Check...
 		var n = 0.0
 		
-		while pow(2,n) <= domain_size.x:
+		while pow(2,n) <= substance_size.x:
 			
 			powers_of_2_set_of_numbers.append(pow(2,n))
 			
 			n +=1
 		
-		if powers_of_2_set_of_numbers.has(domain_size.y) == true and into_pieces == true:
+		if powers_of_2_set_of_numbers.has(substance_size.y) == true and into_pieces == true:
 			
-			cell_size = int(domain_size.x / pow(2,1))
+			cell_size = int(substance_size.x / pow(2,1))
 		else:
 			### the number is not a power of 2...
 			
 			#Square Root Check
-			if fmod(domain_size.x,sqrt(domain_size.x)) == 0 and into_pieces == true:
-				cell_size = sqrt(domain_size.x)
+			if fmod(substance_size.x,sqrt(substance_size.x)) == 0 and into_pieces == true:
+				cell_size = sqrt(substance_size.x)
 			else:
 				### Not a power of 2 or a has a square root...
 				
 				# find the greatest common factor between the domain sizes::
-				for number in range(1,domain_size.x+1):
-					if int(domain_size.x) % number == 0:
+				for number in range(1,substance_size.x+1):
+					if int(substance_size.x) % number == 0:
 						find_x_factors.append(number)
-				for number in range(1,domain_size.y+1):
-					if int(domain_size.y) % number == 0:
+				for number in range(1,substance_size.y+1):
+					if int(substance_size.y) % number == 0:
 						find_y_factors.append(number)
 				
 				### using the greatest common factor to acquire a cell size...
-				if domain_size.x == domain_size.y:
+				if substance_size.x == substance_size.y:
 					for number in range(len(find_x_factors)-1,-1,-1):
 						if find_x_factors[number] in find_y_factors:
 							cell_size = find_x_factors[number] 
 							break
-				elif domain_size.x < domain_size.y:
+				elif substance_size.x < substance_size.y:
 					for number in range(len(find_x_factors)-1,-1,-1):
 						if find_x_factors[number] in find_y_factors:
 							cell_size =  find_x_factors[number] 
 							break
-				elif domain_size.x > domain_size.y:
+				elif substance_size.x > substance_size.y:
 					for number in range(len(find_y_factors)-1,-1,-1):
 						if find_y_factors[number] in find_x_factors:
 							cell_size = find_y_factors[number]
 							break
 											
 	else:
-		if into_pieces == false :
-			cell_size = 1
-		else:
-			#"""
-			# find the greatest common factor between the domain sizes::
-			for number in range(1,domain_size.x+1):
-				if int(domain_size.x) % number == 0:
-					find_x_factors.append(number)
-			for number in range(1,domain_size.y+1):
-				if int(domain_size.y) % number == 0:
-					find_y_factors.append(number)
+		# find the greatest common factor between the domain sizes::
+		for number in range(1,substance_size.x+1):
+			if int(substance_size.x) % number == 0:
+				find_x_factors.append(number)
+		for number in range(1,substance_size.y+1):
+			if int(substance_size.y) % number == 0:
+				find_y_factors.append(number)
 			
-			### using the greatest common factor to acquire a cell size...
-			if domain_size.x == domain_size.y:
-				for number in range(len(find_x_factors)-1,-1,-1):
-					if find_x_factors[number] in find_y_factors:
-						cell_size = find_x_factors[number] 
-						break
-			elif domain_size.x < domain_size.y:
-				for number in range(len(find_x_factors)-1,-1,-1):
-					if find_x_factors[number] in find_y_factors:
-						cell_size =  find_x_factors[number] 
-						break
-			elif domain_size.x > domain_size.y:
-				for number in range(len(find_y_factors)-1,-1,-1):
-					if find_y_factors[number] in find_x_factors:
-						cell_size = find_y_factors[number]
-						break
+		### using the greatest common factor to acquire a cell size...
+		if substance_size.x == substance_size.y:
+			for number in range(len(find_x_factors)-1,-1,-1):
+				if find_x_factors[number] in find_y_factors:
+					cell_size = find_x_factors[number] 
+					break
+		elif substance_size.x < substance_size.y:
+			for number in range(len(find_x_factors)-1,-1,-1):
+				if find_x_factors[number] in find_y_factors:
+					cell_size =  find_x_factors[number] 
+					break
+		elif substance_size.x > substance_size.y:
+			for number in range(len(find_y_factors)-1,-1,-1):
+				if find_y_factors[number] in find_x_factors:
+					cell_size = find_y_factors[number]
+					break
 			#"""
 	return float(cell_size)
 	
@@ -161,12 +157,8 @@ func Cross_Section_Of_Substance(into_pieces:bool):
 
 func _on_alchemy_lab_ready():
 	### the building/construction of substance...
-	#pile_of_substances = File.new()
-	
-	#if pile_of_substances.file_exists("res://Substance.tscn") or pile_of_substances.file_exists("res://Substance(thru_rigid_body).tscn"):
 	if FileAccess.file_exists("res://Substance.tscn"):
-	#if pile_of_substances.file_exists("res://Substance(thru_rigid_body).tscn"):
-	#if pile_of_substances.file_exists("res://Substance(thru sprite).tscn"):
+	
 		Initial_Collection_Of_Substance()
 		
 		### alters how many substances ...
@@ -174,77 +166,57 @@ func _on_alchemy_lab_ready():
 		# default ::one_substance = false , gathered_into_chunks = true:: Is using the greatest common factor between domain_size x and domain_size.y to acquire a number of substances/cell size..
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
+		
 		#one_substance = true
 		#gathered_into_chunks = true
 		
-		if one_substance == true:
-			gathered_into_chunks = false
-			defined_columns = int(domain_size.x / domain_size.x)
-			defined_rows = int(domain_size.y / domain_size.y)
-			
-			number_of_particles = int(defined_columns * defined_rows)
+		if gathered_into_chunks == false and one_substance == false:
+			### the substance is cut into particles with size of 1...
 			cell_size = 1
+			number_of_particles = int(domain_size.x * domain_size.y)
+			appearance = Vector2(1.0,1.0)
+		elif gathered_into_chunks == true and one_substance == false:
+			### the substance is cut into chunks size if either
+			# power of domain.x,domain.y:
+			# square root of domain.x,domain.y:
+			# or greatest common factor of domain.x,domain.y ....
+			cell_size = Cross_Section_Of_Substance(gathered_into_chunks,domain_size)
 			
+			number_of_particles = int(domain_size.x * domain_size.y)
+			appearance = Vector2(number_of_particles/cell_size,number_of_particles/cell_size)
+			
+		elif gathered_into_chunks == false and one_substance == true:
+			### substance is 1 particles no matter the domain size...
+			cell_size = 1
+			number_of_particles = 1
+			appearance = Vector2(domain_size.x,domain_size.y)
 		else:
-			one_substance = false
-			cell_size = Cross_Section_Of_Substance(gathered_into_chunks)
-			#print(cell_size,' cell size check')
+			### both being true is not a thing so just make it same as both being false:
+			### the substance is cut in chunks...
+			cell_size = 1
+			number_of_particles = int(domain_size.x * domain_size.y)
+			appearance = Vector2(1.0,1.0)
 			
-			#25x25 : 1 fps
-			#10x10 : 13 fps
-			#7x8: 33 fps
-			#7x5 : 60 fps
-			#5x5 : 60 fps
-			
-			###
-			defined_columns = int(domain_size.x / cell_size)
-			defined_rows = int(domain_size.y / cell_size)
-				
-			##print(defined_columns,' checking columns')
-			##print(defined_rows,' checking rows')
-				
-			### determines the size/shape of substances...
-			#if gathered_into_chunks == false:
-				### use if substances to be size 1 always...
-			#	substance_limit = int(defined_columns * defined_rows)
-					
-			#else:
-			### the substance will end up as power of two or square root cut...
-			number_of_particles = int(defined_columns * defined_rows)# / 2
 		
-		#var n = 0
-		#for x in range(1,defined_rows+1):
-		#	for y in range(1,defined_columns+1):
-		#		if one_substance == true:
-					#get_child(n).set_position(Vector2(substance_starting_point.x + (domain_size.x * y),substance_starting_point.y + (domain_size.y * x)) )
-		#			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x + (domain_size.x * y),substance_starting_point.y + (domain_size.y * x)),Vector2(domain_size.x,domain_size.y) )
-		#		else:
-					#get_child(n).set_position(Vector2(substance_starting_point.x + (cell_size * y),substance_starting_point.y + (cell_size * x)) )
-		#			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x + (cell_size * y),substance_starting_point.y + (cell_size * x)),Vector2(cell_size,cell_size) )
-		#		n += 1
-			
+		#### staring location of particles...
 		if one_substance == true or number_of_particles == 1:
 			substance_starting_point = Vector2(
 			((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
 			((ProjectSettings.get_setting('display/window/size/height') / 2.0))
 			)
-			#print(substance_starting_point,' substance_starting_point a')
+			
 		else:
 			#sbstance_starting_point = Vector2(
 			#((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
 			#((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
 			#)
 			substance_starting_point = Vector2(
-			((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ),
-			((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0))
+			( (ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
+			( (ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
 			)
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
-		if one_substance == true:
-			substance.appearance = domain_size.x
-		else:
-			substance.appearance = cell_size
 		#"""
 		substance.coefficient_of_restitution = 1.0 #rubber
 		substance.coefficient_of_static_friction = 0.9 #rubber
@@ -253,9 +225,6 @@ func _on_alchemy_lab_ready():
 		substance.constitutive_model = 'hyperelastic'
 		substance.poisson_ratio = 0.5 #rubber
 		substance.youngs_modulus = 0.1 #rubber
-		substance.volume = 1.0
-		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
-		#substance.maintain_velocity = Vector2(0.0,0.0)
 		#"""
 		"""
 		# testing water model
@@ -307,15 +276,22 @@ func _on_alchemy_lab_ready():
 		
 		###
 		### Mechanics of the substance...
-		substance.default_mass_of_substance = 1.0
-		substance.substance_limit = number_of_particles 
-		substance.mass_in_pieces = substance.default_mass_of_substance / substance.substance_limit
+		substance.substance_limit = number_of_particles
+		
+		substance.mass = substance.substance_limit 
+		#volume : l * w * h , : pow(x,3)
+		
+		substance.volume = pow(cell_size,3.0)
+		substance.mass_in_pieces = substance.mass / substance.substance_limit
 		substance.volume_in_pieces =  substance.volume / substance.substance_limit
-
+		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
+		#substance.maintain_velocity = Vector2(0.0,0.0)
+		substance.appearance = appearance
+		
 		#while len(substance.particle_mechanics) < substance_limit:
 		for x in range(substance.substance_limit):
 			### for the position of the starting position of the substance drawn...
-			if location_x == domain_size.x/cell_size:
+			if location_x == substance.substance_limit/cell_size:
 				location_y =  location_y + 1
 				location_x = 0
 			
@@ -330,7 +306,7 @@ func _on_alchemy_lab_ready():
 				'4':digits_list[int(randi_range(0,len(digits_list)-1))]
 				})
 			#substance.set_name(substance_name)
-			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x-(substance.appearance/2.0) + (substance.appearance * location_x),substance_starting_point.y-(substance.appearance/2.0) + (substance.appearance * location_y)),Vector2(substance.appearance,substance.appearance))
+			substance.surrounding_area = Rect2(Vector2(substance_starting_point.x-(substance.appearance.x/2.0) + (substance.appearance.x * location_x),substance_starting_point.y-(substance.appearance.y/2.0) + (substance.appearance.y * location_y)),substance.appearance)
 			
 			substance.particle_workings['mass'] = substance.mass_in_pieces
 			substance.particle_workings['velocity'] = substance.maintain_velocity
