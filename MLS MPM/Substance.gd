@@ -98,27 +98,20 @@ func establish_boundary():
 	copy_lineation = particle_lineation.keys().duplicate(true)
 	rotations = 0
 	identify_number = 0
-	print(' ')
-	print(' cycle start ')
+
 	while true:
-		if len(copy_lineation) == 0:
-			#print(len(copy_lineation),' copy len')
-			break
 		if identify_number >= len(copy_lineation):
 		#if identify_number <= len(copy_lineation):
 		#	results = []
 			identify_number = 0
-			#print(' ')
-			#print('algorithm check ')
-		#print(identify_number,' identify_number check')
-		#print(len(copy_lineation),' len(copy_lineation) check')
-		#	switch = copy_lineation.pop_at(0)
-			#rotations = rotations + 1
-		
-		
+			copy_lineation.pop_at(0)
+			#print('algorithm check')
+			if len(copy_lineation) == 0:
+				#print(len(copy_lineation),' copy len')
+				break
+
 		contact = snapped(particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center()),.0001)
-		print(particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)],' particle check')
-		print(copy_lineation[identify_number],' other particle check')
+		
 		#"""
 		if contact <= 1:
 			###
@@ -152,7 +145,6 @@ func establish_boundary():
 		#print(particle_mechanics[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]]['within_range'],' within check')
 		#"""
 		
-		copy_lineation.pop_at(0)
 		#identify_number = identify_number + 1
 		identify_number = wrapi(identify_number+1,0,len(copy_lineation)+1)
 		
