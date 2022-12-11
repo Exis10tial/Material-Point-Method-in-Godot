@@ -224,6 +224,7 @@ func Inverse_Matrix(m:Array):
 
 		else:
 			#print('The matrix does not have an Inverse.')
+			return m
 			pass
 		#elif len(m[0]) == 3:
 			### a 3x3 square matrix...
@@ -455,28 +456,9 @@ func Multiply_Matrix(m:Array,n:Array):
 func Multiply_Matrix_by_Vector2_to_Vector2(m:Array,v:Vector2):
 	# a matrix is multipled by a vector2 and a vector is return.
 
-	### matrices of any sizes...
-	#converted_vector = [[v.x],[v.y]]
-	#converted_vector = [[0],[0]]
-	#converted_vector[0][0] = v.x
-	#converted_vector[1][0] = v.y
 	converted_vector = [v.x,v.y]
-	
-	#Multiply_Matrix(m,converted_vector)
-	if len(m) == 2 and len(converted_vector) == 1:
-		## 2x1* 1x1
-		### results in a 2x1 matrix...
-		pass
-	#elif len(m) == 2 and len(converted_vector) == 2:
-		## 2x1 * 1x2
-		### results in a 2x2 matrix...
-	#	new_matrix = [0,0,0,0]
-	#	new_matrix[0] = snapped( (m[0] * converted_vector[0]) ,.01)
-	#	new_matrix[1] = snapped( (m[0] * converted_vector[1]) ,.01)
-	#	new_matrix[2] = snapped( (m[1] * converted_vector[0]) ,.01)
-	#	new_matrix[3] = snapped( (m[1] * converted_vector[1]) ,.01)
-		
-	elif len(m) == 4 and len(converted_vector) == 2:
+
+	if len(m) == 4 and len(converted_vector) == 2:
 		## 2x2 * 2x1
 		### results in a 2x1 matrix...
 		new_matrix = [0,0]
@@ -501,11 +483,9 @@ func Multiply_Matrix_by_Vector2_to_Matrix(m:Array,v:Vector2,vector_transposed:bo
 	#Result into a New Matrix..."'''
 
 	if vector_transposed == true:
-		#converted_vector = [[v.x,v.y]]
 		converted_vector = [v.x,v.y]
 	else:
 		### matrices of any sizes...
-		#converted_vector = [[v.x],[v.y]]
 		converted_vector = [v.x,v.y]
 		
 	if flip == false:
@@ -566,19 +546,12 @@ func Multiply_Vector2_by_Vector2_to_Matrix(m:Vector2,m_transposed:bool,n:Vector2
 	var matrix_a 
 	var matrix_b
 	
-	#both vectors is converted to a Matrix.
-	#if m_transposed == true:
-	#	matrix_a = [[m.x,m.y]]
-	#else:
-	#	matrix_a = [[m.x],[m.y]]
-	#if n_transposed == true:
-	#	matrix_b = [[n.x,n.y]]
-	#else:
-	#	matrix_b = [[n.x],[n.y]]
 	matrix_a = [m.x,m.y]
 	matrix_b = [n.x,n.y]
-	### 2x1 2x1
+	
 	if m_transposed == true and n_transposed == true:
+		### 2x1 2x1
+		# can't multiply to matrix
 		pass
 	elif m_transposed == true and n_transposed == false:
 		###1x2 2x1
@@ -595,5 +568,7 @@ func Multiply_Vector2_by_Vector2_to_Matrix(m:Vector2,m_transposed:bool,n:Vector2
 		new_matrix[3] = snapped( (matrix_a[1] * matrix_b[1]) ,.01) 
 			
 	elif m_transposed == false and n_transposed == false:
+		#2x1 2x1
+		# can't multiply to matrix
 		pass
 	return new_matrix
