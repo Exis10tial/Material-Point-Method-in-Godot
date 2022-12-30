@@ -3,5 +3,45 @@ Sort of a version update of changes I continue to make.
 V.1.0.0:
 |
  ---- contains 4 constitutive models: Neohookean,Fixed_Corotated(snow),water,Drucker_Prager(sand)
-      contains collision detection.
-      using Godot v4.0.alpha13.official [59dcddc45] being the latest
+      contains collision detection only for the outline of the windows not between other particles.
+      used nodes for the particles
+      matrix math used [[]] 2D-arrays...
+      
+      at the time used Godot v4.0.alpha13.official [59dcddc45]
+      
+V.2.0.0:
+|
+ ---- Added collision detection between particles.
+      math corrections/changes.
+      used various godot v4.0 betas
+V.3.0.0:
+|
+ ---- Stopped using nodes for the particles and went to something else...
+      math corrections/changes.
+      rearranged the procedure of the simulation ( mainly the grip/particle resets )
+      used various godot v4.0 betas
+V.4.0.0:
+|
+ ---- Introduce a different way of collision detection between the particles.
+      math corrections/changes.
+      used various godot v4.0 betas
+V.5.0.0:
+|
+ ---- matrix math used went to 1D arrays
+      math corrections/changes.
+      rearranged how the simulation was setup in the nodes.
+      broke the process from 1 large function of the simulation into various smaller functions
+      thought/started to moving into C# instead of GDScript (also have a python-in-godot version)
+          C# went nowhere cause.
+          python-in-godot version did work.
+      used various godot v4.0 betas
+
+V.5.5.0:(failed/incomplete)
+|
+ ---- tried to used the physics engine manually thru PhysicsServer2D for the particles
+      
+V.6.0.0:
+|
+ ---- Reestablished from the failed/incomplete try of PhysicsServer2D
+      A lot of math corrections/changes probably need more.
+      v4.0.beta10.official [d0398f62f]
