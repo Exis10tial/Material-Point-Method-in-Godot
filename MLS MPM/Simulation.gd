@@ -13,13 +13,19 @@ var collisions : Object
 #var contact_with_another : File
 #var model_of_substance : File
 var models : Object
-var check_time : float
+var check_time =0
 var adjust_particles : bool = false
 ###...
-var Particles : Dictionary = {}
+#var Particles : Dictionary = {}
 var rate : float
 var mechanics_processing : bool
 var lore_processing : bool
+###..
+var Substances : Array = []
+
+
+
+
 
 func Establish_Rate():
 	### ...
@@ -43,10 +49,16 @@ func Switch_Protocol():
 		set_process(lore_processing)
 		set_physics_process(mechanics_processing)
 		
+func Setup_Outline():
+	### the outline of the simulation is set..
+	### based of the window size...
+	#print($"Simulation".get_child_count(),' nodes check ')
+	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/width')/2.0),0.0))
+	get_tree().get_root().get_node(".").set_position(Vector2(ProjectSettings.get_setting('display/window/size/width'),(ProjectSettings.get_setting('display/window/size/height')/2.0)))
+	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/width')/2.0),ProjectSettings.get_setting('display/window/size/height')))
+	get_tree().get_root().get_node(".").set_position(Vector2(0.0,(ProjectSettings.get_setting('display/window/size/height')/2.0)))
 
-func Otside_Force():
-	return
-
+	
 #func _notification(event):
 	#print(event)
 	#if event == CanvasItem.NOTIFICATION_DRAW:
@@ -92,51 +104,61 @@ func _on_Simulation_ready():
 	add_child(models)
 	add_child(alchemy)
 
-	Establish_Rate()
-	
+
+	Setup_Outline()
+
 	set_process(true)
-	set_physics_process(false)
+	
+	#set_physics_process(true)
 	
 
 func _process(delta):
 	#$"Program".Simulate(delta,$"Substance",$"Substance".grid)
 	#$"Substance".establish_boundary()
+	#print()
+	#print(delta,' delta check')
+	#print(check_time,' check_time check')
+	if check_time > 0.0:
+		#print('start')
+		$"Substance".establish_boundary()
+		$"Program".Grid_Reset($"Substance",$"Substance".grid)
+		
+		$"Program".Particles_to_Grid(delta,$"Substance",$"Substance".grid)
+		
+		$"Program".Grid_Update($"Substance",$"Substance".grid)#,test_outside_forces )
+		
+		$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
+		$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
+		
+		$"Program".Particle_Reset($"Substance")
+		
+		$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
+		
+		$"Substance".queue_redraw()
+		
+		check_time = 0
+	else:
+		### about .0001+ being added normally...
+		check_time=+ delta * 60.0
+		
 	
-	
-	
-	$"Substance".establish_boundary()
-	$"Program".Grid_Reset($"Substance",$"Substance".grid)
-	
-	$"Program".Particles_to_Grid(delta,$"Substance",$"Substance".grid)
-	
-	$"Program".Grid_Update($"Substance",$"Substance".grid)#,test_outside_forces )
-	$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
-	$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
-	$"Program".Particle_Reset($"Substance")
-	$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
-	
-	$"Substance".queue_redraw()
-	#else:
-	#	collect_time(delta)
-	
-	
-	
-	
-func _physics_process(delta):
+func _physics_process(_delta):
 	#if check_time >= rate:
 		#Particle Simulation....
-	$"Program".Grid_Reset($"Substance",$"Substance".grid)
+	#$"Program".Grid_Reset($"Substance",$"Substance".grid)
 	#$"Program".Particles_to_Grid(check_time,$"Substance",$"Substance".grid)
-
-	$"Program".Grid_Update($"Substance",$"Substance".grid)
+	
+	#$"Program".Grid_Update($"Substance",$"Substance".grid)
 	#$"Program".Collision_Detection($"Substance",$"Substance".grid)
-	$"Substance".establish_boundary()
+	#$"Substance".establish_boundary()
 	#$"Program".Grid_to_Particle(check_time,$"Substance",$"Substance".grid)
-		
+	
 	$"Substance".queue_redraw()
 #	else:
 	#	collect_time(delta)
 	
-func collect_time(delta):
-	check_time += snapped(delta,.0001)
-	return check_time
+
+#func build_time(delta):
+#	check_time=+ delta
+#	if check_time > 1.0:
+#		check_time = 0

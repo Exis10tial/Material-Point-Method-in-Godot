@@ -34,9 +34,10 @@ func Model_of_Water(speck,nub):
 	
 	# water properties
 	# bulk modulus = 2.1
-	# y = 3.3 * 10 ^ -6
+	var y = 3.3 * pow(10,-6)
 	#print(nub.particle_mechanics[speck]['J'],' testing J')
-	var deteminant_coefficient = 1.0 / pow(nub.particle_mechanics[speck]['J'],3.0)
+	#var deteminant_coefficient = 1.0 / pow(nub.particle_mechanics[speck]['J'],3.0)
+	var deteminant_coefficient = 1.0 / pow(nub.particle_mechanics[speck]['J'],y)
 	#print(deteminant_coefficient,' deteminant coefficient')
 	var p_coefficient = 2.1 * (deteminant_coefficient - 1.0 )
 	#print(p_coefficient,' p')
@@ -249,10 +250,14 @@ func Update_Plasticity(case,resurface,nub):
 		var critical_compression = 2.5 * pow(10.0,-2.0)
 		var critical_stretch = 7.5 * pow(10.0,-3.0)
 			
-		for row in range(0,len(nub)):
-			for column in range(0,len(nub[row])):
+		#for row in range(0,len(nub)):
+		#	for column in range(0,len(nub[row])):
 					
-				nub[row][column] = clampf(nub[row][column],1.0-critical_compression,1+critical_stretch)
+		#		nub[row][column] = clampf(nub[row][column],1.0-critical_compression,1+critical_stretch)
+		nub[0] = clampf(nub[0],1.0-critical_compression,1+critical_stretch)
+		nub[1] = clampf(nub[1],1.0-critical_compression,1+critical_stretch)
+		nub[2] = clampf(nub[2],1.0-critical_compression,1+critical_stretch)
+		nub[3] = clampf(nub[3],1.0-critical_compression,1+critical_stretch)
 	
 	if case == 'sand':
 		# if the the sand is wet.

@@ -1,14 +1,21 @@
 extends Node2D
 
 ### the particles of a substance...
-var particle_workings : Dictionary = {'position':null,'mass':null,'velocity':null,'volume':null,'stress':null,'B':null,'C':null,'I':null,'F':null,'J':null,'within_range':[],'relation_to_domain':{},'domain_relation_to_substance':{},'U':null,'V':null,'Sigma':null,'contact wall':false,'contact particle':false}
+var particle_workings : Dictionary = {'position':null,'mass':null,'velocity':null,'volume':null,'stress':null,'B':null,'C':null,'I':null,'F':null,'J':null,'contact_with_wall':false,'within_range':[],'relation_to_domain':{},'domain_relation_to_substance':{},'U':null,'V':null,'Sigma':null,'contact wall':false,'contact particle':false}
 var particle_lineation : Dictionary = {}
 var particle_mechanics : Dictionary = {}
-var particle_body : Dictionary = {}
 var grid : Dictionary = {}
 var substance_limit : int = 0
 var mass_in_pieces : float
 var volume_in_pieces : float
+### mechanics of the particle for the servers...
+#var particle_body : Dictionary = {}
+#var touch_modality : PhysicsMaterial
+#var domain : Dictionary
+#var effigy : Dictionary
+#var physical_structure : Dictionary
+#var form : Dictionary
+#var building_effigy_material
 ### particle state,type of state...
 var physical_state : String
 var type_of_substance : String
@@ -42,6 +49,7 @@ var B : Array = [0.0,0.0,0.0,0.0]
 var C : Array = [0.0,0.0,0.0,0.0]
 ### Deformation Identity
 var I : Array = [1.0,0.0,0.0,1.0]
+#const I : = Transform2D.IDENTITY
 ### Polar SVD: mainly used for drucker_prager model...
 var Sigma : Array
 var U : Array
@@ -60,7 +68,6 @@ var J_plastic: float
 ### the surrounding area around the particle/node
 var surrounding_area : Rect2
 #var surrounding_area : Transform2D
-var test_area = Transform2D()
 ### particle is to be removed from the sim...
 var to_remove = false
 ### parameters used to determine to merge particels...
@@ -84,8 +91,9 @@ func _on_substance_draw():
 		draw_rect(particle_lineation[particle],Color(1.0,1.0,1.0),true)
 		
 		#draw_circle(particle_lineation[particle].origin,appearance,Color(1.0,1.0,1.0))
-		#draw_set_transform(particle_lineation[particle].origin)
 		
+		pass
+
 func establish_boundary():
 	var copy_lineation 
 	var total
@@ -98,7 +106,7 @@ func establish_boundary():
 	copy_lineation = particle_lineation.keys().duplicate(true)
 	rotations = 0
 	identify_number = 0
-
+	#print('establish_boundary check')
 	while true:
 		if identify_number >= len(copy_lineation):
 		#if identify_number <= len(copy_lineation):
@@ -142,6 +150,7 @@ func establish_boundary():
 			else:
 				### ...
 				pass
+			
 		#print(particle_mechanics[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]]['within_range'],' within check')
 		#"""
 		

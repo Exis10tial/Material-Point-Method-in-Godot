@@ -2,7 +2,15 @@ extends Node
 
 
 #var pile_of_substances : File
+
 var substance : Object
+var particle : Transform2D
+var effigy_material
+var particle_constitutive_parameters : Object
+var particle_image : Image
+var particle_reach : RID
+var particle_boundary : RID
+var particle_shape : RID 
 var maintain_velocity : Vector2
 var substance_particle_name : String = ''
 var letters_list : Array = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -22,8 +30,6 @@ var gathered_into_chunks : bool = false
 var one_substance : bool = false
 var appearance : Vector2
 var particle_alignment : int
-var x_ : int
-var y_ : int
 var prime_set_of_numbers : Array = []
 var powers_of_2_set_of_numbers : Array = []
 var find_x_factors : Array = []
@@ -51,12 +57,12 @@ func Initial_Collection_Of_Substance():
 	#x:1 y:1: 1 substance
 	
 	#domain_size = Vector2(1000.0,1000.0)
-	#domain_size = Vector2(100.0,100.0)
+	domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(50.0,50.0)
 	#domain_size = Vector2(35.0,30.0)
 	#domain_size = Vector2(25.0,25.0)
-	domain_size = Vector2(16.0,16.0)
+	#domain_size = Vector2(16.0,16.0)
 	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(10.0,8.0)
 	#domain_size = Vector2(9.0,9.0)
@@ -184,10 +190,16 @@ func _on_alchemy_lab_ready():
 			# square root of domain.x,domain.y:
 			# or greatest common factor of domain.x,domain.y ....
 			cell_size = Cross_Section_Of_Substance(gathered_into_chunks,domain_size)
-			
-			number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
+			#print(cell_size, ' cell_size check')
+			#number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
+			number_of_particles = int(cell_size * cell_size)
+			#print(number_of_particles, ' number_of_particles check')
 			appearance = Vector2(cell_size,cell_size)
-			particle_alignment = cell_size/number_of_particles
+			if number_of_particles > cell_size:
+				particle_alignment = number_of_particles/cell_size
+			else:
+				particle_alignment = cell_size/number_of_particles
+			
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particles no matter the domain size...
 			cell_size = 1
@@ -281,23 +293,30 @@ func _on_alchemy_lab_ready():
 		###
 		### Mechanics of the substance...
 		substance.substance_limit = number_of_particles
-		
+		#print(substance.substance_limit, ' substance.substance_limit check')
 		substance.mass = substance.substance_limit 
 		#volume : l * w * h , : pow(x,3)
-		
 		substance.volume = pow(cell_size,3.0)
-		substance.mass_in_pieces = substance.mass / substance.substance_limit
-		substance.volume_in_pieces =  substance.volume / substance.substance_limit
-		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
-		#substance.maintain_velocity = Vector2(0.0,0.0)
+		
+		#substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
+		substance.maintain_velocity = Vector2(0.0,0.0)
 		substance.appearance = appearance
 		
+		substance.mass_in_pieces = substance.mass / (appearance.x * appearance.y)
+		substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
+		#
 		#while len(substance.particle_mechanics) < substance_limit:
 		for x in range(substance.substance_limit):
 			### for the position of the starting position of the substance drawn...
 			if location_x == particle_alignment:
 				location_y =  location_y + 1
 				location_x = 0
+			
+			
+			#particle = RigidBody2D.new()
+			#particle_constitutive_parameters = PhysicsMaterial.new()
+			#particle_boundary = CollisionShape2D.new()
+			#particle_shape = RectangleShape2D.new()
 			
 			substance_particle_name = '{a}{b}{c}{d}{1}{2}{3}{4}'.format({
 				'a':letters_list[int(randi_range(0,len(letters_list)-1))],
@@ -309,30 +328,45 @@ func _on_alchemy_lab_ready():
 				'3':digits_list[int(randi_range(0,len(digits_list)-1))],
 				'4':digits_list[int(randi_range(0,len(digits_list)-1))]
 				})
-			#substance.set_name(substance_name)
-			substance.surrounding_area = Rect2(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)),substance.appearance)
-			substance.particle_workings['mass'] = substance.mass_in_pieces
+			#particle.set_name(substance_particle_name)
+			#particle.position(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)))
+			#substance.surrounding_area = Rect2(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)),substance.appearance)
+			
+			#substance.surrounding_area = Transform2D(0.0,Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)))
+			
+			#substance.surrounding_area = particle
+			### Parameters of the Particles...
+			substance.particle_workings['mass'] = substance.mass / substance.substance_limit
 			substance.particle_workings['velocity'] = substance.maintain_velocity
-			substance.particle_workings['volume'] = substance.volume_in_pieces
+			substance.particle_workings['volume'] = substance.volume / substance.substance_limit
 			substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0].duplicate(true)
 			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
 			substance.particle_workings['B'] = substance.B.duplicate(true)
 			substance.particle_workings['C'] = substance.C.duplicate(true)
-			substance.particle_workings['I'] = substance.I.duplicate(true)
+			substance.particle_workings['I'] =  substance.I.duplicate(true)
+			#substance.particle_workings['I'] =  [substance.I.x.x,substance.I.y.x,substance.I.x.y,substance.I.y.y]
 			substance.particle_workings['F'] = substance.F.duplicate(true)
+			#substance.particle_workings['F'] = [particle.x.x,particle.y.x,particle.x.y,particle.y.y]
 			substance.particle_workings['J'] = substance.J
 			
 			substance.particle_workings['within_range'] = [substance_particle_name].duplicate(true)
 			### 
+			#substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
+			### the components of the particles being connected...
+			substance.particle_lineation[substance_particle_name] = Rect2(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)),substance.appearance)
 			substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
-			###
+			#substance.effigy[substance_particle_name] = ImageTexture.create_from_image(effigy_material)
+			#substance.effigy[substance_particle_name] = effigy_material
+			#substance.physical_structure[substance_particle_name] = particle_boundary
+			#substance.form[substance_particle_name] = particle_shape
+			#substance.domain[substance_particle_name] = particle_reach
+			
 			substance.grid[substance_particle_name] = {'mass':0.0,'velocity':Vector2(0,0),'momentum':Vector2(0.0,0.0)}
-			substance.particle_lineation[substance_particle_name] = substance.surrounding_area
+			
 			#substance.particle_mechanics[substance_particle_name]['position'] = substance.particle_lineation[substance_particle_name].position
 			### 
 			location_x =  location_x + 1
 			
-		
 		get_tree().get_root().get_node("Simulation").add_child(substance)
 	else:
 		print('substances Does not exists')

@@ -87,7 +87,7 @@ func _on_handle_collisions_ready():
 func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure,cell_size):
 	###...
 	if breach == 'top':
-		baluster['window outline']['top']['velocity'] = Vector2(0.0,1.0)# * 1000
+		baluster['window outline']['top']['velocity'] = Vector2(0.0,1.0) * 100
 		collision_restitution = baluster['window outline']['top']['coefficient of restitution'] * mote.coefficient_of_restitution
 		collision_static_friction = baluster['window outline']['top']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['top']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
@@ -120,6 +120,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			line_of_impact = wall_center
 			incoming_angle = snapped(rad_to_deg(mote.get_position().angle_to(line_of_impact)),1)
 			outgoing_angle = rad_to_deg(atan(baluster['window outline']['top']['coefficient of restitution'] * incoming_angle ))
+			
 			x_leg_of_particle_velocity = structure[refer]['velocity'].y * tan(outgoing_angle)
 			# determine which friction static or kinetic...
 			if structure[refer]['velocity'].x in range(-cell_size,cell_size+1) and structure[refer]['velocity'].y in range(-cell_size,cell_size+1):
@@ -139,7 +140,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			
 			
 	if breach == 'right':
-		baluster['window outline']['right']['velocity'] = Vector2(-1.0,0.0)# * 1000
+		baluster['window outline']['right']['velocity'] = Vector2(-1.0,0.0) * 100
 		collision_restitution = baluster['window outline']['right']['coefficient of restitution'] * mote.coefficient_of_restitution
 		collision_static_friction = baluster['window outline']['right']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['right']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
@@ -169,9 +170,11 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			#print(structure[refer]['velocity']," structure[refer]['velocity']")
 		
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
-			
-			incoming_angle = rad_to_deg(mote.get_position().angle_to_point(wall_center))
-			outgoing_angle = collision_restitution * tan(incoming_angle)
+			line_of_impact = wall_center
+			#incoming_angle = rad_to_deg(mote.get_position().angle_to_point(wall_center))
+			incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			#outgoing_angle = collision_restitution * tan(incoming_angle)
+			outgoing_angle = rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * incoming_angle ))
 			y_leg_of_particle_velocity = structure[refer]['velocity'].x * tan(outgoing_angle)
 			# determine which friction static or kinetic...
 			if structure[refer]['velocity'].x in range(-(cell_size/2.0),(cell_size/2.0)+1) and structure[refer]['velocity'].y in range(-(cell_size/2.0),(cell_size/2.0)+1):
@@ -191,7 +194,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 				
 			
 	if breach == 'bottom':
-		baluster['window outline']['bottom']['velocity'] = Vector2(0.0,-1.0)# * 1000
+		baluster['window outline']['bottom']['velocity'] = Vector2(0.0,-1.0) * 100
 		collision_restitution = baluster['window outline']['bottom']['coefficient of restitution'] * mote.coefficient_of_restitution
 		collision_static_friction = baluster['window outline']['bottom']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['bottom']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
@@ -242,7 +245,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 	
 	
 	if breach == 'left':
-		baluster['window outline']['left']['velocity'] = Vector2(1.0,0.0)# * 1000
+		baluster['window outline']['left']['velocity'] = Vector2(1.0,0.0) * 100
 		collision_restitution = baluster['window outline']['left']['coefficient of restitution'] * mote.coefficient_of_restitution
 		collision_static_friction = baluster['window outline']['left']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['left']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
@@ -271,8 +274,13 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 		
-			incoming_angle = snapped(rad_to_deg(wall_center.angle_to_point(mote.get_position())),1)
-			outgoing_angle = snapped(collision_restitution * tan(incoming_angle),1)
+			#incoming_angle = snapped(rad_to_deg(wall_center.angle_to_point(mote.get_position())),1)
+			#outgoing_angle = snapped(collision_restitution * tan(incoming_angle),1)
+
+			line_of_impact = wall_center
+			incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			outgoing_angle = rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * incoming_angle ))
+
 			y_leg_of_particle_velocity = snapped(structure[refer]['velocity'].x * tan(outgoing_angle),.01)
 			# determine which friction static or kinetic...
 			if structure[refer]['velocity'].x in range(-(cell_size/2.0),(cell_size/2.0)+1) and structure[refer]['velocity'].y in range(-(cell_size/2.0),(cell_size/2.0)+1):
@@ -300,12 +308,12 @@ func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,othe
 	### Collision between the particles....
 	
 	collision_restitution = artifact.coefficient_of_restitution * other_artifact.coefficient_of_restitution
-	
+	#print(collision_restitution,' between the particles')
 	if collision_restitution >= 1.0 :
 		
 		normal_vector = other_artifact_zone.get_center() - artifact_zone.get_center()
 
-		unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.0001) + snapped(pow(normal_vector.y,2.0),.0001))),.0001)
+		unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.001) + snapped(pow(normal_vector.y,2.0),.001))),.001)
 		#unit_vector = normal_vector / sqrt((pow(normal_vector.x,2.0) + pow(normal_vector.y,2.0)))
 		unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 		
@@ -354,7 +362,7 @@ func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,othe
 		#grid_field[artifact]['velocity'] = grid_field[artifact]['velocity'] + Vector2(updated_artifact_x_component,grid_field[artifact]['velocity'].y)
 		grid_field[artifact_name]['velocity'] = grid_field[artifact_name]['velocity'] - Vector2(x_leg_of_updated_artifact_velocity,grid_field[artifact_name]['velocity'].y)
 		#"""
-		
+		#print(grid_field[artifact_name]['velocity']," grid_field[artifact]['velocity'] right after")
 	elif collision_restitution == 0.0:
 		### Perfect Inelastic Collisions:::
 		# objects will stick together...
@@ -364,5 +372,6 @@ func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,othe
 		grid_field[artifact_name]['velocity'] = final_velocity
 		
 		#grid_field[other_artifact]['velocity'] = grid_field[other_artifact]['velocity'] - final_velocity
-	
+		#print(grid_field[artifact_name]['velocity']," grid_field[artifact]['velocity'] right after")
+	#print(' ')
 	return grid_field[artifact_name]['velocity']
