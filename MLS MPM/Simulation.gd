@@ -106,7 +106,7 @@ func _on_Simulation_ready():
 
 
 	Setup_Outline()
-
+	$"Substance".establish_boundary()
 	set_process(true)
 	
 	#set_physics_process(true)
@@ -118,28 +118,29 @@ func _process(delta):
 	#print()
 	#print(delta,' delta check')
 	#print(check_time,' check_time check')
-	if check_time > 0.0:
+	#if check_time > 0.0:
 		#print('start')
-		$"Substance".establish_boundary()
-		$"Program".Grid_Reset($"Substance",$"Substance".grid)
 		
-		$"Program".Particles_to_Grid(delta,$"Substance",$"Substance".grid)
+	$"Program".Grid_Reset($"Substance",$"Substance".grid)
 		
-		$"Program".Grid_Update($"Substance",$"Substance".grid)#,test_outside_forces )
+	$"Program".Particles_to_Grid(snapped(delta,.0001),$"Substance",$"Substance".grid)
 		
-		$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
-		$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
+	$"Program".Grid_Update($"Substance",$"Substance".grid)#,test_outside_forces )
 		
-		$"Program".Particle_Reset($"Substance")
+	$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
+	$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
+	$"Substance".establish_boundary()
 		
-		$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
+	$"Program".Particle_Reset($"Substance")
 		
-		$"Substance".queue_redraw()
+	$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
 		
-		check_time = 0
-	else:
+	$"Substance".queue_redraw()
+		
+		#check_time = 0
+	#else:
 		### about .0001+ being added normally...
-		check_time=+ delta * 60.0
+	#	check_time=+ delta #/ 60.0
 		
 	
 func _physics_process(_delta):

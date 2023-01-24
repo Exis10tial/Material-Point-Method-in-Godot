@@ -31,7 +31,10 @@ var one_substance : bool = false
 var appearance : Vector2
 var particle_alignment : int
 var prime_set_of_numbers : Array = []
-var powers_of_2_set_of_numbers : Array = []
+var subdivision_of_2_set_of_numbers : Array = []
+var by_subdivision : bool = false
+var by_square_root : bool = false
+var by_greastest_common_factor : bool = false
 var find_x_factors : Array = []
 var find_y_factors : Array = []
 var defined_rows : int
@@ -57,6 +60,7 @@ func Initial_Collection_Of_Substance():
 	#x:1 y:1: 1 substance
 	
 	#domain_size = Vector2(1000.0,1000.0)
+	#domain_size = Vector2(512.0,512.0)
 	domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(50.0,50.0)
@@ -83,23 +87,31 @@ func Initial_Collection_Of_Substance():
 func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 	### the size of the substance is parsed into evenly cut squares/cubes = (Length == Width)
 	
-	###if code require into_pieces == false you will get substance at domain size.
 	if substance_size.x == substance_size.y and substance_size.x != 1 and substance_size.y != 1 and into_pieces == true :
-		
-		### Powers of 2 Check...
+		### this is if the length/width of the particle are the same...
+		### the substance can be in reduced form...
 		var n = 0.0
 		
+		### Check b y division of 2 first...
 		while pow(2,n) <= substance_size.x:
-			
-			powers_of_2_set_of_numbers.append(pow(2,n))
-			
+			#by_subdivision = true
+			if pow(2,n) == substance_size.x:
+				by_subdivision = true
+				#print('by_subdivision check')
+				break
+			#subdivision_of_2_set_of_numbers.append(pow(2,n))
+			#print('find power of 2')
 			n +=1
-		
-		if powers_of_2_set_of_numbers.has(substance_size.y) == true and into_pieces == true:
 			
-			cell_size = int(substance_size.x / pow(2,1))
+		#if subdivision_of_2_set_of_numbers.has(substance_size.y) == true and into_pieces == true:
+		#if fmod(substance_size.x,2.0) == 0.0:
+		if by_subdivision == true:
+			###.division by 2....
+			#print(substance_size.x, ' substance_size.x')
+			cell_size = int(substance_size.x / 2.0)
+			#by_subdivision = true
 		else:
-			### the number is not a power of 2...
+			### the number is not a subdivision of 2...
 			
 			#Square Root Check
 			if fmod(substance_size.x,sqrt(substance_size.x)) == 0 and into_pieces == true:
@@ -132,6 +144,7 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 							cell_size = find_y_factors[number]
 							break
 											
+				by_square_root= true
 	else:
 		# find the greatest common factor between the domain sizes::
 		for number in range(1,substance_size.x+1):
@@ -158,6 +171,8 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 					cell_size = find_y_factors[number]
 					break
 			#"""
+		by_greastest_common_factor = true
+		
 	return float(cell_size)
 	
 
@@ -175,8 +190,8 @@ func _on_alchemy_lab_ready():
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
 		
-		#one_substance = true
-		gathered_into_chunks = true
+		one_substance = true
+		#gathered_into_chunks = true
 		
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
@@ -190,11 +205,24 @@ func _on_alchemy_lab_ready():
 			# square root of domain.x,domain.y:
 			# or greatest common factor of domain.x,domain.y ....
 			cell_size = Cross_Section_Of_Substance(gathered_into_chunks,domain_size)
+			
+			#print(cell_size, ' cell_size check')
+			appearance = Vector2(cell_size,cell_size)
+			
+			#if by_subdivision == true:
+			number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
+			#print(number_of_particles, ' number_of_particles check')
+			
+			##elif by_square_root == true:
+			#	pass
+			#elif by_greastest_common_factor == true:
+			#	pass
+			
 			#print(cell_size, ' cell_size check')
 			#number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
-			number_of_particles = int(cell_size * cell_size)
+			#number_of_particles = int(cell_size * cell_size)
 			#print(number_of_particles, ' number_of_particles check')
-			appearance = Vector2(cell_size,cell_size)
+			#appearance = Vector2(cell_size,cell_size)
 			if number_of_particles > cell_size:
 				particle_alignment = number_of_particles/cell_size
 			else:
@@ -294,7 +322,34 @@ func _on_alchemy_lab_ready():
 		### Mechanics of the substance...
 		substance.substance_limit = number_of_particles
 		#print(substance.substance_limit, ' substance.substance_limit check')
-		substance.mass = substance.substance_limit 
+		
+		if gathered_into_chunks == false and one_substance == false:
+			### the substance is cut into particles with size of 1...
+			
+			substance.mass = (appearance.x * appearance.y)
+			substance.mass_in_pieces = substance.mass / substance.substance_limit 
+			
+		elif gathered_into_chunks == true and one_substance == false:
+			### the substance is cut into chunks size if either
+			# power of domain.x,domain.y:
+			# square root of domain.x,domain.y:
+			# or greatest common factor of domain.x,domain.y ....
+			substance.mass = (appearance.x * appearance.y)
+			substance.mass_in_pieces = substance.mass / substance.substance_limit
+			
+		elif gathered_into_chunks == false and one_substance == true:
+			### substance is 1 particles no matter the domain size...
+			
+			substance.mass = 1.0#(appearance.x * appearance.y)
+			substance.mass_in_pieces = substance.mass / substance.substance_limit
+		else:
+			### both being true is not a thing so just make it same as both being false:
+			### the substance is cut in chunks...
+			
+			substance.mass
+			
+			
+		#substance.mass = substance.substance_limit 
 		#volume : l * w * h , : pow(x,3)
 		substance.volume = pow(cell_size,3.0)
 		
@@ -302,8 +357,11 @@ func _on_alchemy_lab_ready():
 		substance.maintain_velocity = Vector2(0.0,0.0)
 		substance.appearance = appearance
 		
-		substance.mass_in_pieces = substance.mass / (appearance.x * appearance.y)
+		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
 		substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
+		
+		print(substance.mass, ' substance.mass')
+		print(substance.mass_in_pieces, ' substance.mass_in_pieces')
 		#
 		#while len(substance.particle_mechanics) < substance_limit:
 		for x in range(substance.substance_limit):
