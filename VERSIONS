@@ -45,3 +45,9 @@ V.6.0.0:
  ---- Reestablished from the failed/incomplete try of PhysicsServer2D
       A lot of math corrections/changes probably need more.
       v4.0.beta10.official [d0398f62f]
+
+V.6.0.2:
+|
+---- adjusted how the particles mass property.
+     an option in handling boundary conditions of the particles (for/during collision detection)
+     v4.0.beta11.official [91713ced8]
