@@ -1,10 +1,11 @@
 extends Node2D
 
 ### the particles of a substance...
-var particle_workings : Dictionary = {'position':null,'mass':null,'velocity':null,'volume':null,'stress':null,'B':null,'C':null,'I':null,'F':null,'J':null,'contact_with_wall':false,'within_range':[],'relation_to_domain':{},'domain_relation_to_substance':{},'U':null,'V':null,'Sigma':null,'contact wall':false,'contact particle':false}
+var particle_workings : Dictionary = {'position':null,'mass':null,'velocity':null,'volume':null,'stress':null,'B':null,'C':null,'I':null,'F':null,'J':null,'eulerian':{},'contact_with_wall':false,'within_range':[],'relation_to_domain':{},'domain_relation_to_substance':{},'U':null,'V':null,'Sigma':null,'contact wall':false,'contact particle':false}
 var particle_lineation : Dictionary = {}
 var particle_mechanics : Dictionary = {}
-var grid : Dictionary = {}
+var grid_ : Dictionary = {}
+#var grid_scope : Array = [{}]
 var substance_limit : int = 0
 var mass_in_pieces : float
 var volume_in_pieces : float
@@ -24,10 +25,11 @@ var constitutive_model : String
 var youngs_modulus : float
 var poisson_ratio : float
 ### properties...
-var maintain_velocity : Vector2
 var mass : float
-var velocity : Vector2
+var initial_velocity : Vector2
+var maintain_velocity : Vector2
 var volume: float
+var density : float = mass / volume
 ###...
 var cell_size : int = 1
 var appearance : Vector2
@@ -39,6 +41,11 @@ var coefficient_of_static_friction : float = 0.0
 var coefficient_of_kinetic_friction : float = 0.0
 ### used for other mechanical parts...
 var identify_number
+### scope of how the particles will search the grid...
+#center
+
+#var scope = [Vector2(-1,1),Vector2(1,1),Vector2(0,0),Vector2(-1,-1),Vector2(1,-1)]
+#var scope = [Vector2(-1,1),Vector2(0,1),Vector2(1,1),Vector2(-1,0),Vector2(1,0),Vector2(-1,-1),Vector2(0,-1),Vector2(1,-1)]
 
 
 ### cauchy stress
@@ -97,7 +104,7 @@ func _on_substance_draw():
 func establish_boundary():
 	var copy_lineation 
 	var total
-	var contact
+	var contact = 0
 	var results
 	var rotations 
 	var switch
@@ -118,12 +125,15 @@ func establish_boundary():
 				#print(len(copy_lineation),' copy len')
 				break
 
-		contact = snapped(particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center()),.0001)
-		
+		#contact = snapped(particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().distance_squared_to(particle_lineation[copy_lineation[identify_number]].get_center()),.0001)
+		var relation_between_particles = Vector2(snapped(particle_lineation[copy_lineation[identify_number]].get_center().x - particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().x,.01),snapped(particle_lineation[copy_lineation[identify_number]].get_center().y - particle_lineation[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]].get_center().y,.01))
+
 		#"""
-		if contact <= 1:
+		#if contact <= 1:
+		if abs(relation_between_particles/appearance).x >= 0.0 and abs(relation_between_particles/appearance).x < 1.0 and abs(relation_between_particles/appearance).y >= 0.0 and abs(relation_between_particles/appearance).y < 1.0:
 			###
-			if contact == 0:
+			#if contact == 0:
+			if relation_between_particles.x == 0.0 and relation_between_particles.y == 0:
 				### this is itself...
 				if particle_mechanics[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]]['within_range'].has(copy_lineation[identify_number]) == false:
 					#particle_mechanics[particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]]['within_range'].append(particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)])

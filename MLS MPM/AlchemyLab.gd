@@ -42,6 +42,8 @@ var defined_columns : int
 var number_of_particles : int
 var cell_size : float 
 var substance_starting_point : Vector2
+var random_point_of_x : float
+var random_point_of_y: float
 var grid_nodes : Dictionary
 
 
@@ -61,10 +63,10 @@ func Initial_Collection_Of_Substance():
 	
 	#domain_size = Vector2(1000.0,1000.0)
 	#domain_size = Vector2(512.0,512.0)
-	domain_size = Vector2(100.0,100.0)
+	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(50.0,50.0)
-	#domain_size = Vector2(35.0,30.0)
+	domain_size = Vector2(39.0,39.0)
 	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
 	#domain_size = Vector2(10.0,10.0)
@@ -76,6 +78,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(3.0,3.0)
 	#domain_size = Vector2(2.0,2.0)
 	#domain_size = Vector2(1.0,1.0)
+	
 	#---------------------------------
 	# if substances size is always 1...
 	#domain_size = Vector2(2,10.0)
@@ -127,6 +130,15 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 					if int(substance_size.y) % number == 0:
 						find_y_factors.append(number)
 				
+				### Remove 1 and (itself) from the list
+				if len(find_x_factors) > 2:
+					find_x_factors.pop_back()
+					find_x_factors.pop_front()
+				
+				if len(find_y_factors) > 2:
+					find_y_factors.pop_back()
+					find_y_factors.pop_front()
+				
 				### using the greatest common factor to acquire a cell size...
 				if substance_size.x == substance_size.y:
 					for number in range(len(find_x_factors)-1,-1,-1):
@@ -144,7 +156,7 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 							cell_size = find_y_factors[number]
 							break
 											
-				by_square_root= true
+				#by_square_root= true
 	else:
 		# find the greatest common factor between the domain sizes::
 		for number in range(1,substance_size.x+1):
@@ -153,7 +165,16 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 		for number in range(1,substance_size.y+1):
 			if int(substance_size.y) % number == 0:
 				find_y_factors.append(number)
-			
+		
+		### Remove 1 and (itself) from the list
+		if len(find_x_factors) > 2:
+			find_x_factors.pop_back()
+			find_x_factors.pop_front()
+				
+		if len(find_y_factors) > 2:
+			find_y_factors.pop_back()
+			find_y_factors.pop_front()
+				
 		### using the greatest common factor to acquire a cell size...
 		if substance_size.x == substance_size.y:
 			for number in range(len(find_x_factors)-1,-1,-1):
@@ -171,11 +192,10 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 					cell_size = find_y_factors[number]
 					break
 			#"""
-		by_greastest_common_factor = true
+		#by_greastest_common_factor = true
 		
 	return float(cell_size)
 	
-
 
 
 func _on_alchemy_lab_ready():
@@ -190,8 +210,8 @@ func _on_alchemy_lab_ready():
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
 		
-		one_substance = true
-		#gathered_into_chunks = true
+		#one_substance = true
+		gathered_into_chunks = true
 		
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
@@ -210,24 +230,40 @@ func _on_alchemy_lab_ready():
 			appearance = Vector2(cell_size,cell_size)
 			
 			#if by_subdivision == true:
-			number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
-			#print(number_of_particles, ' number_of_particles check')
 			
-			##elif by_square_root == true:
-			#	pass
-			#elif by_greastest_common_factor == true:
-			#	pass
-			
+			#print(domain_size, ' domain_size check')
 			#print(cell_size, ' cell_size check')
-			#number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
-			#number_of_particles = int(cell_size * cell_size)
-			#print(number_of_particles, ' number_of_particles check')
-			#appearance = Vector2(cell_size,cell_size)
-			if number_of_particles > cell_size:
-				particle_alignment = number_of_particles/cell_size
-			else:
-				particle_alignment = cell_size/number_of_particles
+		#	if domain_size.x == domain_size.y:
+				#cell_size = Cross_Section_Of_Substance(gathered_into_chunks,domain_size)
 			
+				#print(cell_size, ' cell_size check')
+				#appearance = Vector2(cell_size,cell_size)
+				#number_of_particles = cell_size * cell_size
+				#particle_alignment = cell_size
+				
+			#else:
+			number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
+				#number_of_particles = int(cell_size)
+		#	print(number_of_particles, ' number_of_particles check')
+				
+				##elif by_square_root == true:
+				#	pass
+				#elif by_greastest_common_factor == true:
+				#	pass
+				
+				#print(cell_size, ' cell_size check')
+				#number_of_particles = int((domain_size.x/cell_size) * (domain_size.y/cell_size))
+				#number_of_particles = int(cell_size * cell_size)
+				#print(number_of_particles, ' number_of_particles check')
+				#appearance = Vector2(cell_size,cell_size)
+			#if number_of_particles > cell_size:
+				#particle_alignment = number_of_particles/cell_size
+			particle_alignment = domain_size.x/cell_size
+			#else:
+				#particle_alignment = cell_size/number_of_particles
+				#particle_alignment = cell_size/domain_size.x
+			#print(particle_alignment, ' particle_alignment check')
+				
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particles no matter the domain size...
 			cell_size = 1
@@ -236,28 +272,38 @@ func _on_alchemy_lab_ready():
 			particle_alignment = domain_size.y
 		else:
 			### both being true is not a thing so just make it same as both being false:
-			### the substance is cut in chunks...
 			cell_size = 1
 			number_of_particles = int(domain_size.x * domain_size.y)
 			appearance = Vector2(1.0,1.0)
 			particle_alignment = domain_size.y
 		
+		
+		### place the starting_point of the substance placed any where...
+		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/width')-appearance.x/2.0))
+		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/height')-appearance.y/2.0))
+		
 		#### staring location of particles...
 		if one_substance == true or number_of_particles == 1:
-			substance_starting_point = Vector2(
-			((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
-			((ProjectSettings.get_setting('display/window/size/height') / 2.0))
-			)
+			### places the substance in the middle of the screen...
+			#substance_starting_point = Vector2(
+			#((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
+			#((ProjectSettings.get_setting('display/window/size/height') / 2.0))
+			#)
+			### places randomly anywhere on the window...
+			substance_starting_point = Vector2(random_point_of_x,random_point_of_y)
 			
 		else:
 			#sbstance_starting_point = Vector2(
 			#((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
 			#((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
 			#)
+			### places the substance in the middle of the screen...
 			substance_starting_point = Vector2(
 			( (ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
 			( (ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
 			)
+			### places randomly anywhere on the window...
+			
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
@@ -340,7 +386,8 @@ func _on_alchemy_lab_ready():
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particles no matter the domain size...
 			
-			substance.mass = 1.0#(appearance.x * appearance.y)
+			#set to anything...
+			substance.mass = .10#(appearance.x * appearance.y)
 			substance.mass_in_pieces = substance.mass / substance.substance_limit
 		else:
 			### both being true is not a thing so just make it same as both being false:
@@ -354,14 +401,15 @@ func _on_alchemy_lab_ready():
 		substance.volume = pow(cell_size,3.0)
 		
 		#substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
-		substance.maintain_velocity = Vector2(0.0,0.0)
+		#substance.initial_velocity = Vector2(0.0,0.0)
+		substance.initial_velocity = Vector2(randf_range(-10000.00,10000.00),randf_range(-10000.00,10000.00))
 		substance.appearance = appearance
 		
 		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
 		substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
 		
-		print(substance.mass, ' substance.mass')
-		print(substance.mass_in_pieces, ' substance.mass_in_pieces')
+		#print(substance.mass, ' substance.mass')
+		#print(substance.mass_in_pieces, ' substance.mass_in_pieces')
 		#
 		#while len(substance.particle_mechanics) < substance_limit:
 		for x in range(substance.substance_limit):
@@ -395,7 +443,7 @@ func _on_alchemy_lab_ready():
 			#substance.surrounding_area = particle
 			### Parameters of the Particles...
 			substance.particle_workings['mass'] = substance.mass / substance.substance_limit
-			substance.particle_workings['velocity'] = substance.maintain_velocity
+			substance.particle_workings['velocity'] = substance.initial_velocity
 			substance.particle_workings['volume'] = substance.volume / substance.substance_limit
 			substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0].duplicate(true)
 			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
@@ -406,7 +454,10 @@ func _on_alchemy_lab_ready():
 			substance.particle_workings['F'] = substance.F.duplicate(true)
 			#substance.particle_workings['F'] = [particle.x.x,particle.y.x,particle.x.y,particle.y.y]
 			substance.particle_workings['J'] = substance.J
-			
+			#substance.particle_workings['grid scope'] = [].duplicate(true)
+			#substance.particle_workings['ambit'] = substance.scope.duplicate(true)
+			substance.particle_workings['eulerian'] = [].duplicate(true)
+			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}.duplicate(true)
 			substance.particle_workings['within_range'] = [substance_particle_name].duplicate(true)
 			### 
 			#substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
@@ -419,7 +470,7 @@ func _on_alchemy_lab_ready():
 			#substance.form[substance_particle_name] = particle_shape
 			#substance.domain[substance_particle_name] = particle_reach
 			
-			substance.grid[substance_particle_name] = {'mass':0.0,'velocity':Vector2(0,0),'momentum':Vector2(0.0,0.0)}
+			#substance.grid[substance_particle_name] = {'mass':0.0,'velocity':Vector2(0,0),'momentum':Vector2(0.0,0.0)}
 			
 			#substance.particle_mechanics[substance_particle_name]['position'] = substance.particle_lineation[substance_particle_name].position
 			### 
