@@ -48,6 +48,14 @@ V.6.0.0:
 
 V.6.0.2:
 |
----- adjusted how the particles mass property.
+---- adjusted the particles mass property application.
      an option in handling boundary conditions of the particles (for/during collision detection)
      v4.0.beta11.official [91713ced8]
+
+V.6.4.0:
+|
+---- change how weight interpolation interaction between particles, altered how the grid(has always confused me) operates.
+     put in as an option; plain,original,normal: Material Point Method
+     corrected how particles is created/arranged
+     more math corrections.
+     v4.0.rc2.official [d2699dc7a]
