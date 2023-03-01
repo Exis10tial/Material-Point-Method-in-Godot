@@ -85,6 +85,13 @@ func Neo_Hookean(speck,nub):
 	#f_transposed_coefficient = matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])
 	resulted_stress = matrix_math.Multiply_Matrix(stress_coefficient,transposed_f)
 
+	# inf , nan check...
+	for location in range(0,(len(resulted_stress))):
+		if is_inf(resulted_stress[location]) == true or is_nan(resulted_stress[location]) == true:
+			resulted_stress[location] = 0.0
+			#if location == 1 or location == 3:
+				#resulted_stress[location] = 0.0
+		
 	return resulted_stress
 
 
@@ -266,5 +273,13 @@ func Update_Plasticity(case,resurface,nub):
 		### if any is less than or equal to 0...
 		nub = matrix_math.Multiply_Matrix_by_Scalar(nub,resurface,true)
 	
-	
+	# inf,nan check
+	for location in range(0,(len(nub))):
+		if is_inf(nub[location]) == true or is_nan(nub[location]) == true:
+			if location == 0 or location == 2:
+				nub[location] = 1.0
+			if location == 1 or location == 3:
+				nub[location] = 0.0
+			
+		
 	return nub
