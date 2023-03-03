@@ -809,8 +809,8 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		#print(material.particle_mechanics[particle]['C'],' C check')
 		###particle position update...
 		#print(material.particle_mechanics[particle]['velocity'],' velocity check')
-		#material.particle_lineation[particle].position.x = snapped((material.particle_lineation[particle].position.x + snapped((time_passed * material.particle_mechanics[particle]['velocity'].x),.01)  ),.01)
-		#material.particle_lineation[particle].position.y = snapped((material.particle_lineation[particle].position.y + snapped((time_passed * material.particle_mechanics[particle]['velocity'].y),.01)  ),.01)
+		material.particle_lineation[particle].position.x = snapped((material.particle_lineation[particle].position.x + snapped((time_passed * material.particle_mechanics[particle]['velocity'].x),.01)  ),.01)
+		material.particle_lineation[particle].position.y = snapped((material.particle_lineation[particle].position.y + snapped((time_passed * material.particle_mechanics[particle]['velocity'].y),.01)  ),.01)
 		
 		###deformation update...
 		#particle.F = (particle.I + time_passed * particle.C ) * particle.F
