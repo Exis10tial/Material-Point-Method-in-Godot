@@ -82,8 +82,6 @@ func _on_handle_collisions_ready():
 	pass # Replace with function body.
 
 
-
-
 func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure,cell_size):
 	###...
 	if breach == 'top':
@@ -92,12 +90,14 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_static_friction = baluster['window outline']['top']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['top']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		baluster['window outline']['top']['velocity'] = baluster['window outline']['top']['velocity'] * -structure['velocity']
-		wall_center = Vector2(particle_boundary.get_center().x,(0.0-ProjectSettings.get_setting('display/window/size/height')/2.0))
+		#wall_center = Vector2(particle_boundary.get_center().x,(0.0-ProjectSettings.get_setting('display/window/size/height')/2.0))
+		wall_center = Vector2(particle_boundary.origin.x,(0.0-ProjectSettings.get_setting('display/window/size/height')/2.0))
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
-			normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			normal_vector = Vector2(wall_center - particle_boundary.origin)
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
@@ -118,7 +118,9 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			line_of_impact = wall_center
-			incoming_angle = snapped(rad_to_deg(mote.get_position().angle_to(line_of_impact)),1)
+			#incoming_angle = snapped(rad_to_deg(mote.get_position().angle_to(line_of_impact)),1)
+			#incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			incoming_angle = snapped(rad_to_deg(particle_boundary.origin.angle_to(line_of_impact)),1)
 			outgoing_angle = rad_to_deg(atan(baluster['window outline']['top']['coefficient of restitution'] * incoming_angle ))
 			
 			x_leg_of_particle_velocity = structure['velocity'].y * tan(outgoing_angle)
@@ -145,12 +147,14 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_static_friction = baluster['window outline']['right']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['right']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		baluster['window outline']['right']['velocity'] = baluster['window outline']['right']['velocity'] * structure['velocity']# * 100.0
-		wall_center = Vector2(baluster['window outline']['right']['outline']+(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),particle_boundary.get_center().y)
+		#wall_center = Vector2(baluster['window outline']['right']['outline']+(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),particle_boundary.get_center().y)
+		wall_center = Vector2(baluster['window outline']['right']['outline']+(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),particle_boundary.origin.y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
-			normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			normal_vector = Vector2(wall_center - particle_boundary.origin)
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
@@ -172,7 +176,8 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			line_of_impact = wall_center
 			#incoming_angle = rad_to_deg(mote.get_position().angle_to_point(wall_center))
-			incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			#incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			incoming_angle = snapped(rad_to_deg(particle_boundary.origin.angle_to(line_of_impact)),1)
 			#outgoing_angle = collision_restitution * tan(incoming_angle)
 			outgoing_angle = rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * incoming_angle ))
 			y_leg_of_particle_velocity = structure['velocity'].x * tan(outgoing_angle)
@@ -199,11 +204,15 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_static_friction = baluster['window outline']['bottom']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['bottom']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		baluster['window outline']['bottom']['velocity'] = baluster['window outline']['bottom']['velocity'] * structure['velocity']# * 10.0
-		wall_center = Vector2(particle_boundary.get_center().x,baluster['window outline']['bottom']['outline']+baluster['window outline']['bottom']['outline']/2.0)
+		#wall_center = Vector2(particle_boundary.get_center().x,baluster['window outline']['bottom']['outline']+baluster['window outline']['bottom']['outline']/2.0)
+		wall_center = Vector2(particle_boundary.origin.x,baluster['window outline']['bottom']['outline']+baluster['window outline']['bottom']['outline']/2.0)
+		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
-			normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			normal_vector = Vector2(wall_center - particle_boundary.origin)
+			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
@@ -222,7 +231,8 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			line_of_impact = wall_center
-			incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			#incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			incoming_angle = snapped(rad_to_deg(particle_boundary.origin.angle_to(line_of_impact)),1)
 			outgoing_angle = rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * incoming_angle ))
 			x_leg_of_particle_velocity = structure['velocity'].y * tan(outgoing_angle)
 			# determine which friction static or kinetic...
@@ -250,12 +260,15 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 		collision_static_friction = baluster['window outline']['left']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['left']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		baluster['window outline']['left']['velocity'] = baluster['window outline']['left']['velocity'] * -structure['velocity']
-		wall_center = Vector2(0.0-(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),particle_boundary.get_center().y)
+		#wall_center = Vector2(0.0-(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),particle_boundary.get_center().y)
+		wall_center = Vector2(0.0-(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),particle_boundary.origin.y)
+		
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
-			normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			normal_vector = Vector2(wall_center - particle_boundary.origin)
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
@@ -278,7 +291,8 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			#outgoing_angle = snapped(collision_restitution * tan(incoming_angle),1)
 
 			line_of_impact = wall_center
-			incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			#incoming_angle = snapped(rad_to_deg(particle_boundary.get_center().angle_to(line_of_impact)),1)
+			incoming_angle = snapped(rad_to_deg(particle_boundary.origin.angle_to(line_of_impact)),1)
 			outgoing_angle = rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * incoming_angle ))
 
 			y_leg_of_particle_velocity = snapped(structure['velocity'].x * tan(outgoing_angle),.01)
@@ -312,8 +326,9 @@ func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,othe
 	#print(collision_restitution,' between the particles')
 	if collision_restitution >= 1.0 :
 		
-		normal_vector = other_artifact_zone.get_center() - artifact_zone.get_center()
-
+		#normal_vector = other_artifact_zone.get_center() - artifact_zone.get_center()
+		normal_vector = other_artifact_zone.origin - artifact_zone.origin
+		
 		unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.001) + snapped(pow(normal_vector.y,2.0),.001))),.001)
 		#unit_vector = normal_vector / sqrt((pow(normal_vector.x,2.0) + pow(normal_vector.y,2.0)))
 		unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
@@ -342,9 +357,11 @@ func Collision_between_Other_Particles(artifact_name,artifact,artifact_zone,othe
 		#"""
 		# find the point of contact between particles...
 		#line_of_impact = (artifact_zone.intersection(other_artifact_zone)).get_center()
-		line_of_impact = artifact_zone.get_center() - other_artifact_zone.get_center()
+		#line_of_impact = artifact_zone.get_center() - other_artifact_zone.get_center()
+		line_of_impact = artifact_zone.origin - other_artifact_zone.origin
 		##print(line_of_impact,' artifact to other artifact')
-		incoming_angle_of_artifact = rad_to_deg(artifact_zone.get_center().angle_to(line_of_impact))
+		#incoming_angle_of_artifact = rad_to_deg(artifact_zone.get_center().angle_to(line_of_impact))
+		incoming_angle_of_artifact = rad_to_deg(artifact_zone.origin.angle_to(line_of_impact))
 		##print(incoming_angle_of_artifact,' incoming angle artifact to other artifact')
 		outgoing_angle_of_artifact = rad_to_deg(atan(other_artifact.coefficient_of_restitution * incoming_angle_of_artifact ))
 		x_leg_of_updated_artifact_velocity = snapped((artifact_grid['velocity'].y * tan(outgoing_angle_of_artifact)),.01)

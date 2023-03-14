@@ -168,8 +168,8 @@ func Establish_Grid(grid_cell_size:int):
 	#for width in range(0,(ProjectSettings.get_setting('display/window/size/width'))):
 	#	for height in range(0,(ProjectSettings.get_setting('display/window/size/height'))):
 	#		Grid[Vector2(width,-height)] = {'mass': $"Substance".mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
-	print(ProjectSettings.get_setting('display/window/size/height') / grid_cell_size,' height')
-	print(ProjectSettings.get_setting('display/window/size/width') / grid_cell_size,' width')
+	#print(ProjectSettings.get_setting('display/window/size/height') / grid_cell_size,' height')
+	#print(ProjectSettings.get_setting('display/window/size/width') / grid_cell_size,' width')
 	var width = 0
 	var height= 0
 	while true:
@@ -257,7 +257,7 @@ func _process(delta):
 	#if check_time > 0.0:
 		#print('start')
 		
-	
+	#print('cycle start')
 	$"Program".Grid_Reset($"Substance")
 	$"Program".Particles_to_Grid(snapped(delta,.0001),$"Substance")
 	$"Program".Grid_Update(delta,$"Substance")

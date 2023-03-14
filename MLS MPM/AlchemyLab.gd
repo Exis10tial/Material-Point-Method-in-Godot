@@ -66,10 +66,10 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(50.0,50.0)
-	domain_size = Vector2(39.0,39.0)
+	#domain_size = Vector2(39.0,39.0)
 	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
-	#domain_size = Vector2(10.0,10.0)
+	domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(10.0,8.0)
 	#domain_size = Vector2(9.0,9.0)
 	#domain_size = Vector2(6.0,6.0)
@@ -211,7 +211,7 @@ func _on_alchemy_lab_ready():
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
 		
 		#one_substance = true
-		gathered_into_chunks = true
+		#gathered_into_chunks = true
 		
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
@@ -364,6 +364,8 @@ func _on_alchemy_lab_ready():
 		substance.Sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(diagonalize_helper,substance.F),get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(diagonalize_helper))
 		"""
 		
+		
+		
 		###
 		### Mechanics of the substance...
 		substance.substance_limit = number_of_particles
@@ -400,9 +402,9 @@ func _on_alchemy_lab_ready():
 		#volume : l * w * h , : pow(x,3)
 		substance.volume = pow(cell_size,3.0)
 		
-		#substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
+		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
 		#substance.initial_velocity = Vector2(0.0,0.0)
-		substance.initial_velocity = Vector2(randf_range(-10000.00,10000.00),randf_range(-10000.00,10000.00))
+		#substance.initial_velocity = Vector2(randf_range(-10000.00,10000.00),randf_range(-10000.00,10000.00))
 		substance.appearance = appearance
 		
 		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
@@ -423,6 +425,32 @@ func _on_alchemy_lab_ready():
 			#particle_constitutive_parameters = PhysicsMaterial.new()
 			#particle_boundary = CollisionShape2D.new()
 			#particle_shape = RectangleShape2D.new()
+			
+			
+			
+			
+			
+			particle = Transform2D(0.0,Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)))
+			
+			
+			#var particle_body = PlaneMesh.new()
+			#particle_body.size = substance.appearance
+			#particle_body.orientation = PlaneMesh.FACE_Z
+			var particle_body = QuadMesh.new()
+			particle_body.size = substance.appearance
+			
+			
+			var particle_form = Image.new()
+			particle_form.create(appearance.x,appearance.y,false,Image.FORMAT_RGBAF)
+			particle_form.fill(Color(1.0,1.0,1.0,1))
+			#print(particle_form,' image check')
+			var particle_effigy = ImageTexture.new()
+			particle_effigy = ImageTexture.create_from_image(particle_form)
+			#particle_effigy.set_image(particle_form)
+			#print(particle_effigy,' image check')
+			
+			
+			
 			
 			substance_particle_name = '{a}{b}{c}{d}{1}{2}{3}{4}'.format({
 				'a':letters_list[int(randi_range(0,len(letters_list)-1))],
@@ -449,20 +477,23 @@ func _on_alchemy_lab_ready():
 			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
 			substance.particle_workings['B'] = substance.B.duplicate(true)
 			substance.particle_workings['C'] = substance.C.duplicate(true)
-			substance.particle_workings['I'] =  substance.I.duplicate(true)
-			#substance.particle_workings['I'] =  [substance.I.x.x,substance.I.y.x,substance.I.x.y,substance.I.y.y]
-			substance.particle_workings['F'] = substance.F.duplicate(true)
-			#substance.particle_workings['F'] = [particle.x.x,particle.y.x,particle.x.y,particle.y.y]
+			#substance.particle_workings['I'] =  substance.I#.duplicate(true)
+			substance.particle_workings['I'] =  [substance.I.x.x,substance.I.y.x,substance.I.x.y,substance.I.y.y]
+			#substance.particle_workings['F'] = substance.F.duplicate(true)
+			substance.particle_workings['F'] = [particle.x.x,particle.y.x,particle.x.y,particle.y.y]
 			substance.particle_workings['J'] = substance.J
 			#substance.particle_workings['grid scope'] = [].duplicate(true)
 			#substance.particle_workings['ambit'] = substance.scope.duplicate(true)
+			substance.particle_workings['body'] = particle_body
+			substance.particle_workings['effigy'] = particle_effigy
 			substance.particle_workings['eulerian'] = [].duplicate(true)
-			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}.duplicate(true)
+			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'forces':[0,0,0,0]}.duplicate(true)
 			substance.particle_workings['within_range'] = [substance_particle_name].duplicate(true)
 			### 
 			#substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
 			### the components of the particles being connected...
-			substance.particle_lineation[substance_particle_name] = Rect2(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)),substance.appearance)
+			#substance.particle_lineation[substance_particle_name] = Rect2(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)),substance.appearance)
+			substance.particle_lineation[substance_particle_name] = particle
 			substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
 			#substance.effigy[substance_particle_name] = ImageTexture.create_from_image(effigy_material)
 			#substance.effigy[substance_particle_name] = effigy_material
