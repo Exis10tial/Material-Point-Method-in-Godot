@@ -64,3 +64,7 @@ V.7.0.0:
 |
 ---- altered how the particle is represented and displayed. (was a Rect2 and drawn as a Rect2, now is a Transform2d and drawn as a Image).
      v4.0.stable.official [92bee43ad]
+     
+V.7.0.2:
+|
+---- math corrections ( how "forces" is calculated ) 
