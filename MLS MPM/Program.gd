@@ -237,8 +237,8 @@ func Weight_Interpolation(splines:String,version:int,relative:Vector2,cell_size:
 		###...
 		weight_interpolation['weight'] = ((1.0/cell_size)*building_weights.x ) * ((1.0/cell_size)*building_weights.y)
 
-		weight_interpolation['gradient'] =((1.0/cell_size) * ((1.0/cell_size)*building_weights.y)) * (((1.0/cell_size)*building_weights.x ) * (1.0/cell_size))
-		
+		#weight_interpolation['gradient'] =((1.0/cell_size) * ((1.0/cell_size)*building_weights.y)) * (((1.0/cell_size)*building_weights.x ) * (1.0/cell_size))
+		weight_interpolation['gradient'] = Vector2((( (1.0/cell_size) * ((1.0/cell_size)*building_weights.x ) ) * ((1.0/cell_size)*building_weights.y)),   ((1.0/cell_size)*building_weights.x ) *  ((1.0/cell_size) * ((1.0/cell_size)*building_weights.y)))
 			#weight_interpolation = snapped(building_weights.x * building_weights.y,.01)
 			#if kernel.x < -((3.0 * cell_size) / 2.0) and kernel.x > -( (1.0*cell_size) / 2.0 ):
 			#	building_weights.x =  snapped( ((1.0 * pow(kernel.x,2.0)) /  (2.0 * pow(cell_size,2.0))),.01 ) + snapped(((3.0 * kernel.x) / (2.0 * cell_size)),.01) + snapped((9.0/8.0),.001)
@@ -455,7 +455,7 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			while different_number < len(material.particle_mechanics[other_particle]['eulerian']):
 				#print(' ')
 				#print(material.particle_mechanics[particle]['stress'],' stress check')
-				var stressed_gradient = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['stress'],material.particle_mechanics[particle]['gradient forces'][other_particle][different_number],true)
+				var stressed_gradient = matrix_math.Multiply_Matrix_by_Vector2_to_Matrix(material.particle_mechanics[particle]['stress'],material.particle_mechanics[particle]['gradient forces'][other_particle][different_number],false,false)
 				var volumed_stressed_gradient = matrix_math.Multiply_Matrix_by_Scalar(stressed_gradient,material.particle_mechanics[particle]['volume'],true)
 				
 				#forces = matrix_math.Add_Matrix(forces,volumed_stressed_gradient)
@@ -536,16 +536,10 @@ func Grid_Update(time_passed:float,material:Object):
 	for particle in material.particle_lineation.keys():
 		if material.particle_mechanics[particle]['euler data']['mass'] > 0.0:
 			
-			#material.particle_mechanics[particle]['euler data']['velocity'] = material.particle_mechanics[particle]['euler data']['velocity'] + ((time_passed * gravity)/material.particle_mechanics[particle]['euler data']['mass'])
-			
-			
-			
-			#material.particle_mechanics[particle]['euler data']['velocity'] = material.particle_mechanics[particle]['euler data']['velocity'] + ((time_passed*gravity)/material.particle_mechanics[particle]['euler data']['mass'])
 			
 			material.particle_mechanics[particle]['euler data']['velocity'] = material.particle_mechanics[particle]['euler data']['velocity'] + (time_passed*gravity)
 			
-			
-			
+			#material.particle_mechanics[particle]['euler data']['velocity'] = material.particle_mechanics[particle]['euler data']['velocity'] + ((time_passed * matrix_math.Convert_to_Vector2(material.particle_mechanics[particle]['euler data']['forces']))/material.particle_mechanics[particle]['euler data']['mass'])
 			
 			
 		else:
@@ -603,6 +597,8 @@ func Collision_with_Wall(material:Object):
 		if rad_to_deg(material.particle_lineation[particle].get_rotation()) > 0:
 			### if the particle has the slightest rotation...
 			
+			
+			#find the position of the mesh corners(square)...
 			var topleft_rotated = Vector2(material.particle_lineation[particle].origin.x - ( (material.appearance.x/2.0) * rad_to_deg(cos(material.particle_lineation[particle].get_rotation())) - (material.appearance.y/2.0) * rad_to_deg(sin(material.particle_lineation[particle].get_rotation())) ),
 			material.particle_lineation[particle].origin.y - ( (material.appearance.x/2.0) * rad_to_deg(sin(material.particle_lineation[particle].get_rotation())) + (material.appearance.y/2.0) * rad_to_deg(cos(material.particle_lineation[particle].get_rotation())) ) )
 			
@@ -615,7 +611,92 @@ func Collision_with_Wall(material:Object):
 			var bottomleft_rotated = Vector2(material.particle_lineation[particle].origin.x - ( (material.appearance.x/2.0) * rad_to_deg(cos(material.particle_lineation[particle].get_rotation())) + (material.appearance.y/2.0) * rad_to_deg(sin(material.particle_lineation[particle].get_rotation())) ),
 			material.particle_lineation[particle].origin.y - ( (material.appearance.x/2.0) * rad_to_deg(sin(material.particle_lineation[particle].get_rotation())) - (material.appearance.y/2.0) * rad_to_deg(cos(material.particle_lineation[particle].get_rotation())) ) )
 			
-			
+			# finding which is has past a barrier
+			if topleft_rotated.y < barriers['window outline']['top']['outline'] or topright_rotated.y < barriers['window outline']['top']['outline'] or bottomright_rotated.y < barriers['window outline']['top']['outline'] or bottomleft_rotated.y < barriers['window outline']['top']['outline']:
+				if topleft_rotated.y < barriers['window outline']['top']['outline']:
+					### Enforce Particle Density...
+					topleft_rotated.y = barriers['window outline']['top']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('top',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if topright_rotated.y < barriers['window outline']['right']['outline']:
+					### Enforce Particle Density...
+					topright_rotated.y = barriers['window outline']['right']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('right',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomright_rotated.y < barriers['window outline']['bottom']['outline']:
+					### Enforce Particle Density...
+					bottomright_rotated.y = barriers['window outline']['bottom']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('bottom',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomleft_rotated.y < barriers['window outline']['left']['outline']:
+					### Enforce Particle Density...
+					bottomleft_rotated.y = barriers['window outline']['left']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+			if topleft_rotated.x > barriers['window outline']['right']['outline'] or topright_rotated.x > barriers['window outline']['right']['outline'] or bottomright_rotated.x > barriers['window outline']['right']['outline'] or bottomleft_rotated.x > barriers['window outline']['right']['outline']:
+				if topleft_rotated.x > barriers['window outline']['top']['outline']:
+					### Enforce Particle Density...
+					topleft_rotated.x = barriers['window outline']['top']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('top',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if topright_rotated.x > barriers['window outline']['right']['outline']:
+					### Enforce Particle Density...
+					topright_rotated.x = barriers['window outline']['right']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('right',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomright_rotated.x > barriers['window outline']['bottom']['outline']:
+					### Enforce Particle Density...
+					bottomright_rotated.x = barriers['window outline']['bottom']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('bottom',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomleft_rotated.x > barriers['window outline']['left']['outline']:
+					### Enforce Particle Density...
+					bottomleft_rotated.x = barriers['window outline']['left']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+			if topleft_rotated.y > barriers['window outline']['bottom']['outline'] or topright_rotated.y > barriers['window outline']['bottom']['outline'] or bottomright_rotated.y > barriers['window outline']['bottom']['outline'] or bottomleft_rotated.y > barriers['window outline']['bottom']['outline']:
+				if topleft_rotated.y > barriers['window outline']['top']['outline']:
+					### Enforce Particle Density...
+					topleft_rotated.y = barriers['window outline']['top']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('top',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if topright_rotated.y > barriers['window outline']['right']['outline']:
+					### Enforce Particle Density...
+					topright_rotated.y = barriers['window outline']['right']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('right',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomright_rotated.y > barriers['window outline']['bottom']['outline']:
+					### Enforce Particle Density...
+					bottomright_rotated.y = barriers['window outline']['bottom']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('bottom',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomleft_rotated.y > barriers['window outline']['left']['outline']:
+					### Enforce Particle Density...
+					bottomleft_rotated.y = barriers['window outline']['left']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+			if topleft_rotated.x < barriers['window outline']['left']['outline'] or topright_rotated.x < barriers['window outline']['left']['outline'] or bottomright_rotated.x < barriers['window outline']['left']['outline'] or bottomleft_rotated.x < barriers['window outline']['left']['outline']:
+				if topleft_rotated.x < barriers['window outline']['top']['outline']:
+					### Enforce Particle Density...
+					topleft_rotated.x = barriers['window outline']['top']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('top',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if topright_rotated.x < barriers['window outline']['right']['outline']:
+					### Enforce Particle Density...
+					topright_rotated.x = barriers['window outline']['right']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('right',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomright_rotated.x < barriers['window outline']['bottom']['outline']:
+					### Enforce Particle Density...
+					bottomright_rotated.x = barriers['window outline']['bottom']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('bottom',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				if bottomleft_rotated.x < barriers['window outline']['left']['outline']:
+					### Enforce Particle Density...
+					bottomleft_rotated.x = barriers['window outline']['left']['outline']
+					### collision with the wall...
+					material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
+				
 			
 		elif material.particle_lineation[particle].get_rotation() == 0:
 			### if the particle has no rotation...
@@ -650,7 +731,7 @@ func Collision_with_Wall(material:Object):
 				### the particle pasts the bottom of the window...
 				
 				### Enforce Particle Density...
-				material.particle_lineation[particle].origin.x = 0
+				material.particle_lineation[particle].origin.x = barriers['window outline']['left']['outline']
 				### collision with the wall...
 				material.particle_mechanics[particle]['euler data']['velocity'] = particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,material.particle_mechanics[particle]['euler data'],material.cell_size)
 		
