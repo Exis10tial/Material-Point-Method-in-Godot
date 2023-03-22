@@ -63,15 +63,16 @@ func Initial_Collection_Of_Substance():
 	
 	#domain_size = Vector2(1000.0,1000.0)
 	#domain_size = Vector2(512.0,512.0)
-	#domain_size = Vector2(100.0,100.0)
+	domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(50.0,50.0)
 	#domain_size = Vector2(39.0,39.0)
 	#domain_size = Vector2(25.0,25.0)
 	#domain_size = Vector2(16.0,16.0)
-	domain_size = Vector2(10.0,10.0)
+	#domain_size = Vector2(10.0,10.0)
 	#domain_size = Vector2(10.0,8.0)
 	#domain_size = Vector2(9.0,9.0)
+	#domain_size = Vector2(7.0,7.0)
 	#domain_size = Vector2(6.0,6.0)
 	#domain_size = Vector2(5.0,5.0)
 	#domain_size = Vector2(4.0,4.0)
@@ -210,7 +211,7 @@ func _on_alchemy_lab_ready():
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
 		
-		#one_substance = true
+		one_substance = true
 		#gathered_into_chunks = true
 		
 		if gathered_into_chunks == false and one_substance == false:
@@ -278,32 +279,6 @@ func _on_alchemy_lab_ready():
 			particle_alignment = domain_size.y
 		
 		
-		### place the starting_point of the substance placed any where...
-		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/width')-appearance.x/2.0))
-		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/height')-appearance.y/2.0))
-		
-		#### staring location of particles...
-		if one_substance == true or number_of_particles == 1:
-			### places the substance in the middle of the screen...
-			#substance_starting_point = Vector2(
-			#((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
-			#((ProjectSettings.get_setting('display/window/size/height') / 2.0))
-			#)
-			### places randomly anywhere on the window...
-			substance_starting_point = Vector2(random_point_of_x,random_point_of_y)
-			
-		else:
-			#sbstance_starting_point = Vector2(
-			#((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
-			#((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
-			#)
-			### places the substance in the middle of the screen...
-			substance_starting_point = Vector2(
-			( (ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
-			( (ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
-			)
-			### places randomly anywhere on the window...
-			
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
@@ -365,7 +340,6 @@ func _on_alchemy_lab_ready():
 		"""
 		
 		
-		
 		###
 		### Mechanics of the substance...
 		substance.substance_limit = number_of_particles
@@ -374,7 +348,8 @@ func _on_alchemy_lab_ready():
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
 			
-			substance.mass = (appearance.x * appearance.y)
+			substance.mass = (domain_size.x * domain_size.y)
+			
 			substance.mass_in_pieces = substance.mass / substance.substance_limit 
 			
 		elif gathered_into_chunks == true and one_substance == false:
@@ -388,14 +363,14 @@ func _on_alchemy_lab_ready():
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particles no matter the domain size...
 			
-			#set to anything...
-			substance.mass = .10#(appearance.x * appearance.y)
+			#
+			substance.mass = 1.0#(appearance.x * appearance.y)#set to anything...
 			substance.mass_in_pieces = substance.mass / substance.substance_limit
 		else:
 			### both being true is not a thing so just make it same as both being false:
-			### the substance is cut in chunks...
-			
-			substance.mass
+			### the substance is cut into particles with size of 1
+			substance.mass = (domain_size.x * domain_size.y)
+			substance.mass_in_pieces = substance.mass / substance.substance_limit 
 			
 			
 		#substance.mass = substance.substance_limit 
@@ -404,11 +379,39 @@ func _on_alchemy_lab_ready():
 		
 		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
 		#substance.initial_velocity = Vector2(0.0,0.0)
-		#substance.initial_velocity = Vector2(randf_range(-10000.00,10000.00),randf_range(-10000.00,10000.00))
+	#	substance.maintain_velocity = Vector2(randf_range(-10000.00,10000.00),randf_range(-10000.00,10000.00))
 		substance.appearance = appearance
 		
 		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
 		substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
+		
+		
+		### place the starting_point of the substance placed any where...
+		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/width')-appearance.x/2.0))
+		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/height')-appearance.y/2.0))
+		
+		#### staring location of particles...
+		if one_substance == true or number_of_particles == 1:
+			### places the substance in the middle of the screen...
+			#substance_starting_point = Vector2(
+			#((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
+			#((ProjectSettings.get_setting('display/window/size/height') / 2.0))
+			#)
+			### places randomly anywhere on the window...
+			substance_starting_point = Vector2(random_point_of_x,random_point_of_y)
+			
+		else:
+			#sbstance_starting_point = Vector2(
+			#((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
+			#((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
+			#)
+			### places the substance in the middle of the screen...
+			substance_starting_point = Vector2(
+			( (ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
+			( (ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
+			)
+			### places randomly anywhere on the window...
+			
 		
 		#print(substance.mass, ' substance.mass')
 		#print(substance.mass_in_pieces, ' substance.mass_in_pieces')
@@ -487,7 +490,7 @@ func _on_alchemy_lab_ready():
 			substance.particle_workings['body'] = particle_body
 			substance.particle_workings['effigy'] = particle_effigy
 			substance.particle_workings['eulerian'] = [].duplicate(true)
-			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'forces':[0,0,0,0]}.duplicate(true)
+			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'forces':[0,0]}.duplicate(true)
 			substance.particle_workings['within_range'] = [substance_particle_name].duplicate(true)
 			### 
 			#substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)

@@ -50,11 +50,15 @@ func Identify_Columns(m:Array):
 func Convert_to_Vector2(m:Array):
 	#Converts a Matrix in to a Vector2 """
 	
-	if len(m)== 2 and len(m[0]) == 1:
-		new_vector = Vector2(m[0][0],m[1][0])
-	else:
+	#if len(m)== 2 and len(m[0]) == 1:
+		#new_vector = Vector2(m[0][0],m[1][0])
+	#else:
 		#print('converts a 2 by 1 matrix into a vector...')
-		pass
+		#pass
+	if len(m) == 2:
+		new_vector = Vector2(m[0],m[1])
+	#elif len(m) == 4:
+		#pass
 	return new_vector
 
 func Convert_to_Scalar(m:Array):
@@ -124,9 +128,9 @@ func Find_Determinant(m:Array):
 
 	### a number calculated from a square matrix( rows == columns ):
 	#if len(m) == len(m[0]):
-	if len(m) ==4:
+	if len(m) == 4:
 
-		new_determinant = snapped(((m[0] * m[3]) - (m[1] * m[2])),.01)
+		new_determinant = abs(snapped(((m[0] * m[3]) - (m[1] * m[2])),.01))
 
 	
 	return new_determinant
@@ -383,21 +387,26 @@ func Multiply_Matrix_by_Scalar(m:Array,n,is_float:bool):
 	#new_matrix[0][1] = snapped((m[0][1] * n),.01)
 	#new_matrix[1][0] = snapped((m[1][0] * n),.01)
 	#new_matrix[1][1] = snapped((m[1][1] * n),.01)
-	new_matrix =[0,0,0,0]
-	new_matrix[0] = snapped((m[0] - n),.01)
-	new_matrix[1] = snapped((m[1] - n),.01)
-	new_matrix[2] = snapped((m[2] - n),.01)
-	new_matrix[3] = snapped((m[3] - n),.01)
-	
+	if len(m)==2:
+		new_matrix =[0,0]
+		new_matrix[0] = snapped((m[0] - n),.01)
+		new_matrix[1] = snapped((m[1] - n),.01)
+	elif len(m)== 4:
+		new_matrix =[0,0,0,0]
+		new_matrix[0] = snapped((m[0] - n),.01)
+		new_matrix[1] = snapped((m[1] - n),.01)
+		new_matrix[2] = snapped((m[2] - n),.01)
+		new_matrix[3] = snapped((m[3] - n),.01)
+		
 
 	#if len(new_matrix) == 2 and len(new_matrix[0]) == 1:
-	if len(new_matrix) == 2:
-		var new_vector = Vector2(0,0)
-		#new_vector = Vector2(new_matrix[0][0],new_matrix[1][0])
-		new_vector = Vector2(new_matrix[0],new_matrix[1])
-		return new_vector
-	else:
-		return new_matrix
+	#if len(new_matrix) == 2:
+	#	var new_vector = Vector2(0,0)
+	#	#new_vector = Vector2(new_matrix[0][0],new_matrix[1][0])
+	#	new_vector = Vector2(new_matrix[0],new_matrix[1])
+	#	return new_vector
+	#else:
+	return new_matrix
 
 
 func Divide_Matrix_by_Scalar(m:Array,n,is_float:bool):
@@ -504,7 +513,7 @@ func Multiply_Matrix_by_Vector2_to_Matrix(m:Array,v:Vector2,vector_transposed:bo
 		elif len(m) == 4 and len(converted_vector) == 2 and vector_transposed == false:
 			## 2x2 * 2x1
 			### results in a 2x1 matrix...
-			new_matrix = [0,0,0,0]
+			new_matrix = [0,0]
 			new_matrix[0] = snapped( ( (m[0] * converted_vector[0]) + (m[1]*converted_vector[1]) ),.01)
 			new_matrix[1] = snapped( ( (m[2] * converted_vector[0]) + (m[3]*converted_vector[1]) ),.01)
 						
@@ -523,7 +532,7 @@ func Multiply_Matrix_by_Vector2_to_Matrix(m:Array,v:Vector2,vector_transposed:bo
 			if len(converted_vector) == 2 and len(m) == 1:
 				### 2x1 1x1
 				### results in a 2x1 matrix...
-				new_matrix = [0,0,0,0]
+				new_matrix = [0,0]
 				new_matrix[0] = snapped( ( (converted_vector[0] * m[0]) + (converted_vector[1]*m[1]) ),.01)
 				new_matrix[1] = snapped( ( (converted_vector[2] * m[0]) + (converted_vector[3]*m[1]) ),.01)
 				

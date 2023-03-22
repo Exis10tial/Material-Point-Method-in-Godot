@@ -98,13 +98,16 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
 			normal_vector = Vector2(wall_center - particle_boundary.origin)
-			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
-			dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			
+			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
+			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
+			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
 			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['top']['velocity'])
 			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['top']['velocity'])
+			
 			final_tangential_mote_velocity = dotted_tangent_mote_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
 			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['top']['mass']) + 2.0 * baluster['window outline']['top']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['right']['mass'])
@@ -158,16 +161,21 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
-			dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			
+			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
+			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
+			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
 			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['right']['velocity'])
 			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['right']['velocity'])
+			
 			final_tangential_mote_velocity = dotted_tangent_mote_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
 			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['right']['mass']) + 2.0 * baluster['window outline']['right']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['right']['mass'])
 			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['right']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['right']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['right']['mass'])
 			
 			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			
 			#final_tangential_mote_velocity * unit_tangent
 			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
 			
@@ -212,22 +220,24 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
 			normal_vector = Vector2(wall_center - particle_boundary.origin)
-			
+			#print(unit_vector,' unit_vector check')
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
-			dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
+			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
+			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
 			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['bottom']['velocity'])
 			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['bottom']['velocity'])
 			
 			final_tangential_mote_velocity = dotted_tangent_mote_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
+			
 			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['bottom']['mass']) + 2.0 * baluster['window outline']['bottom']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['bottom']['mass'])
 			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['bottom']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['bottom']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['bottom']['mass'])
 			
 			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
-			
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			line_of_impact = wall_center
@@ -272,10 +282,14 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
-			dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			
+			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
+			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
+			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
+			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
 			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['left']['velocity'])
 			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['left']['velocity'])
+			
 			final_tangential_mote_velocity = dotted_tangent_mote_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
 			
@@ -283,8 +297,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['left']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['left']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['left']['mass'])
 			
 			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
-
-		
+			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 		
 			#incoming_angle = snapped(rad_to_deg(wall_center.angle_to_point(mote.get_position())),1)
@@ -313,6 +326,7 @@ func Collision_with_Walls(breach,mote,refer,particle_boundary,baluster,structure
 			structure['velocity'] = final_velocity
 			
 			
+	
 	return structure['velocity']
 	
 	
