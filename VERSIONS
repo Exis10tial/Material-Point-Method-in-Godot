@@ -5,7 +5,7 @@ V.1.0.0:
  ---- contains 4 constitutive models: Neohookean,Fixed_Corotated(snow),water,Drucker_Prager(sand)
       contains collision detection only for the outline of the windows not between other particles.
       used nodes for the particles
-      matrix math used [[]] 2D-arrays...
+      matrix math used [[]] for 2D-arrays.
       
       at the time used Godot v4.0.alpha13.official [59dcddc45]
       
@@ -27,7 +27,7 @@ V.4.0.0:
       used various godot v4.0 betas
 V.5.0.0:
 |
- ---- matrix math used went to 1D arrays
+ ---- matrix math used went to [] 1D arrays
       math corrections/changes.
       rearranged how the simulation was setup in the nodes.
       broke the process from 1 large function of the simulation into various smaller functions
@@ -68,3 +68,9 @@ V.7.0.0:
 V.7.0.2:
 |
 ---- math corrections ( how "forces" is calculated ) 
+
+V.7.0.3:
+|
+---- math corrections ( how the particle interact with the wall (window outline) ) 
+
+
