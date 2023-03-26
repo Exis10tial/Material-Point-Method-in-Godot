@@ -377,9 +377,12 @@ func _on_alchemy_lab_ready():
 		#volume : l * w * h , : pow(x,3)
 		substance.volume = pow(cell_size,3.0)
 		
-		substance.maintain_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-19.60,19.60))
-		#substance.initial_velocity = Vector2(0.0,0.0)
-	#	substance.maintain_velocity = Vector2(randf_range(-10000.00,10000.00),randf_range(-10000.00,10000.00))
+		
+		#substance.initial_velocity = Vector2(0,0)
+		substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))
+		#substance.initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
+		
+		
 		substance.appearance = appearance
 		
 		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
@@ -422,14 +425,6 @@ func _on_alchemy_lab_ready():
 			if location_x == particle_alignment:
 				location_y =  location_y + 1
 				location_x = 0
-			
-			
-			#particle = RigidBody2D.new()
-			#particle_constitutive_parameters = PhysicsMaterial.new()
-			#particle_boundary = CollisionShape2D.new()
-			#particle_shape = RectangleShape2D.new()
-			
-			
 			
 			
 			
@@ -476,7 +471,7 @@ func _on_alchemy_lab_ready():
 			substance.particle_workings['mass'] = substance.mass / substance.substance_limit
 			substance.particle_workings['velocity'] = substance.initial_velocity
 			substance.particle_workings['volume'] = substance.volume / substance.substance_limit
-			substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0].duplicate(true)
+			substance.particle_workings['stress'] = [1.0,0.0,0.0,1.0].duplicate(true)
 			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
 			substance.particle_workings['B'] = substance.B.duplicate(true)
 			substance.particle_workings['C'] = substance.C.duplicate(true)
@@ -490,7 +485,7 @@ func _on_alchemy_lab_ready():
 			substance.particle_workings['body'] = particle_body
 			substance.particle_workings['effigy'] = particle_effigy
 			substance.particle_workings['eulerian'] = [].duplicate(true)
-			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'forces':[0,0]}.duplicate(true)
+			substance.particle_workings['euler data'] = {'mass': substance.mass_in_pieces,'velocity':Vector2(0.0,0.0),'forces':[0,0]}.duplicate(true)
 			substance.particle_workings['within_range'] = [substance_particle_name].duplicate(true)
 			### 
 			#substance.particle_mechanics[substance_particle_name] = substance.particle_workings.duplicate(true)
