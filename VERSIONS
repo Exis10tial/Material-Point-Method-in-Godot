@@ -73,4 +73,8 @@ V.7.0.3:
 |
 ---- math corrections ( how the particle interact with the wall (window outline) ) 
 
-
+V.7.1.0:
+|
+---- math corrections ( parts of weight interpolation was incorrect.)
+     reassert the MLS verison of mpm. ( the original mpm is still there just commented out ; can go back and forth between original and MLS just comment or uncomment the portions).
+     v4.0.stable.official [92bee43ad]
