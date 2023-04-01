@@ -65,7 +65,8 @@ func Neo_Hookean(speck,nub):
 	# or
 	# P = u*(F - F^-T) + n*log (J)*F^-T ; mpm course pg. 19,equation 48
 	#f_coefficient =  matrix_math.Subtract_Matrix(nub.particle_mechanics[speck]['F'],matrix_math.Inverse_Matrix(matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])))
-	
+	#print(mu,' mu check')
+	#print(lambda,' lambda check')
 	var transposed_f = matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])
 	var inversed_trasposed_f = matrix_math.Inverse_Matrix(transposed_f)
 	var f_coefficient = matrix_math.Subtract_Matrix(nub.particle_mechanics[speck]['F'],inversed_trasposed_f)
@@ -78,13 +79,16 @@ func Neo_Hookean(speck,nub):
 	pk_lambda_coefficient =  matrix_math.Multiply_Matrix_by_Scalar(inversed_trasposed_f,lambda_log_cofficient,true)
 
 	P = matrix_math.Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
-
+	#print(P,' P check')
+	#print(nub.particle_mechanics[speck]['J'],' J check')
 	#stress = 1 / J * P * F^T
-	j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
+	#j_coefficient =  clamp(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01),1.0,(snapped((1.0 / nub.particle_mechanics[speck]['J']),.01))+1)
+	j_coefficient = 1.0 / nub.particle_mechanics[speck]['J']
+	#print(j_coefficient,' j_coefficient check')
 	stress_coefficient = matrix_math.Multiply_Matrix_by_Scalar(P,j_coefficient,true)
 	#f_transposed_coefficient = matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])
 	resulted_stress = matrix_math.Multiply_Matrix(stress_coefficient,transposed_f)
-
+	#print(resulted_stress,' results stress check')
 	# inf , nan check...
 	for location in range(0,(len(resulted_stress))):
 		if is_inf(resulted_stress[location]) == true or is_nan(resulted_stress[location]) == true:
@@ -152,6 +156,7 @@ func Drucker_Prager_Elasticity(speck,nub):
 	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
 	lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
 	
+	#
 	var FFtransposed = matrix_math.Multiply_Matrix(nub.particle_mechanics[speck]['F'],matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F']))
 	nub.particle_mechanics[speck]['U'] = matrix_math.Find_Eigenvectors(FFtransposed)
 	var FtransposedF = matrix_math.Multiply_Matrix(nub.particle_mechanics[speck]['F'],matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F']))
@@ -161,7 +166,7 @@ func Drucker_Prager_Elasticity(speck,nub):
 	# 
 	nub.particle_mechanics[speck]['Sigma'] = matrix_math.Multiply_Matrix(matrix_math.Multiply_Matrix(diagonalize_helper,nub.particle_mechanics[speck]['F']),matrix_math.Inverse_Matrix(diagonalize_helper))
 			
-	### if any is less than or equal to 0...
+	"""### if any is less than or equal to 0...
 	if nub.particle_mechanics[speck]['Sigma'][0][0] <= 0.0 or nub.particle_mechanics[speck]['Sigma'][0][1] <= 0.0 or nub.particle_mechanics[speck]['Sigma'][1][0] <= 0.0 or nub.particle_mechanics[speck]['Sigma'][1][1] <= 0.0:
 		if nub.particle_mechanics[speck]['Sigma'][0][0] <= 0.0 and nub.particle_mechanics[speck]['Sigma'][0][1] <= 0.0 and nub.particle_mechanics[speck]['Sigma'][1][0] <= 0.0 and nub.particle_mechanics[speck]['Sigma'][1][1] <= 0.0:
 			logged_sigma =[[ snapped(log(.001),.001), snapped(log(.001),.001) ],[snapped(log(.001),.001), snapped(log(.001),.001) ]]
@@ -190,6 +195,9 @@ func Drucker_Prager_Elasticity(speck,nub):
 	
 	else:
 		logged_sigma = [[ snapped(log(nub.particle_mechanics[speck]['Sigma'][0][0]),.001), snapped(log(nub.particle_mechanics[speck]['Sigma'][0][1]),.001) ],[ snapped(log(nub.particle_mechanics[speck]['Sigma'][1][0]),.001), snapped(log(nub.particle_mechanics[speck]['Sigma'][1][1]),.001) ]]
+	"""
+	logged_sigma = [ snapped(log(nub.particle_mechanics[speck]['Sigma'][0]),.001), snapped(log(nub.particle_mechanics[speck]['Sigma'][1]),.001),snapped(log(nub.particle_mechanics[speck]['Sigma'][2]),.001), snapped(log(nub.particle_mechanics[speck]['Sigma'][3]),.001) ]
+	
 	var V_transposed = matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['V'])
 	var SIGMA_inverse = matrix_math.Inverse_Matrix(nub.particle_mechanics[speck]['Sigma'])
 	##print( logged_sigma,' logged sigma')
@@ -224,7 +232,7 @@ func Drucker_Prager_Elasticity(speck,nub):
 	nub.yield_surface = snapped(snapped(sqrt(snapped(2.0/3.0,.01)),.01) * ( snapped((2.0*snapped(sin(internal_coefficient_of_fiction),.001)),.01) / 3.0 - snapped(sin(internal_coefficient_of_fiction),.01) ),.01)
 	
 	
-	
+	# F = U * E(sigme) * V_transposed
 	# P = U * (2*mu*sigma^-1*log(sigma) + lambda * trace( log(sigma))*sigma^-1)*V^T
 	mu_cofficient = matrix_math.Multiply_Matrix_by_Scalar(SIGMA_inverse,(2.0*mu),true)
 	#var trace_log_sigma = get_tree().get_root().get_node("Simulation/Matrix Math").Trace(logged_sigma)

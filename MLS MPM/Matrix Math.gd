@@ -1,6 +1,5 @@
 extends Node
 
-
 var new_matrix : Array = []
 var check_matrix : String
 var matrix_toolbox  : Dictionary
@@ -11,6 +10,7 @@ var new_vector : Vector2
 var new_scalar : float
 var converted_vector : Array
 var new_determinant : float
+
 
 func _on_Matrix_Math_ready():
 	### Collection of Math Formulas:(Matrix) used/needed...
@@ -113,15 +113,19 @@ func Trace(m:Array):
 	
 	new_scalar = 0.0
 	
-	if len(m) == len(m[0]):
+	if len(m) == 4:
+		new_scalar = m[1] + m[3]
+	
+	#if len(m) == len(m[0]):
+	
 		### checks if the matrix is a square matrix...
 		
-		for square in range(0, len(m[0])):
+		#for square in range(0, len(m[0])):
 			
-			new_scalar = snapped(new_scalar + m[square][square],.001)
-	else:
+			#new_scalar = snapped(new_scalar + m[square][square],.001)
+	#else:
 		#print('not a square matrix... m by n where m equals n')
-		pass
+		#pass
 	return new_scalar
 
 func Find_Determinant(m:Array):
@@ -243,65 +247,72 @@ func Inverse_Matrix(m:Array):
 	
 	return updated_new_matrix
 
-#func Find_Eigenvectors(a:Array):
+func Find_Eigenvectors(a:Array):
 	### Eigenvector formula : AV = evV
 	# A = square matrix, ev = eigenvalues, V = eigenvectors
 	### eigenvalues formula : | A - Iev |...
 	# A = sqare matrix , I = Identity Matrix of A,ev = eigenvalues
-#	var eigenvectors_01 : Vector2
-	#var eigenvectors_02 : Vector2
-	#var solve_by_determinant : Array
-	#var find_eigenvector : Array
-	#var eigen_identity : Array
-	#var quadratic_form 
-	#var eigenvalues_01 : float
-	#var eigenvalues_02 : float
+	var eigenvectors_01 : Vector2
+	var eigenvectors_02 : Vector2
+	var solve_by_determinant : Array
+	var find_eigenvector : Array
+	var eigen_identity : Array
+	var quadratic_form 
+	var eigenvalues_01 : float
+	var eigenvalues_02 : float
 	
-#	var quadratic_coefficient_a
-	#var quadratic_coefficient_b
-	#var quadratic_constant_c
+	var quadratic_coefficient_a
+	var quadratic_coefficient_b
+	var quadratic_constant_c
 	
-	#var helper_diagonalize_matrix
+	var helper_diagonalize_matrix
 
 	#if Identify_Rows(a) == Identify_Columns(a):
 		### It is a square matrix...
 		#if Identify_Rows(a) == 2:
+	if len(a) == 4:
+		### Find Eigenvalues...
+		# I time v
+		# A minus Iv matrix
+		# determinant from A minus Iv 
+		#eigen_identity = [['ev',0],[0,'ev']]
+		eigen_identity = ['ev',0,0,'ev']
+		#solve_by_determinant = [['{0}'.format({'0':a[0][0]}) + ' - ' + eigen_identity[0][0],a[0][1] - eigen_identity[0][1]],[a[1][0] - eigen_identity[1][0],'{0}'.format({'0':a[1][1]}) + ' - ' + eigen_identity[1][1] ]]
+		
+		solve_by_determinant =  ['{0}'.format({'0':a[0]}) + ' - ' + eigen_identity[0],
+		a[1] - eigen_identity[1],
+		a[2] - eigen_identity[2],
+		'{0}'.format({'0':a[3]}) + ' - ' + eigen_identity[3]]
+		
+		#print(solve_by_determinant,' solving')
 			
-			### Find Eigenvalues...
-			# I time v
-			# A minus Iv matrix
-			# determinant from A minus Iv 
-			#eigen_identity = [['ev',0],[0,'ev']]
-			#solve_by_determinant = [['{0}'.format({'0':a[0][0]}) + ' - ' + eigen_identity[0][0],a[0][1] - eigen_identity[0][1]],[a[1][0] - eigen_identity[1][0],'{0}'.format({'0':a[1][1]}) + ' - ' + eigen_identity[1][1] ]]
-			
-			#print(solve_by_determinant,' solving')
-			
-		#	quadratic_coefficient_a = - 1.0 * -1.0
-			#quadratic_coefficient_b = (a[0][0] * -1.0) + (a[1][1] * -1.0)
-			#quadratic_constant_c = (a[0][0] * a[1][1]) + (solve_by_determinant[0][1] * solve_by_determinant[1][0])
+		quadratic_coefficient_a = - 1.0 * -1.0
+		quadratic_coefficient_b = (a[0] * -1.0) + (a[3] * -1.0)
+		quadratic_constant_c = (a[0] * a[3]) + (solve_by_determinant[1] * solve_by_determinant[2])
 			
 		
-			#solving quadratic equation
-			# x = -b +- square root ( power(b,2.0) - 4ac  ) / 2a
+		#solving quadratic equation
+		# x = -b +- square root ( power(b,2.0) - 4ac  ) / 2a
 			
-			#eigenvalues_01 = (-1.0*quadratic_coefficient_b) + ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
+		eigenvalues_01 = (-1.0*quadratic_coefficient_b) + ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
 			
-			#eigenvalues_02 = (-1.0*quadratic_coefficient_b) - ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
+		eigenvalues_02 = (-1.0*quadratic_coefficient_b) - ( (sqrt(  pow(quadratic_coefficient_b,2.0) - (4.0 *quadratic_coefficient_a*quadratic_constant_c) )) / (2.0 * quadratic_coefficient_a) )
 	
-			#print(eigenvalues_01,' plus')
-			#print(eigenvalues_02,' minus')
+		#print(eigenvalues_01,' plus')
+		#print(eigenvalues_02,' minus')
 
-			# Find Eigenvectors...
-			#eigenvectors_01.x = (a[0][0] - eigenvalues_01) / (-1.0 * (a[0][1] - eigenvalues_01))
-			#eigenvectors_01.y = (a[1][0] - eigenvalues_01) / (-1.0 * (a[1][1] - eigenvalues_01))
+		# Find Eigenvectors...
+		eigenvectors_01.x = (a[0] - eigenvalues_01) / (-1.0 * (a[1] - eigenvalues_01))
+		eigenvectors_01.y = (a[2] - eigenvalues_01) / (-1.0 * (a[3] - eigenvalues_01))
 			
-			#eigenvectors_02.x = (a[0][0] - eigenvalues_02) / (-1.0 * (a[0][1] - eigenvalues_02))
-			#eigenvectors_02.y = (a[1][0] - eigenvalues_02) / (-1.0 * (a[1][1] - eigenvalues_02))
+		eigenvectors_02.x = (a[0] - eigenvalues_02) / (-1.0 * (a[1] - eigenvalues_02))
+		eigenvectors_02.y = (a[2] - eigenvalues_02) / (-1.0 * (a[3] - eigenvalues_02))
 			
-			# Eigenvectors form a mastrix...
-			#helper_diagonalize_matrix = [[eigenvectors_01.x,eigenvectors_02.x ],[eigenvectors_01.y,eigenvectors_02.y ]]
-			
-			#return helper_diagonalize_matrix
+		# Eigenvectors form a mastrix...
+		#helper_diagonalize_matrix = [[eigenvectors_01.x,eigenvectors_02.x ],[eigenvectors_01.y,eigenvectors_02.y ]]
+		
+		helper_diagonalize_matrix = [eigenvectors_01.x,eigenvectors_02.x,eigenvectors_01.y,eigenvectors_02.y]
+		return helper_diagonalize_matrix
 #	else:
 		
 		### not a square matrix...
@@ -389,14 +400,14 @@ func Multiply_Matrix_by_Scalar(m:Array,n,is_float:bool):
 	#new_matrix[1][1] = snapped((m[1][1] * n),.01)
 	if len(m)==2:
 		new_matrix =[0,0]
-		new_matrix[0] = snapped((m[0] - n),.01)
-		new_matrix[1] = snapped((m[1] - n),.01)
+		new_matrix[0] = snapped((m[0] * n),.01)
+		new_matrix[1] = snapped((m[1] * n),.01)
 	elif len(m)== 4:
 		new_matrix =[0,0,0,0]
-		new_matrix[0] = snapped((m[0] - n),.01)
-		new_matrix[1] = snapped((m[1] - n),.01)
-		new_matrix[2] = snapped((m[2] - n),.01)
-		new_matrix[3] = snapped((m[3] - n),.01)
+		new_matrix[0] = snapped((m[0] * n),.01)
+		new_matrix[1] = snapped((m[1] * n),.01)
+		new_matrix[2] = snapped((m[2] * n),.01)
+		new_matrix[3] = snapped((m[3] * n),.01)
 		
 
 	#if len(new_matrix) == 2 and len(new_matrix[0]) == 1:
@@ -472,17 +483,9 @@ func Multiply_Matrix_by_Vector2_to_Vector2(m:Array,v:Vector2):
 		### results in a 2x1 matrix...
 		new_matrix = [0,0]
 		new_matrix[0] = snapped( ( (m[0] * converted_vector[0]) + (m[1]*converted_vector[1]) ),.01)
+		
 		new_matrix[1] = snapped( ( (m[2] * converted_vector[0]) + (m[3]*converted_vector[1]) ),.01)
-	
-	#elif len(m) == 4 and len(converted_vector) == 4:
-	#	## 2x2 * 2x2
-		### results in a 2x2 matrix...
-	#	new_matrix = [0,0,0,0]
-	#	new_matrix[0] = snapped( ( (m[0] * converted_vector[0]) + (m[1]*converted_vector[2]) ),.01)
-	#	new_matrix[1] = snapped( ( (m[0] * converted_vector[1]) + (m[1]*converted_vector[3]) ),.01)
-	#	new_matrix[2] = snapped( ( (m[2] * converted_vector[0]) + (m[3]*converted_vector[2]) ),.01)
-	#	new_matrix[3] = snapped( ( (m[2] * converted_vector[1]) + (m[3]*converted_vector[3]) ),.01)
-	
+		
 	new_vector = Vector2(new_matrix[0],new_matrix[1])
 	
 	return new_vector

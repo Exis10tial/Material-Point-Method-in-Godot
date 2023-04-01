@@ -249,15 +249,7 @@ func _on_Simulation_ready():
 	
 
 func _process(delta):
-	#$"Program".Simulate(delta,$"Substance",$"Substance".grid)
-	#$"Substance".establish_boundary()
 	
-	#print(delta,' delta check')
-	#print(check_time,' check_time check')
-	#if check_time > 0.0:
-		#print('start')
-		
-	#print('cycle start')
 	$"Program".Grid_Reset($"Substance")
 	$"Program".Particles_to_Grid(snapped(delta,.0001),$"Substance")
 	$"Program".Grid_Update(delta,$"Substance")
@@ -268,44 +260,12 @@ func _process(delta):
 	$"Substance".establish_boundary()
 	$"Substance".queue_redraw()
 	
-	#$"Program".Grid_Reset($"Substance",$"Substance".grid)
-	#$"Program".Particles_to_Grid(snapped(delta,.0001),$"Substance",$"Substance".grid,$"Substance".cell_size)
-	#$"Program".Particles_to_Grid(snapped(delta,.0001),$"Substance",$"Substance".grid_nodes,grid_cell_size)
-	#$"Program".Grid_Update($"Substance",$"Substance".grid)#,test_outside_forces )
-#	$"Program".Grid_Update($"Substance")
-	#$"Program".Collision_with_Wall($"Substance",$"Substance".grid)
-	#$"Program".Collision_with_Other_Particles($"Substance",$"Substance".grid)
-	#$"Substance".establish_boundary()
-		
-	#$"Program".Particle_Reset($"Substance")
-		
-	#$"Program".Grid_to_Particle(delta,$"Substance",$"Substance".grid)
-	#$"Program".Grid_to_Particle(delta,$"Substance",$"Program".grid_nodes)
-		
-	#$"Substance".queue_redraw()
-		
-		#check_time = 0
-	#else:
-		### about .0001+ being added normally...
-	#	check_time=+ delta #/ 60.0
-		
+	
 	
 func physics_process(_delta):
-	#if check_time >= rate:
-		#Particle Simulation....
-	#$"Program".Grid_Reset($"Substance",$"Substance".grid)
-	#$"Program".Particles_to_Grid(check_time,$"Substance",$"Substance".grid)
-	
-	#$"Program".Grid_Update($"Substance",$"Substance".grid)
-	#$"Program".Collision_Detection($"Substance",$"Substance".grid)
-	#$"Substance".establish_boundary()
-	#$"Program".Grid_to_Particle(check_time,$"Substance",$"Substance".grid)
 	
 	$"Substance".queue_redraw()
-#	else:
-	#	collect_time(delta)
-	
-
+#	
 #func build_time(delta):
 #	check_time=+ delta
 #	if check_time > 1.0:

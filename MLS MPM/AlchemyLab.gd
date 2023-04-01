@@ -301,8 +301,8 @@ func _on_alchemy_lab_ready():
 		#var flow = randf_range(-10.0,10.0)
 		var flow = 100.0
 		#maintain_velocity = Vector2(flow,flow)
-		substance.maintain_velocity = Vector2(0.0,flow)
-		substance.volume = 1.0
+		#substance.maintain_velocity = Vector2(0.0,flow)
+		#substance.volume = 1.0
 		#"""
 		"""
 		# testing fixed-corated model - snow...
@@ -314,7 +314,7 @@ func _on_alchemy_lab_ready():
 		substance.type_of_substance = 'snow'
 		substance.poisson_ratio = 0.2#0.5
 		substance.youngs_modulus = snapped((1.4 * pow(10.0,5.0)),.1)
-		substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
+		#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
 		#
 		#"""
 		"""
@@ -327,17 +327,8 @@ func _on_alchemy_lab_ready():
 		substance.type_of_substance = 'sand'
 		substance.poisson_ratio = 0.29
 		substance.youngs_modulus = snapped((3.537 * pow(10.0,7.0)),.1)
-		substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
-		# Polar SVD :   U from AA^T, V from A^TA...
-		var FFtransposed = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(substance.F,get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(substance.F))
-		substance.U = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Eigenvectors(FFtransposed)
-		var FtransposedF = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(substance.F,get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Transposed_Matrix(substance.F))
-		substance.V = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Eigenvectors(FtransposedF)
-		#Diagonalize SIGMA = PAP^-1... P = diagonalize_helper ,A = artifact.F
-		var diagonalize_helper = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Find_Eigenvectors(substance.F)
-		# 
-		substance.Sigma = get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Multiply_Matrix(diagonalize_helper,substance.F),get_tree().get_root().get_node("Test Area/Simulation/Matrix Math").Inverse_Matrix(diagonalize_helper))
-		"""
+		#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
+		#"""
 		
 		
 		###
@@ -379,7 +370,7 @@ func _on_alchemy_lab_ready():
 		
 		
 		#substance.initial_velocity = Vector2(0,0)
-		substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))
+		substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80)) * 100
 		#substance.initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
 		
 		
