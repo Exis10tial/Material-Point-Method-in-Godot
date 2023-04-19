@@ -32,7 +32,7 @@ func Establish_Rate():
 	### ...
 	#rate = snapped(1.0/float(len($"Substance".particle_mechanics)),.001)
 	#rate = snapped(1.0/1.50,.001)
-	rate = 1.0
+	rate = 0.0
 	return rate
 
 
@@ -50,6 +50,7 @@ func Switch_Protocol():
 		set_process(lore_processing)
 		set_physics_process(mechanics_processing)
 		
+
 func Setup_Outline():
 	### the outline of the simulation is set..
 	### based of the window size...
@@ -58,8 +59,6 @@ func Setup_Outline():
 	get_tree().get_root().get_node(".").set_position(Vector2(ProjectSettings.get_setting('display/window/size/width'),(ProjectSettings.get_setting('display/window/size/height')/2.0)))
 	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/width')/2.0),ProjectSettings.get_setting('display/window/size/height')))
 	get_tree().get_root().get_node(".").set_position(Vector2(0.0,(ProjectSettings.get_setting('display/window/size/height')/2.0)))
-
-
 
 
 func Determine_Eulerian_Grid(x:int,y:int):
@@ -250,16 +249,21 @@ func _on_Simulation_ready():
 
 func _process(delta):
 	
-	$"Program".Grid_Reset($"Substance")
-	$"Program".Particles_to_Grid(snapped(delta,.0001),$"Substance")
-	$"Program".Grid_Update(delta,$"Substance")
-	$"Program".Collision_with_Wall($"Substance")
-	$"Program".Collision_with_Other_Particles($"Substance")
-	$"Program".Particle_Reset($"Substance")
-	$"Program".Grid_to_Particle(delta,$"Substance")
-	$"Substance".establish_boundary()
-	$"Substance".queue_redraw()
+	#print()
 	
+	if rate >= (1.0/60.0):
+		$"Program".Grid_Reset($"Substance")
+		$"Program".Particles_to_Grid(snapped(rate,.001),$"Substance")
+		$"Program".Grid_Update(rate,$"Substance")
+		$"Program".Collision_with_Wall($"Substance")
+		$"Program".Collision_with_Other_Particles($"Substance")
+		$"Program".Particle_Reset($"Substance")
+		$"Program".Grid_to_Particle(snapped(rate,.001),$"Substance")
+		$"Substance".establish_boundary()
+		$"Substance".queue_redraw()
+		rate = 0.0
+	else:
+		rate = rate + delta
 	
 	
 func physics_process(_delta):

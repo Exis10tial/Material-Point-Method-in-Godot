@@ -99,7 +99,8 @@ func _on_substance_draw():
 	for particle in particle_lineation.keys():
 		#draw_rect(particle_lineation[particle],Color(1.0,1.0,1.0),true)
 		draw_mesh(particle_mechanics[particle]['body'],particle_mechanics[particle]['effigy'],particle_lineation[particle],Color(1,1,1,1))
-		pass
+		
+	
 
 func establish_boundary():
 	var copy_lineation 

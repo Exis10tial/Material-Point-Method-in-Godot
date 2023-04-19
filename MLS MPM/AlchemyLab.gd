@@ -283,9 +283,9 @@ func _on_alchemy_lab_ready():
 		###...
 		substance = load("res://Substance.tscn").instantiate()
 		#"""
-		substance.coefficient_of_restitution = 1.0 #rubber
-		substance.coefficient_of_static_friction = 0.9 #rubber
-		substance.coefficient_of_kinetic_friction = 0.250 #rubber
+		substance.coefficient_of_restitution = 1.0#9.0 #rubber
+		substance.coefficient_of_static_friction = 0.80 #rubber
+		substance.coefficient_of_kinetic_friction = 0.60 #rubber
 		substance.physical_state = 'solid'
 		substance.constitutive_model = 'hyperelastic'
 		substance.poisson_ratio = 0.5 #rubber
@@ -339,9 +339,12 @@ func _on_alchemy_lab_ready():
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
 			
-			substance.mass = (domain_size.x * domain_size.y)
-			
-			substance.mass_in_pieces = substance.mass / substance.substance_limit 
+			substance.mass = (domain_size.x * domain_size.y)# * 2.0
+			#print('one particle')
+			#print(substance.mass,' mass. check')
+			#print(substance.substance_limit,' substance_limit. check')
+			substance.mass_in_pieces = substance.mass / substance.substance_limit
+			#print(substance.mass_in_pieces,' substance. check')
 			
 		elif gathered_into_chunks == true and one_substance == false:
 			### the substance is cut into chunks size if either
@@ -352,27 +355,36 @@ func _on_alchemy_lab_ready():
 			substance.mass_in_pieces = substance.mass / substance.substance_limit
 			
 		elif gathered_into_chunks == false and one_substance == true:
-			### substance is 1 particles no matter the domain size...
+			### substance is 1 particle no matter the domain size...
 			
 			#
 			substance.mass = 1.0#(appearance.x * appearance.y)#set to anything...
 			substance.mass_in_pieces = substance.mass / substance.substance_limit
+			#print('one substance')
+			###print(substance.mass,' mass. check')
+			#print(substance.substance_limit,' substance_limit. check')
+			#print(substance.mass_in_pieces,' substance. check')
 		else:
 			### both being true is not a thing so just make it same as both being false:
 			### the substance is cut into particles with size of 1
+			#print('one particle fault line')
 			substance.mass = (domain_size.x * domain_size.y)
 			substance.mass_in_pieces = substance.mass / substance.substance_limit 
 			
 			
 		#substance.mass = substance.substance_limit 
 		#volume : l * w * h , : pow(x,3)
+		### initial volume
 		substance.volume = pow(cell_size,3.0)
 		
 		
 		#substance.initial_velocity = Vector2(0,0)
-		substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80)) * 100
+		substance.initial_velocity = Vector2(0,-9.8) * 10
+		#substance.initial_velocity = Vector2(9.8,0.0) * 10
+		#substance.initial_velocity = Vector2(0,9.8) * 10
+		#substance.initial_velocity = Vector2(-9.80,0.0) * 10
+		#substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80)) * 10
 		#substance.initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
-		
 		
 		substance.appearance = appearance
 		
@@ -417,10 +429,7 @@ func _on_alchemy_lab_ready():
 				location_y =  location_y + 1
 				location_x = 0
 			
-			
-			
 			particle = Transform2D(0.0,Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)))
-			
 			
 			#var particle_body = PlaneMesh.new()
 			#particle_body.size = substance.appearance
@@ -437,9 +446,6 @@ func _on_alchemy_lab_ready():
 			particle_effigy = ImageTexture.create_from_image(particle_form)
 			#particle_effigy.set_image(particle_form)
 			#print(particle_effigy,' image check')
-			
-			
-			
 			
 			substance_particle_name = '{a}{b}{c}{d}{1}{2}{3}{4}'.format({
 				'a':letters_list[int(randi_range(0,len(letters_list)-1))],

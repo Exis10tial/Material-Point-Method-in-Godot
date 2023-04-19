@@ -55,28 +55,37 @@ func Neo_Hookean(speck,nub):
 	matrix_math = get_tree().get_root().get_node("Simulation/Matrix Math")
 	#var pk_stress
 	
-	#var F_transposed = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.particle_mechanics[speck]['F'])
-	
 	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
 	lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
 	#'''
 	#  Piola-Kirchoff stress = u*F + (n * In(J) - u )*F^-T
 	# note ln() = log()
 	# or
-	# P = u*(F - F^-T) + n*log (J)*F^-T ; mpm course pg. 19,equation 48
+	# P = u*(F - F^-T) + lambda*log (J)*F^-T ; mpm course pg. 19,equation 48
 	#f_coefficient =  matrix_math.Subtract_Matrix(nub.particle_mechanics[speck]['F'],matrix_math.Inverse_Matrix(matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])))
 	#print(mu,' mu check')
 	#print(lambda,' lambda check')
 	var transposed_f = matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])
 	var inversed_trasposed_f = matrix_math.Inverse_Matrix(transposed_f)
+	#print(transposed_f,' transposed_f check')
+	#print(inversed_trasposed_f,' inversed_trasposed_f check')
 	var f_coefficient = matrix_math.Subtract_Matrix(nub.particle_mechanics[speck]['F'],inversed_trasposed_f)
-	
+	#print(f_coefficient,' f_coefficient check')
 	pk_mu_coefficient =  matrix_math.Multiply_Matrix_by_Scalar(f_coefficient,mu,true)
 	
+	#print(nub.particle_mechanics[speck]['J'],' J check')
+	
 	lambda_log_cofficient = lambda * log(nub.particle_mechanics[speck]['J']) # snapped(n * snapped(log(nub.particle_mechanics[speck]['J']),.001),.001)
+	
+	#print(inversed_trasposed_f,' inversed_trasposed_f check')
+	#print(lambda_log_cofficient,' lambda_log_cofficient check')
 
 	#pk_lambda_coefficient = matrix_math.Multiply_Matrix_by_Scalar(matrix_math.Inverse_Matrix(matrix_math.Transposed_Matrix(nub.particle_mechanics[speck]['F'])),lambda_log_cofficient,true)
 	pk_lambda_coefficient =  matrix_math.Multiply_Matrix_by_Scalar(inversed_trasposed_f,lambda_log_cofficient,true)
+
+
+	#print(pk_mu_coefficient,' pk_mu_coefficient check')
+	#print(pk_lambda_coefficient,' pk_lambda_coefficient check')
 
 	P = matrix_math.Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
 	#print(P,' P check')
@@ -92,7 +101,7 @@ func Neo_Hookean(speck,nub):
 	# inf , nan check...
 	for location in range(0,(len(resulted_stress))):
 		if is_inf(resulted_stress[location]) == true or is_nan(resulted_stress[location]) == true:
-			resulted_stress[location] = 0.0
+			resulted_stress[location] = 1.0
 			#if location == 1 or location == 3:
 				#resulted_stress[location] = 0.0
 		
