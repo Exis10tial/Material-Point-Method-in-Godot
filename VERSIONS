@@ -78,3 +78,9 @@ V.7.1.0:
 ---- math corrections ( parts of weight interpolation was incorrect.)
      reassert the MLS verison of mpm. ( the original mpm is still there just commented out ; can go back and forth between original and MLS just comment or uncomment the portions).
      v4.0.stable.official [92bee43ad]
+     
+ V.7.2.0:
+|
+---- math corrections (weight interpolation),(math between particle/wall collisions), (constitutive models math), (the math of MPM and MLS MPM)
+     
+     v4.0.1.stable.official [cacf49999]
