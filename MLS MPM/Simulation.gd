@@ -55,138 +55,13 @@ func Setup_Outline():
 	### the outline of the simulation is set..
 	### based of the window size...
 	#print($"Simulation".get_child_count(),' nodes check ')
-	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/width')/2.0),0.0))
-	get_tree().get_root().get_node(".").set_position(Vector2(ProjectSettings.get_setting('display/window/size/width'),(ProjectSettings.get_setting('display/window/size/height')/2.0)))
-	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/width')/2.0),ProjectSettings.get_setting('display/window/size/height')))
-	get_tree().get_root().get_node(".").set_position(Vector2(0.0,(ProjectSettings.get_setting('display/window/size/height')/2.0)))
+	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),0.0))
+	get_tree().get_root().get_node(".").set_position(Vector2(ProjectSettings.get_setting('display/window/size/viewport_width'),(ProjectSettings.get_setting('display/window/size/viewport_height')/2.0)))
+	get_tree().get_root().get_node(".").set_position(Vector2((ProjectSettings.get_setting('display/window/size/viewport_width')/2.0),ProjectSettings.get_setting('display/window/size/viewport_height')))
+	get_tree().get_root().get_node(".").set_position(Vector2(0.0,(ProjectSettings.get_setting('display/window/size/viewport_height')/2.0)))
 
 
-func Determine_Eulerian_Grid(x:int,y:int):
-	### the size of the substance is parsed into evenly cut squares/cubes = (Length == Width)
-	var size 
-	var by_subdivision = false
-	var find_x_factors = []
-	var find_y_factors = []
-	
-	if x == y and x != 1 and y != 1:# and into_pieces == true :
-		### this is if the length/width of the particle are the same...
-		### the substance can be in reduced form...
-		var n = 0.0
-		
-		### Check b y division of 2 first...
-		while pow(2,n) <= x:
-			#by_subdivision = true
-			if pow(2,n) == x:
-				by_subdivision = true
-				#print('by_subdivision check')
-				break
-			#subdivision_of_2_set_of_numbers.append(pow(2,n))
-			#print('find power of 2')
-			n +=1
-			
-		#if subdivision_of_2_set_of_numbers.has(substance_size.y) == true and into_pieces == true:
-		#if fmod(substance_size.x,2.0) == 0.0:
-		if by_subdivision == true:
-			###.division by 2....
-			#print(substance_size.x, ' substance_size.x')
-			size = int(x / 2.0)
-			#by_subdivision = true
-		else:
-			### the number is not a subdivision of 2...
-			
-			#Square Root Check
-			if fmod(x,sqrt(x)) == 0:# and into_pieces == true:
-				size = sqrt(x)
-			else:
-				### Not a power of 2 or a has a square root...
-				
-				# find the greatest common factor between the domain sizes::
-				for number in range(1,x+1):
-					if int(x) % number == 0:
-						find_x_factors.append(number)
-				for number in range(1,y+1):
-					if int(y) % number == 0:
-						find_y_factors.append(number)
-				
-				### using the greatest common factor to acquire a cell size...
-				if x == y:
-					for number in range(len(find_x_factors)-1,-1,-1):
-						if find_x_factors[number] in find_y_factors:
-							size = find_x_factors[number] 
-							break
-				elif x < y:
-					for number in range(len(find_x_factors)-1,-1,-1):
-						if find_x_factors[number] in find_y_factors:
-							size =  find_x_factors[number] 
-							break
-				elif x > y:
-					for number in range(len(find_y_factors)-1,-1,-1):
-						if find_y_factors[number] in find_x_factors:
-							size = find_y_factors[number]
-							break
-											
-				#by_square_root= true
-	else:
-		# find the greatest common factor between the domain sizes::
-		for number in range(1,x+1):
-			if int(x) % number == 0:
-				find_x_factors.append(number)
-		for number in range(1,y+1):
-			if int(y) % number == 0:
-				find_y_factors.append(number)
-			
-		### using the greatest common factor to acquire a cell size...
-		if x == y:
-			for number in range(len(find_x_factors)-1,-1,-1):
-				if find_x_factors[number] in find_y_factors:
-					size = find_x_factors[number] 
-					break
-		elif x < y:
-			for number in range(len(find_x_factors)-1,-1,-1):
-				if find_x_factors[number] in find_y_factors:
-					size =  find_x_factors[number] 
-					break
-		elif x > y:
-			for number in range(len(find_y_factors)-1,-1,-1):
-				if find_y_factors[number] in find_x_factors:
-					size = find_y_factors[number]
-					break
-			#"""
-		#by_greastest_common_factor = true
-		
-	return int(size)
-	
 
-
-func Establish_Grid(grid_cell_size:int):
-	###...
-	
-	#print(ProjectSettings.get_setting('display/window/size/width')," ProjectSettings.get_setting('display/window/size/width')")
-	#print(ProjectSettings.get_setting('display/window/size/height')," ProjectSettings.get_setting('display/window/size/height')")
-	
-	#for width in range(0,(ProjectSettings.get_setting('display/window/size/width'))):
-	#	for height in range(0,(ProjectSettings.get_setting('display/window/size/height'))):
-	#		Grid[Vector2(width,-height)] = {'mass': $"Substance".mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
-	#print(ProjectSettings.get_setting('display/window/size/height') / grid_cell_size,' height')
-	#print(ProjectSettings.get_setting('display/window/size/width') / grid_cell_size,' width')
-	var width = 0
-	var height= 0
-	while true:
-		if height == (ProjectSettings.get_setting('display/window/size/height') / grid_cell_size):
-			break
-		if width == (ProjectSettings.get_setting('display/window/size/width') / grid_cell_size):
-			height = height + 1
-			width = 0
-		Grid[Vector2(width,-height)] = {'mass': $"Substance".mass_in_pieces,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
-		#
-		width = width + 1
-	
-	$"Program".grid_nodes = Grid.duplicate(true)
-	#print(len(Grid),' len(Grid)')
-	#print(Grid,' Grid')
-	#print(Grid[Vector2(0,0)],' Grid[Vector2(0,0)]')
-	
-	
 
 #func _notification(event):
 	#print(event)
@@ -227,6 +102,7 @@ func _on_Simulation_ready():
 		### file does not exists...
 		print('models are not there...')
 	
+	
 	add_child(program)
 	add_child(math_book)
 	add_child(collisions)
@@ -236,27 +112,23 @@ func _on_Simulation_ready():
 	
 	Setup_Outline()
 	
-	#grid_cell_size = Determine_Eulerian_Grid(ProjectSettings.get_setting('display/window/size/width'),ProjectSettings.get_setting('display/window/size/height'))
-	#print(grid_cell_size,' size of grid cells')
-	#Establish_Grid(grid_cell_size)
 	
-	#Establish_Grid()
-	$"Substance".establish_boundary()
-	set_process(true)
-	
-	#set_physics_process(false)
+	#$"Substance".establish_boundary()
+#	print("ready")
+	set_process(false)
+	set_physics_process(true)
 	
 
 func _process(delta):
 	
-	#print()
+	#print('cycle')
 	
-	if rate >= (1.0/60.0):
+	if rate >= 1/60.0:
 		$"Program".Grid_Reset($"Substance")
 		$"Program".Particles_to_Grid(snapped(rate,.001),$"Substance")
 		$"Program".Grid_Update(rate,$"Substance")
-		$"Program".Collision_with_Wall($"Substance")
-		$"Program".Collision_with_Other_Particles($"Substance")
+		#$"Program".Collision_with_Wall($"Substance")
+		#$"Program".Collision_with_Other_Particles($"Substance")
 		$"Program".Particle_Reset($"Substance")
 		$"Program".Grid_to_Particle(snapped(rate,.001),$"Substance")
 		$"Substance".establish_boundary()
@@ -265,9 +137,17 @@ func _process(delta):
 	else:
 		rate = rate + delta
 	
-	
-func physics_process(_delta):
-	
+func _physics_process(delta):
+	#print()
+	#print('turn')
+	$"Program".Grid_Reset($"Substance")
+	$"Program".Particles_to_Grid(snapped(delta,.001),$"Substance")
+	$"Program".Grid_Update(delta,$"Substance")
+	#$"Program".Collision_with_Wall($"Substance")
+	#$"Program".Collision_with_Other_Particles($"Substance")
+	$"Program".Particle_Reset($"Substance")
+	$"Program".Grid_to_Particle(snapped(delta,.001),$"Substance")
+	#$"Substance".establish_boundary()
 	$"Substance".queue_redraw()
 #	
 #func build_time(delta):

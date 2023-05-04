@@ -1,7 +1,7 @@
 extends Node2D
 
 ### the particles of a substance...
-var particle_workings : Dictionary = {'position':null,'mass':null,'velocity':null,'volume':null,'stress':null,'B':null,'C':null,'I':null,'F':null,'J':null,'eulerian':{},'body':null,'effigy':null,'gradient forces':{},'contact_with_wall':false,'within_range':[],'relation_to_domain':{},'domain_relation_to_substance':{},'U':null,'V':null,'Sigma':null,'contact wall':false,'contact particle':false}
+var particle_workings : Dictionary = {'position':null,'mass':null,'velocity':null,'volume':null,'stress':null,'B':null,'C':null,'I':null,'F':null,'J':null,'eulerian':{},'collision':Vector2(0,0),'body':null,'effigy':null,'gradient forces':{},'contact_with_wall':false,'within_range':[],'U':null,'V':null,'Sigma':null,'contact wall':false,'contact particle':false}
 var particle_lineation : Dictionary = {}
 var particle_mechanics : Dictionary = {}
 var grid_ : Dictionary = {}

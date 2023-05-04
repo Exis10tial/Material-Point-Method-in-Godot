@@ -457,7 +457,7 @@ func Multiply_Matrix(m:Array,n:Array):
 	elif len(m) == 4 and len(n) == 2:
 		## 2x2 * 2x1
 		### results in a 2x1 matrix...
-		new_matrix = [0,0,0,0]
+		new_matrix = [0,0]
 		new_matrix[0] = snapped( ( (m[0] * n[0]) + (m[1]*n[1]) ),.01)
 		new_matrix[1] = snapped( ( (m[2] * n[0]) + (m[3]*n[1]) ),.01)
 	

@@ -282,6 +282,15 @@ func _on_alchemy_lab_ready():
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
+		"""
+		substance.coefficient_of_restitution = 0.5
+		substance.coefficient_of_static_friction = 0.5
+		substance.coefficient_of_kinetic_friction = 0.5
+		substance.physical_state = 'none'
+		substance.constitutive_model = 'none'
+		substance.poisson_ratio = 0.0
+		substance.youngs_modulus = 0.0
+		#"""
 		#"""
 		substance.coefficient_of_restitution = 1.0#9.0 #rubber
 		substance.coefficient_of_static_friction = 0.80 #rubber
@@ -343,7 +352,7 @@ func _on_alchemy_lab_ready():
 			#print('one particle')
 			#print(substance.mass,' mass. check')
 			#print(substance.substance_limit,' substance_limit. check')
-			substance.mass_in_pieces = substance.mass / substance.substance_limit
+			#substance.mass_in_pieces = substance.mass / substance.substance_limit
 			#print(substance.mass_in_pieces,' substance. check')
 			
 		elif gathered_into_chunks == true and one_substance == false:
@@ -352,14 +361,14 @@ func _on_alchemy_lab_ready():
 			# square root of domain.x,domain.y:
 			# or greatest common factor of domain.x,domain.y ....
 			substance.mass = (appearance.x * appearance.y)
-			substance.mass_in_pieces = substance.mass / substance.substance_limit
+			#substance.mass_in_pieces = substance.mass / substance.substance_limit
 			
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particle no matter the domain size...
 			
 			#
 			substance.mass = 1.0#(appearance.x * appearance.y)#set to anything...
-			substance.mass_in_pieces = substance.mass / substance.substance_limit
+			#substance.mass_in_pieces = substance.mass / substance.substance_limit
 			#print('one substance')
 			###print(substance.mass,' mass. check')
 			#print(substance.substance_limit,' substance_limit. check')
@@ -369,32 +378,31 @@ func _on_alchemy_lab_ready():
 			### the substance is cut into particles with size of 1
 			#print('one particle fault line')
 			substance.mass = (domain_size.x * domain_size.y)
-			substance.mass_in_pieces = substance.mass / substance.substance_limit 
+			#substance.mass_in_pieces = substance.mass / substance.substance_limit 
 			
 			
 		#substance.mass = substance.substance_limit 
 		#volume : l * w * h , : pow(x,3)
 		### initial volume
-		substance.volume = pow(cell_size,3.0)
+		#substance.volume = pow(cell_size,3.0)
+		substance.volume = 1.0
 		
-		
-		#substance.initial_velocity = Vector2(0,0)
-		substance.initial_velocity = Vector2(0,-9.8) * 10
-		#substance.initial_velocity = Vector2(9.8,0.0) * 10
-		#substance.initial_velocity = Vector2(0,9.8) * 10
-		#substance.initial_velocity = Vector2(-9.80,0.0) * 10
-		#substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80)) * 10
+		substance.initial_velocity = Vector2(0,0)
+		#substance.initial_velocity = Vector2(0,-9.8)# * 10
+		#substance.initial_velocity = Vector2(9.8,0.0)# * 10
+		#substance.initial_velocity = Vector2(0,9.8)# * 10
+		#substance.initial_velocity = Vector2(-9.80,0.0)# * 10
+		#substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
 		#substance.initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
 		
 		substance.appearance = appearance
 		
 		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
-		substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
-		
+		#substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
 		
 		### place the starting_point of the substance placed any where...
-		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/width')-appearance.x/2.0))
-		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/height')-appearance.y/2.0))
+		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/viewport_width')-appearance.x/2.0))
+		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/viewport_height')-appearance.y/2.0))
 		
 		#### staring location of particles...
 		if one_substance == true or number_of_particles == 1:
@@ -413,8 +421,8 @@ func _on_alchemy_lab_ready():
 			#)
 			### places the substance in the middle of the screen...
 			substance_starting_point = Vector2(
-			( (ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
-			( (ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
+			( (ProjectSettings.get_setting('display/window/size/viewport_width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
+			( (ProjectSettings.get_setting('display/window/size/viewport_height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
 			)
 			### places randomly anywhere on the window...
 			
@@ -479,6 +487,7 @@ func _on_alchemy_lab_ready():
 			substance.particle_workings['J'] = substance.J
 			#substance.particle_workings['grid scope'] = [].duplicate(true)
 			#substance.particle_workings['ambit'] = substance.scope.duplicate(true)
+			substance.particle_workings['collision'] = Vector2(0.0,0.0)
 			substance.particle_workings['body'] = particle_body
 			substance.particle_workings['effigy'] = particle_effigy
 			substance.particle_workings['eulerian'] = [].duplicate(true)
