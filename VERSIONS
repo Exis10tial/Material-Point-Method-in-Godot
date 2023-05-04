@@ -83,3 +83,20 @@ V.7.1.0:
 |
 ---- math corrections (weight interpolation),(math between particle/wall collisions), (constitutive models math), (the math of MPM and MLS MPM)
      v4.0.1.stable.official [cacf49999]
+
+V.8.0.0:
+|
+---- proper "background eulerian" grid is implemented. I didn't quite understand the grid, up until now the weight-interpolation 
+     was done/handled between each particle relation to every other particle. Now weight-interpolation is done between the grid and particle.
+     math corrections ( weight interpolation),(math of MLS program)
+     v4.0.1.stable.official [cacf49999]
+
+
+
+
+
+
+
+
+
+
