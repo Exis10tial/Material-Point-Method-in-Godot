@@ -131,7 +131,7 @@ func _process(delta):
 		#$"Program".Collision_with_Other_Particles($"Substance")
 		$"Program".Particle_Reset($"Substance")
 		$"Program".Grid_to_Particle(snapped(rate,.001),$"Substance")
-		$"Substance".establish_boundary()
+		#$"Substance".establish_boundary()
 		$"Substance".queue_redraw()
 		rate = 0.0
 	else:
@@ -143,12 +143,13 @@ func _physics_process(delta):
 	$"Program".Grid_Reset($"Substance")
 	$"Program".Particles_to_Grid(snapped(delta,.001),$"Substance")
 	$"Program".Grid_Update(delta,$"Substance")
-	#$"Program".Collision_with_Wall($"Substance")
+	$"Program".Collision_with_Wall($"Substance")
 	#$"Program".Collision_with_Other_Particles($"Substance")
 	$"Program".Particle_Reset($"Substance")
 	$"Program".Grid_to_Particle(snapped(delta,.001),$"Substance")
 	#$"Substance".establish_boundary()
 	$"Substance".queue_redraw()
+	
 #	
 #func build_time(delta):
 #	check_time=+ delta

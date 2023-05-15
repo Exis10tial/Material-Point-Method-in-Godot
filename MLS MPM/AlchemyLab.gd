@@ -4,6 +4,7 @@ extends Node
 #var pile_of_substances : File
 
 var substance : Object
+var initial_velocity : Vector2
 var particle : Transform2D
 var effigy_material
 var particle_constitutive_parameters : Object
@@ -282,8 +283,8 @@ func _on_alchemy_lab_ready():
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
-		"""
-		substance.coefficient_of_restitution = 0.5
+		#"""
+		substance.coefficient_of_restitution = 1.0
 		substance.coefficient_of_static_friction = 0.5
 		substance.coefficient_of_kinetic_friction = 0.5
 		substance.physical_state = 'none'
@@ -291,7 +292,7 @@ func _on_alchemy_lab_ready():
 		substance.poisson_ratio = 0.0
 		substance.youngs_modulus = 0.0
 		#"""
-		#"""
+		"""
 		substance.coefficient_of_restitution = 1.0#9.0 #rubber
 		substance.coefficient_of_static_friction = 0.80 #rubber
 		substance.coefficient_of_kinetic_friction = 0.60 #rubber
@@ -385,15 +386,16 @@ func _on_alchemy_lab_ready():
 		#volume : l * w * h , : pow(x,3)
 		### initial volume
 		#substance.volume = pow(cell_size,3.0)
-		substance.volume = 1.0
+		#substance.volume = 1.0
+		substance.volume = substance.mass
 		
-		substance.initial_velocity = Vector2(0,0)
-		#substance.initial_velocity = Vector2(0,-9.8)# * 10
-		#substance.initial_velocity = Vector2(9.8,0.0)# * 10
-		#substance.initial_velocity = Vector2(0,9.8)# * 10
-		#substance.initial_velocity = Vector2(-9.80,0.0)# * 10
-		#substance.initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
-		#substance.initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
+		#nitial_velocity = Vector2(0,0)
+		#initial_velocity = Vector2(0,-9.8)# * 10
+		#initial_velocity = Vector2(9.8,0.0)# * 10
+		#initial_velocity = Vector2(0,9.8)# * 10
+		#initial_velocity = Vector2(-9.80,0.0)# * 10
+		initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
+		#initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
 		
 		substance.appearance = appearance
 		
@@ -474,7 +476,8 @@ func _on_alchemy_lab_ready():
 			#substance.surrounding_area = particle
 			### Parameters of the Particles...
 			substance.particle_workings['mass'] = substance.mass / substance.substance_limit
-			substance.particle_workings['velocity'] = substance.initial_velocity
+			substance.particle_workings['velocity'] = Vector2(0,0)
+			substance.particle_workings['initial velocity'] = initial_velocity
 			substance.particle_workings['volume'] = substance.volume / substance.substance_limit
 			substance.particle_workings['stress'] = [1.0,0.0,0.0,1.0].duplicate(true)
 			#substance.particle_workings['stress'] = [1.0,1.0,1.0,1.0]
