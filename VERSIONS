@@ -91,8 +91,11 @@ V.8.0.0:
      math corrections ( weight interpolation),(math of MLS program)
      v4.0.1.stable.official [cacf49999]
 
-
-
+V.8.3.0:
+|
+---- collision between the particles and walls(window outline) was reinserted.
+     particles now also can rotate.
+     v4.0.1.stable.official [cacf49999]
 
 
 
