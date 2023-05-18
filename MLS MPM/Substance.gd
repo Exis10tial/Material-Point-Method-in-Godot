@@ -96,8 +96,12 @@ func _on_substance_ready():
 func _on_substance_draw():
 	###
 	
+	
 	for particle in particle_lineation.keys():
 		#draw_rect(particle_lineation[particle],Color(1.0,1.0,1.0),true)
+		#print(particle_mechanics[particle]['body'],' draw mesh')
+		#print(particle_mechanics[particle]['effigy'],' draw image')
+		#print(particle_lineation[particle],' draw transform')
 		draw_mesh(particle_mechanics[particle]['body'],particle_mechanics[particle]['effigy'],particle_lineation[particle],Color(1,1,1,1))
 		
 	
@@ -131,38 +135,6 @@ func establish_boundary():
 		# cycle thru every other particle...
 		#particle_lineation.keys()[len(particle_lineation)-len(copy_lineation)]
 		
-		if rad_to_deg(particle_lineation[copy_lineation[identify_number]].get_rotation()) > 0:
-			### if the particle has the slightest rotation...
-			
-			var topleft_rotated = Vector2(particle_lineation[copy_lineation[identify_number]].origin.x - ( (appearance.x/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) - (appearance.y/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) ),
-			particle_lineation[copy_lineation[identify_number]].origin.y - ( (appearance.x/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) + (appearance.y/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) ) )
-			
-			var topright_rotated = Vector2(material.particle_lineation[copy_lineation[identify_number]].origin.x + ( (appearance.x/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) - (appearance.y/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) ),
-			particle_lineation[copy_lineation[identify_number]].origin.y + ( (appearance.x/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) + (appearance.y/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) ) )
-			
-			var bottomright_rotated = Vector2(particle_lineation[copy_lineation[identify_number]].origin.x + ( (appearance.x/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) + (appearance.y/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) ),
-			particle_lineation[copy_lineation[identify_number]].origin.y + ( (appearance.x/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) - (appearance.y/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) ) )
-			
-			var bottomleft_rotated = Vector2(particle_lineation[copy_lineation[identify_number]].origin.x - ( (appearance.x/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) + (appearance.y/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) ),
-			particle_lineation[copy_lineation[identify_number]].origin.y - ( (appearance.x/2.0) * rad_to_deg(sin(particle_lineation[copy_lineation[identify_number]].get_rotation())) - (appearance.y/2.0) * rad_to_deg(cos(particle_lineation[copy_lineation[identify_number]].get_rotation())) ) )
-			
-			
-			
-			
-			
-			
-		elif particle_lineation[copy_lineation[identify_number]].get_rotation() == 0:
-			### if the particle has no rotation...
-			
-			var topleft = Vector2(snapped(particle_lineation[copy_lineation[identify_number]].origin.x,.01),snapped(particle_lineation[copy_lineation[identify_number]].origin.y,.01)) + Vector2(-(appearance.x/2.0),-(appearance.y/2.0))
-			var topright = Vector2(snapped(particle_lineation[copy_lineation[identify_number]].origin.x,.01),snapped(particle_lineation[copy_lineation[identify_number]].origin.y,.01)) + Vector2((appearance.x/2.0),-(appearance.y/2.0))
-			var bottomright = Vector2(snapped(particle_lineation[copy_lineation[identify_number]].origin.x,.01),snapped(particle_lineation[copy_lineation[identify_number]].origin.y,.01)) + Vector2((appearance.x/2.0),(appearance.y/2.0))
-			var bottomleft = Vector2(snapped(particle_lineation[copy_lineation[identify_number]].origin.x,.01),snapped(particle_lineation[copy_lineation[identify_number]].origin.y,.01)) + Vector2(-(appearance.x/2.0),(appearance.y/2.0))
-			
-
-
-
-
 
 
 		#identify_number = identify_number + 1

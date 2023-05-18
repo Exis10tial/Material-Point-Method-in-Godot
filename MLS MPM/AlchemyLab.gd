@@ -64,7 +64,8 @@ func Initial_Collection_Of_Substance():
 	
 	#domain_size = Vector2(1000.0,1000.0)
 	#domain_size = Vector2(512.0,512.0)
-	domain_size = Vector2(100.0,100.0)
+	domain_size = Vector2(128.0,128.0)
+	#domain_size = Vector2(100.0,100.0)
 	#domain_size = Vector2(81.0,81.0)
 	#domain_size = Vector2(50.0,50.0)
 	#domain_size = Vector2(39.0,39.0)
@@ -212,8 +213,8 @@ func _on_alchemy_lab_ready():
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
 		
-		one_substance = true
-		#gathered_into_chunks = true
+		#one_substance = true
+		gathered_into_chunks = true
 		
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
@@ -227,7 +228,7 @@ func _on_alchemy_lab_ready():
 			# square root of domain.x,domain.y:
 			# or greatest common factor of domain.x,domain.y ....
 			cell_size = Cross_Section_Of_Substance(gathered_into_chunks,domain_size)
-			
+			#print('gathered_into_chunks',' check')
 			#print(cell_size, ' cell_size check')
 			appearance = Vector2(cell_size,cell_size)
 			
@@ -349,7 +350,9 @@ func _on_alchemy_lab_ready():
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
 			
-			substance.mass = (domain_size.x * domain_size.y)# * 2.0
+			#substance.mass = (domain_size.x * domain_size.y)# * 2.0
+			substance.mass = 1.0
+			
 			#print('one particle')
 			#print(substance.mass,' mass. check')
 			#print(substance.substance_limit,' substance_limit. check')
@@ -361,7 +364,8 @@ func _on_alchemy_lab_ready():
 			# power of domain.x,domain.y:
 			# square root of domain.x,domain.y:
 			# or greatest common factor of domain.x,domain.y ....
-			substance.mass = (appearance.x * appearance.y)
+			#substance.mass = (appearance.x * appearance.y)
+			substance.mass = 1.0
 			#substance.mass_in_pieces = substance.mass / substance.substance_limit
 			
 		elif gathered_into_chunks == false and one_substance == true:
@@ -378,7 +382,8 @@ func _on_alchemy_lab_ready():
 			### both being true is not a thing so just make it same as both being false:
 			### the substance is cut into particles with size of 1
 			#print('one particle fault line')
-			substance.mass = (domain_size.x * domain_size.y)
+			#substance.mass = (domain_size.x * domain_size.y)
+			substance.mass = 1.0
 			#substance.mass_in_pieces = substance.mass / substance.substance_limit 
 			
 			
@@ -389,12 +394,12 @@ func _on_alchemy_lab_ready():
 		#substance.volume = 1.0
 		substance.volume = substance.mass
 		
-		#nitial_velocity = Vector2(0,0)
+		initial_velocity = Vector2(0,0)
 		#initial_velocity = Vector2(0,-9.8)# * 10
 		#initial_velocity = Vector2(9.8,0.0)# * 10
 		#initial_velocity = Vector2(0,9.8)# * 10
 		#initial_velocity = Vector2(-9.80,0.0)# * 10
-		initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
+		#initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
 		#initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
 		
 		substance.appearance = appearance
@@ -440,22 +445,22 @@ func _on_alchemy_lab_ready():
 				location_x = 0
 			
 			particle = Transform2D(0.0,Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)))
-			
+			#print(particle.origin,' position')
 			#var particle_body = PlaneMesh.new()
 			#particle_body.size = substance.appearance
 			#particle_body.orientation = PlaneMesh.FACE_Z
 			var particle_body = QuadMesh.new()
 			particle_body.size = substance.appearance
-			
+			#print(particle_body,' particle_body check')
 			
 			var particle_form = Image.new()
-			particle_form.create(appearance.x,appearance.y,false,Image.FORMAT_RGBAF)
+			particle_form.create(substance.appearance.x,substance.appearance.y,false,Image.FORMAT_RGB8)
 			particle_form.fill(Color(1.0,1.0,1.0,1))
-			#print(particle_form,' image check')
+			#print(particle_form,' particle_form check')
 			var particle_effigy = ImageTexture.new()
-			particle_effigy = ImageTexture.create_from_image(particle_form)
-			#particle_effigy.set_image(particle_form)
-			#print(particle_effigy,' image check')
+			#particle_effigy = ImageTexture.create_from_image(particle_form)
+			particle_effigy.update(particle_form)
+			#print(particle_effigy.get_size(),' particle_effigy check')
 			
 			substance_particle_name = '{a}{b}{c}{d}{1}{2}{3}{4}'.format({
 				'a':letters_list[int(randi_range(0,len(letters_list)-1))],
@@ -467,6 +472,8 @@ func _on_alchemy_lab_ready():
 				'3':digits_list[int(randi_range(0,len(digits_list)-1))],
 				'4':digits_list[int(randi_range(0,len(digits_list)-1))]
 				})
+			#print(substance_particle_name)
+			
 			#particle.set_name(substance_particle_name)
 			#particle.position(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)))
 			#substance.surrounding_area = Rect2(Vector2((substance_starting_point.x-(substance.appearance.x/2.0)) + (substance.appearance.x * location_x),(substance_starting_point.y-(substance.appearance.y/2.0)) - (substance.appearance.y * location_y)),substance.appearance)

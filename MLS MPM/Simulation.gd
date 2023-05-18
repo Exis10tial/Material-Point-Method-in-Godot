@@ -122,20 +122,20 @@ func _on_Simulation_ready():
 func _process(delta):
 	
 	#print('cycle')
-	
-	if rate >= 1/60.0:
-		$"Program".Grid_Reset($"Substance")
-		$"Program".Particles_to_Grid(snapped(rate,.001),$"Substance")
-		$"Program".Grid_Update(rate,$"Substance")
-		#$"Program".Collision_with_Wall($"Substance")
-		#$"Program".Collision_with_Other_Particles($"Substance")
-		$"Program".Particle_Reset($"Substance")
-		$"Program".Grid_to_Particle(snapped(rate,.001),$"Substance")
+	#$"Substance".queue_redraw()
+	#if rate >= 1/60.0:
+	$"Program".Grid_Reset($"Substance")
+	$"Program".Particles_to_Grid(snapped(rate,.001),$"Substance")
+	$"Program".Grid_Update(rate,$"Substance")
+	$"Program".Collision_with_Wall($"Substance")
+	#$"Program".Collision_with_Other_Particles($"Substance")
+	$"Program".Particle_Reset($"Substance")
+	$"Program".Grid_to_Particle(snapped(rate,.001),$"Substance")
 		#$"Substance".establish_boundary()
-		$"Substance".queue_redraw()
-		rate = 0.0
-	else:
-		rate = rate + delta
+	$"Substance".queue_redraw()
+	#	rate = 0.0
+	#else:
+	#	rate = rate + delta
 	
 func _physics_process(delta):
 	#print()
@@ -147,7 +147,7 @@ func _physics_process(delta):
 	#$"Program".Collision_with_Other_Particles($"Substance")
 	$"Program".Particle_Reset($"Substance")
 	$"Program".Grid_to_Particle(snapped(delta,.001),$"Substance")
-	#$"Substance".establish_boundary()
+	
 	$"Substance".queue_redraw()
 	
 #	
