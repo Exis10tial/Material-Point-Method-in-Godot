@@ -97,7 +97,10 @@ V.8.3.0:
      particles now also can rotate.
      v4.0.1.stable.official [cacf49999]
 
-
+V.8.3.5:
+|
+---- corrections to how the particles collided with the wall(window outline)
+     v4.0.1.stable.official [cacf49999]
 
 
 
