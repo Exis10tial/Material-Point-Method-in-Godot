@@ -102,6 +102,12 @@ V.8.3.5:
 ---- corrections to how the particles collided with the wall(window outline)
      v4.0.1.stable.official [cacf49999]
 
+V.8.3.7:
+|
+---- the constitutive models was reinserted. All still need more testing, 
+     but can't properly test: Fixed_Corotated(snow),water,Drucker_Prager(sand) - cause unable the particle count is far too low (next problem to solve)
+     Neohookean - should work, but still require more testing.
+     v4.0.1.stable.official [cacf49999]
 
 
 
