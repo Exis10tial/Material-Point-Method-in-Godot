@@ -284,7 +284,7 @@ func _on_alchemy_lab_ready():
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
-		#"""
+		"""
 		substance.coefficient_of_restitution = 1.0
 		substance.coefficient_of_static_friction = 0.5
 		substance.coefficient_of_kinetic_friction = 0.5
@@ -294,7 +294,7 @@ func _on_alchemy_lab_ready():
 		substance.youngs_modulus = 0.0
 		#"""
 		"""
-		substance.coefficient_of_restitution = 1.0#9.0 #rubber
+		substance.coefficient_of_restitution = 9.0 #rubber
 		substance.coefficient_of_static_friction = 0.80 #rubber
 		substance.coefficient_of_kinetic_friction = 0.60 #rubber
 		substance.physical_state = 'solid'
@@ -328,8 +328,8 @@ func _on_alchemy_lab_ready():
 		#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
 		#
 		#"""
-		"""
-		# testing fixed-corated model - sand...
+		#"""
+		# testing drucker_prager_elasticity - sand...
 		substance.coefficient_of_restitution = randf_range(0.88,0.98) # wet sand (0.05,0.70)
 		substance.coefficient_of_static_friction = randf_range(0.3,0.5) # wet sand 0.40 
 		substance.coefficient_of_kinetic_friction = 0.15 #random

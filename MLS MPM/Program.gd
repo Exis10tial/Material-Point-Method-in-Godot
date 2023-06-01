@@ -14,10 +14,10 @@ var grid_nodes : Dictionary = {}
 var station : Vector2
 #var identify_grid_reach : Array = []
 #var gravity : Vector2
-var gravity : Vector2 = Vector2(0.00,9.80) * 100
+var gravity : Vector2 = Vector2(0.00,9.80) * 10
 #var gravity : Vector2 = Vector2(0.00,-9.80#)* 100
-#var gravity : Vector2 = Vector2(9.80,0.0)# * 100
-#var gravity : Vector2 = Vector2(-9.80,0.0)#* 100
+#var gravity : Vector2 = Vector2(9.80,0.0) * 100
+#var gravity : Vector2 = Vector2(-9.80,0.0) * 100
 #var apply_outside_forces
 var identify_number : int
 var particle : String
@@ -93,15 +93,20 @@ var f_term_2
 func _on_Program_ready():
 	### basis fuction setup...
 	
-
 	##basis = "cubic"
 	##basis_coefficient = 3.0
 	
 	basis = "quadratic"
 	basis_coefficient = 4.0
 	basis_function_version = 1
-	grid_cells = ProjectSettings.get_setting('display/window/size/viewport_width') * ProjectSettings.get_setting('display/window/size/viewport_height')
-	grid_spacing = 1
+	
+	#grid_cells = ProjectSettings.get_setting('display/window/size/viewport_width') * ProjectSettings.get_setting('display/window/size/viewport_height')
+	#grid_spacing = 1
+	
+	grid_cells = 16*9
+	grid_spacing = 120
+	
+	
 	### setup up the barrier... 
 	barriers['window outline']['top'] = {'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
 	barriers['window outline']['right'] = {'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':ProjectSettings.get_setting('display/window/size/viewport_width'),'mass':0.0,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0)}
@@ -337,6 +342,8 @@ func Particles_to_Grid(time_passed:float,material:Object):
 		
 		#print(particle,' particle check')
 		#### the sum of aspects that is resetted...
+		var energy_density_is_known = false
+		var energy_denisty_coeficient = [0,0,0,0]
 		affine_momentum_fuse = Vector2(0.0,0.0)
 		var sum_of_f_forces = Vector2(0.0,0.0)
 		var transfer_momentum = Vector2(0.0,0.0)
@@ -348,8 +355,9 @@ func Particles_to_Grid(time_passed:float,material:Object):
 		var number = 0 
 		var different_number = 0
 		
+		var differentiate_transposed_energy  = [0,0,0,0]
+		var q_differentiated_stressed_summed = [0,0,0,0]
 		
-		var q_stressed_volumed_mass_C = [0,0,0,0]
 		var affline_force_contribution = Vector2(0,0)
 		#print(' ')
 		#for other_particle in material.particle_mechanics.keys():
@@ -359,34 +367,69 @@ func Particles_to_Grid(time_passed:float,material:Object):
 		#constitutive models...
 		if material.physical_state == 'solid':
 			if material.constitutive_model == 'hyperelastic':
-				#material.particle_mechanics[other_particle].stress = constitutive_models.Neo_Hookean(particle,material)
-				material.particle_mechanics[particle]['stress'] = constitutive_models.Neo_Hookean(particle,material)
+				energy_denisty_coeficient = constitutive_models.Neo_Hookean(particle,material)
+				energy_density_is_known = true
 			if material.constitutive_model == 'fixed_corated':
-				#material.particle_mechanics[other_particle].stress = constitutive_models.Fixed_Corotated(particle,material)
-				material.particle_mechanics[particle]['stress'] = constitutive_models.Fixed_Corotated(particle,material)
+				energy_denisty_coeficient = constitutive_models.Fixed_Corotated(particle,material)
+				energy_density_is_known = true
 			if material.constitutive_model == 'drucker_prager_elasticity':
-				#material.particle_mechanics[other_particle].stress = constitutive_models.Drucker_Prager_Elasticity(particle,material)
-				material.particle_mechanics[particle]['stress'] = constitutive_models.Drucker_Prager_Elasticity(particle,material)
+				energy_denisty_coeficient = constitutive_models.Drucker_Prager_Elasticity(particle,material)
+				energy_density_is_known = true
 		elif material.physical_state == 'liquid':
 			if material.constitutive_model == 'water':
-				material.particle_mechanics[particle]['stress'] = constitutive_models.Model_of_Water(particle,material)
+				energy_denisty_coeficient = constitutive_models.Model_of_Water(particle,material)
+				energy_density_is_known = true
 					
 		elif material.physical_state == 'gas':
+			energy_density_is_known = true
 			pass
+			
+			
+		if energy_density_is_known == true:
+			var volumed_energy = matrix_math.Multiply_Matrix_by_Scalar(energy_denisty_coeficient,material.volume,true)
+			var F_transposed = matrix_math.Transposed_Matrix(material.particle_mechanics[particle]['F'])
+			
+			var transposed_volumed_energy = matrix_math.Multiply_Matrix(volumed_energy,F_transposed)
+			
+			var basis_coefficient = 4.0 / pow(grid_spacing,2)
+			#print(basis_coefficient,' basis_coefficient check')
+			var inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
+			var differentiate_weight_interpolation = matrix_math.Multiply_Matrix_by_Scalar(inverse_I_coefficient,basis_coefficient,true)
+			
+			differentiate_transposed_energy = matrix_math.Multiply_Matrix(transposed_volumed_energy,differentiate_weight_interpolation)
+			differentiate_transposed_energy = matrix_math.Multiply_Matrix_by_Scalar(differentiate_transposed_energy,-1.0,true)
+			
+			var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
+			
+			affline_force_contribution = matrix_math.Add_Matrix(differentiate_transposed_energy,q_mass_C) 
+			#print(affline_force_contribution,' affine check')
 		else:
-			pass
+			### MLS MPM:  fuses the scattering of the affine momentum and particle force contribution
+			# weight_interpolation * (Q)* (relation_between_particle_grid_node)
+			#Q = time * D^-1 * particle initial volume * differentiate(energy density)/differentiate(F) * F * F_transposed + mass * C (original form)
+			#  or ; if energy density is unknown.
+			#Q = - sum of ( time * volume of material occupied at p * stess * (differentiate)weight_interpolation) + mass * C
+			#(differentiate)weight_interpolation = weight_interpolation * D^-1 * (relation_between_particle_grid_node)
+			# D^-1 = (4/pow(cell_size,2)) * particle.I^-1
 		
-		### MLS MPM:  fuses the scattering of the affine momentum and particle force contribution
-		# weight_interpolation * (Q)* (relation_between_particle_grid_node)
-		#Q = time * D^-1 * volume of material at time * differentiate(energy density)/differentiate(F) * F * F_transposed + mass * C (original form)
-		#Q = time * stess + mass * C
-		var q_timed_stressed = matrix_math.Multiply_Matrix_by_Scalar( material.particle_mechanics[particle]['stress'],time_passed,true)
-		#print(material.mass,' material.mass check')
-		var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
-		#print(q_mass_C,' q_mass_C check')
-		affline_force_contribution = matrix_math.Add_Matrix(q_timed_stressed,q_mass_C)
+			var q_timed_volumed = material.particle_mechanics[particle]['volume'] * time_passed
+			var q_volumed_stress =  matrix_math.Multiply_Matrix_by_Scalar( material.particle_mechanics[particle]['stress'],q_timed_volumed,true)
+			
+			var basis_coefficient = 4.0 / pow(grid_spacing,2)
+			#print(basis_coefficient,' basis_coefficient check')
+			var inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
+			var differentiate_weight_interpolation = matrix_math.Multiply_Matrix_by_Scalar(inverse_I_coefficient,basis_coefficient,true)
+			
+			var q_differentiated_stresse_coefficient = matrix_math.Multiply_Matrix(q_volumed_stress,differentiate_weight_interpolation)
+			
+			q_differentiated_stressed_summed = matrix_math.Add_Matrix(q_differentiated_stressed_summed,q_differentiated_stresse_coefficient)
+			q_differentiated_stressed_summed = matrix_math.Multiply_Matrix_by_Scalar(q_differentiated_stressed_summed,-1.0,true)
+			
+			var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
+			
+			affline_force_contribution = matrix_math.Add_Matrix(q_differentiated_stressed_summed,q_mass_C)
 		#print(affline_force_contribution,' affine check')
-		
+			
 		
 		for node in material.particle_mechanics[particle]['eulerian']:
 			#print()
@@ -423,7 +466,6 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			
 			#different_number = different_number + 1
 			
-			
 		#while number < len(material.particle_mechanics[particle]['eulerian']):
 			### MPM momentum.
 			#material.particle_mechanics[particle]['euler data']['momentum'] = material.particle_mechanics[particle]['euler data']['momentum'] + (material.particle_mechanics[particle]['euler data']['mass'] * ( material.initial_velocity + ( matrix_math.Multiply_Matrix_by_Vector2_to_Vector2(material.particle_mechanics[particle]['C'],stored_relation[number]))))
@@ -441,8 +483,6 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			#number = number + 1
 		
 		identify_number = wrapi(identify_number+1,0,len(material.particle_mechanics.keys())+1)
-
-
 
 #func Grid_Update(material:Object,the_grid:Dictionary):#,outside_forces:Vector2):
 func Grid_Update(time_passed:float,material:Object):
@@ -462,9 +502,6 @@ func Grid_Update(time_passed:float,material:Object):
 			grid_nodes[node]['velocity'] = grid_nodes[node]['momentum'] / grid_nodes[node]['mass']
 			#print(node,' ',grid_nodes[node], ' node update check')
 	
-
-
-
 #func Collision_Detection(material:Object,the_grid:Dictionary):
 #func Collision_with_Wall(material:Object,the_grid:Dictionary):
 func Collision_with_Wall(material:Object):
@@ -518,7 +555,6 @@ func Collision_with_Wall(material:Object):
 					topleft.y = material.particle_lineation[particle].origin.y -((material.appearance.x /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation()))) + ((material.appearance.y /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					
 					
-					
 					if topright.x > barriers['window outline']['right']['outline'] or bottomright.x > barriers['window outline']['right']['outline'] or bottomleft.x > barriers['window outline']['right']['outline'] or topleft.x > barriers['window outline']['right']['outline'] :
 						### the particle braches the right of the window...
 						### collision with the wall...
@@ -528,15 +564,15 @@ func Collision_with_Wall(material:Object):
 							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
 						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
 					elif topright.y > barriers['window outline']['bottom']['outline'] or bottomright.y > barriers['window outline']['bottom']['outline'] or bottomleft.y > barriers['window outline']['bottom']['outline'] or topleft.y > barriers['window outline']['bottom']['outline'] :
-						### the particle braches the right of the window...
+						### the particle braches the bottom of the window...
 						### collision with the wall...
 						var collision_results =  particle_interaction.Collision_with_Walls('bottom',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
-						#print(collision_results,' testing collision')
+						#print(collision_results,' bottom testing collision')
 						if barriers['window outline']['bottom']['coefficient of restitution'] >= 1.0 and material.coefficient_of_restitution >= 1.0:
 							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
 						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
 					elif topright.x < barriers['window outline']['left']['outline'] or bottomright.x < barriers['window outline']['left']['outline'] or bottomleft.x < barriers['window outline']['left']['outline'] or topleft.x < barriers['window outline']['left']['outline'] :
-						### the particle braches the right of the window...
+						### the particle braches the left of the window...
 						### collision with the wall...
 						var collision_results =  particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
 						#print(collision_results,' testing collision')
@@ -544,7 +580,7 @@ func Collision_with_Wall(material:Object):
 							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
 						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
 					elif topright.y < barriers['window outline']['top']['outline'] or bottomright.y < barriers['window outline']['top']['outline'] or bottomleft.y < barriers['window outline']['top']['outline'] or topleft.y < barriers['window outline']['top']['outline'] :
-						### the particle braches the right of the window...
+						### the particle braches the top of the window...
 						### collision with the wall...
 						var collision_results =  particle_interaction.Collision_with_Walls('top',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
 						#print(collision_results,' testing collision')
@@ -715,10 +751,26 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		#print(material.particle_mechanics[particle]['F'],' F before final multi check')
 		material.particle_mechanics[particle]['F'] = matrix_math.Multiply_Matrix(f_term_2,material.particle_mechanics[particle]['F'])
 		#print(material.particle_mechanics[particle]['F'],' F Update check')
+		
+		"""
+		var test_FE = matrix_math.Multiply_Matrix( material.particle_mechanics[particle]['F'],material.particle_mechanics[particle]['I'])
+		
+		var inverse_FE = matrix_math.Inverse_Matrix(test_FE)
+		var test_FP = matrix_math.Multiply_Matrix(test_FE,material.particle_mechanics[particle]['F'])
+		
+		var test_F = matrix_math.Multiply_Matrix(test_FE,test_FP)
+		print(test_F,' F from E and P check')
+		#"""
+		
 		### Updating Plasticity...
-		material.particle_mechanics[particle]['F'] = constitutive_models.Update_Plasticity(material.type_of_substance,material.yield_surface,material.particle_mechanics[particle]['F'])
+		constitutive_models.Update_Plasticity(material,particle,material.type_of_substance)
 		#print(material.particle_mechanics[particle]['F'],' F after P check')
 		
+		
+		
+		
+		
+		#print(material.particle_mechanics[particle]['F'],' F check')
 		var f_t = matrix_math.Transposed_Matrix(material.particle_mechanics[particle]['F'])
 		#print(f_t,' f_t check')
 		#var u = matrix_math.Multiply_Matrix(f_t,material.particle_mechanics[particle]['F'])
@@ -730,17 +782,20 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		
 		#print(r,' r check')
 		
+		#"""
 		#particle rotation...
 		var v = matrix_math.Multiply_Matrix(material.particle_mechanics[particle]['F'],f_t)
 		#print(v,' v check')
 		var principal_orientation = snapped(((2*v[1]) / (v[0]- v[3])),.01)
+		if is_inf(principal_orientation) == true or is_nan(principal_orientation) == true:
+			principal_orientation = 0
 		#print(principal_orientation,' principal_orientation check')
 		
 		material.particle_lineation[particle].x.x = cos(deg_to_rad(principal_orientation))
 		material.particle_lineation[particle].y.x = -sin(deg_to_rad(principal_orientation))
 		material.particle_lineation[particle].x.y = sin(deg_to_rad(principal_orientation))
 		material.particle_lineation[particle].y.y = cos(deg_to_rad(principal_orientation))
-		
+		#"""
 		
 		
 		
