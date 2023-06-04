@@ -110,5 +110,8 @@ V.8.3.7:
      v4.0.1.stable.official [cacf49999]
 
 
-
+V.8.4.0:
+|
+---- Increased the allowable number of different substances ( from 1 to whatever),
+     (already had the ability for substances to be represented/show by any number of particles from 1 to whatever)
 
