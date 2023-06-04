@@ -14,8 +14,8 @@ var grid_nodes : Dictionary = {}
 var station : Vector2
 #var identify_grid_reach : Array = []
 #var gravity : Vector2
-var gravity : Vector2 = Vector2(0.00,9.80) * 10
-#var gravity : Vector2 = Vector2(0.00,-9.80#)* 100
+var gravity : Vector2 = Vector2(0.00,9.80) * 100
+#var gravity : Vector2 = Vector2(0.00,-9.80)* 100
 #var gravity : Vector2 = Vector2(9.80,0.0) * 100
 #var gravity : Vector2 = Vector2(-9.80,0.0) * 100
 #var apply_outside_forces
@@ -33,6 +33,7 @@ var basis : String
 var basis_coefficient : float
 var basis_function_version : int
 var collection_of_velocities : Array
+var updating_plasticity : bool = false
 var relation_between_particle_and_grid_node : Vector2
 var relation_between_grid_node_and_particle : Vector2
 # handling particle merging...
@@ -165,7 +166,7 @@ func Substance_Alignment():
 	pass
 
 
-func Weight_Interpolation(splines:String,version:int,updated_relation:Vector2,cell_size:float):
+func Weight_Interpolation(splines:String,version:int,updated_relation:Vector2):#,cell_size:float):
 	#reset parameters
 	building_weights = Vector2(0.0,0.0)
 	### Weight Interpolation...
@@ -372,9 +373,11 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			if material.constitutive_model == 'fixed_corated':
 				energy_denisty_coeficient = constitutive_models.Fixed_Corotated(particle,material)
 				energy_density_is_known = true
+				updating_plasticity = true
 			if material.constitutive_model == 'drucker_prager_elasticity':
 				energy_denisty_coeficient = constitutive_models.Drucker_Prager_Elasticity(particle,material)
 				energy_density_is_known = true
+				updating_plasticity = true
 		elif material.physical_state == 'liquid':
 			if material.constitutive_model == 'water':
 				energy_denisty_coeficient = constitutive_models.Model_of_Water(particle,material)
@@ -443,7 +446,7 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			#print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node check')
 			stored_relation.append(relation_between_particle_and_grid_node)
 		
-			Weight_Interpolation(basis,basis_function_version,updated_relation,grid_spacing)
+			Weight_Interpolation(basis,basis_function_version,updated_relation)#,grid_spacing)
 			#print(weight_interpolation['weight'],' weight_interpolation check' )
 			
 			### MPM lumped mass
@@ -691,7 +694,7 @@ func Grid_to_Particle(time_passed:float,material:Object):
 				
 				var updated_relation = (1.0/grid_spacing) * relation_between_particle_and_grid_node
 						
-				Weight_Interpolation(basis,basis_function_version,updated_relation,grid_spacing)
+				Weight_Interpolation(basis,basis_function_version,updated_relation)#,grid_spacing)
 					
 				### MPM,MLS MPM paraticle velocity update
 				# particle Velocity = sum of ( grid velocity * weight_interpolation )
@@ -762,9 +765,12 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		print(test_F,' F from E and P check')
 		#"""
 		
-		### Updating Plasticity...
-		constitutive_models.Update_Plasticity(material,particle,material.type_of_substance)
-		#print(material.particle_mechanics[particle]['F'],' F after P check')
+		
+		if updating_plasticity == true:
+			### Updating Plasticity...
+			constitutive_models.Update_Plasticity(material,particle,material.type_of_substance)
+			#print(material.particle_mechanics[particle]['F'],' F after P check')
+			updating_plasticity = false
 		
 		
 		

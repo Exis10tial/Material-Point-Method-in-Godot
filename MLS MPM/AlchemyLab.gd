@@ -62,25 +62,25 @@ func Initial_Collection_Of_Substance():
 	#x:4 y:4 : 2 substances
 	#x:1 y:1: 1 substance
 	
-	#domain_size = Vector2(1000.0,1000.0)
-	#domain_size = Vector2(512.0,512.0)
-	domain_size = Vector2(128.0,128.0)
-	#domain_size = Vector2(100.0,100.0)
-	#domain_size = Vector2(81.0,81.0)
-	#domain_size = Vector2(50.0,50.0)
-	#domain_size = Vector2(39.0,39.0)
-	#domain_size = Vector2(25.0,25.0)
-	#domain_size = Vector2(16.0,16.0)
-	#domain_size = Vector2(10.0,10.0)
-	#domain_size = Vector2(10.0,8.0)
-	#domain_size = Vector2(9.0,9.0)
-	#domain_size = Vector2(7.0,7.0)
-	#domain_size = Vector2(6.0,6.0)
-	#domain_size = Vector2(5.0,5.0)
-	#domain_size = Vector2(4.0,4.0)
-	#domain_size = Vector2(3.0,3.0)
-	#domain_size = Vector2(2.0,2.0)
-	#domain_size = Vector2(1.0,1.0)
+	#domain_size = Vector2(1000,1000)
+	#domain_size = Vector2(512,512)
+	#domain_size = Vector2(128,128)
+	#domain_size = Vector2(100,100)
+	#domain_size = Vector2(81,81)
+	#domain_size = Vector2(50,50)
+	#domain_size = Vector2(39,39)
+	#domain_size = Vector2(25,25)
+	#domain_size = Vector2(16,16)
+	domain_size = Vector2(10,10)
+	#domain_size = Vector2(10,8)
+	#domain_size = Vector2(9,9)
+	#domain_size = Vector2(7,7)
+	#domain_size = Vector2(6,6)
+	#domain_size = Vector2(5,5)
+	#domain_size = Vector2(4,4)
+	#domain_size = Vector2(3,3)
+	#domain_size = Vector2(2,2)
+	#domain_size = Vector2(1,1)
 	
 	#---------------------------------
 	# if substances size is always 1...
@@ -284,11 +284,12 @@ func _on_alchemy_lab_ready():
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
-		"""
+		#"""
 		substance.coefficient_of_restitution = 1.0
 		substance.coefficient_of_static_friction = 0.5
 		substance.coefficient_of_kinetic_friction = 0.5
 		substance.physical_state = 'none'
+		substance.type_of_substance = 'void'
 		substance.constitutive_model = 'none'
 		substance.poisson_ratio = 0.0
 		substance.youngs_modulus = 0.0
@@ -328,7 +329,7 @@ func _on_alchemy_lab_ready():
 		#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
 		#
 		#"""
-		#"""
+		"""
 		# testing drucker_prager_elasticity - sand...
 		substance.coefficient_of_restitution = randf_range(0.88,0.98) # wet sand (0.05,0.70)
 		substance.coefficient_of_static_friction = randf_range(0.3,0.5) # wet sand 0.40 
@@ -341,6 +342,21 @@ func _on_alchemy_lab_ready():
 		#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
 		#"""
 		
+		### set the name of substance...
+		var substance_name = '{a}{b}{1}{2}{3}{4}'.format({
+				'a':substance.type_of_substance,
+				'b':'_',
+				'1':digits_list[int(randi_range(0,len(digits_list)-1))],
+				'2':digits_list[int(randi_range(0,len(digits_list)-1))],
+				'3':digits_list[int(randi_range(0,len(digits_list)-1))],
+				'4':digits_list[int(randi_range(0,len(digits_list)-1))]
+				})
+
+		substance.set_name(substance_name)
+		
+		#substance.color = Color(0,0,0,1)
+		#substance.color = Color(1,1,1,1)
+		substance.color = Color(snapped(randf_range(0.0,1.0),.1),snapped(randf_range(0.0,1.0),.1),snapped(randf_range(0.0,1.0),.1),1.0)
 		
 		###
 		### Mechanics of the substance...
@@ -411,26 +427,38 @@ func _on_alchemy_lab_ready():
 		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/viewport_width')-appearance.x/2.0))
 		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/viewport_height')-appearance.y/2.0))
 		
+		print(get_tree().get_root().get_node("Simulation").number_of_substances,' number of substances check')
+		
+		var place_in_middle = false
+		
+		
+		if place_in_middle == true:
+			### places the substance in the middle of the screen...
+			substance_starting_point = Vector2(
+			( (ProjectSettings.get_setting('display/window/size/viewport_width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
+			( (ProjectSettings.get_setting('display/window/size/viewport_height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
+			)
+		else:
+			substance_starting_point = Vector2(random_point_of_x,random_point_of_y)
+			
+		
 		#### staring location of particles...
-		if one_substance == true or number_of_particles == 1:
+		#if one_substance == true or number_of_particles == 1 or get_tree().get_root().get_node("Simulation").number_of_substances == 1:
 			### places the substance in the middle of the screen...
 			#substance_starting_point = Vector2(
 			#((ProjectSettings.get_setting('display/window/size/width') / 2.0)),
 			#((ProjectSettings.get_setting('display/window/size/height') / 2.0))
 			#)
 			### places randomly anywhere on the window...
-			substance_starting_point = Vector2(random_point_of_x,random_point_of_y)
+			#print('a')
+			#substance_starting_point = Vector2(random_point_of_x,random_point_of_y)
 			
-		else:
-			#sbstance_starting_point = Vector2(
-			#((ProjectSettings.get_setting('display/window/size/width') / 2.0) - ((cell_size * defined_columns) / 2.0) ) + (cell_size/2.0),
-			#((ProjectSettings.get_setting('display/window/size/height') / 2.0) - ((cell_size * defined_rows) / 2.0)) + (cell_size/2.0)
+		#else:
+			#print('b')
+			#substance_starting_point = Vector2(
+			#( (ProjectSettings.get_setting('display/window/size/viewport_width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
+			#( (ProjectSettings.get_setting('display/window/size/viewport_height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
 			#)
-			### places the substance in the middle of the screen...
-			substance_starting_point = Vector2(
-			( (ProjectSettings.get_setting('display/window/size/viewport_width') / 2.0) - ((number_of_particles/cell_size) / 2.0)),
-			( (ProjectSettings.get_setting('display/window/size/viewport_height') / 2.0) - ((number_of_particles/cell_size) / 2.0))
-			)
 			### places randomly anywhere on the window...
 			
 		
@@ -521,7 +549,7 @@ func _on_alchemy_lab_ready():
 			### 
 			location_x =  location_x + 1
 			
-		get_tree().get_root().get_node("Simulation").add_child(substance)
+		get_tree().get_root().get_node("Simulation/Matter").add_child(substance)
 	else:
 		print('substances Does not exists')
 		pass

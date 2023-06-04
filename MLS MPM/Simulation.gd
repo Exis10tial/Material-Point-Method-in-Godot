@@ -1,6 +1,9 @@
 extends Node
 
 
+#
+var check_substances : int = 0
+var number_of_substances : int =  0
 #var fund_chemistry : File
 var alchemy : Object
 #var find_math_book : File
@@ -10,6 +13,9 @@ var matrix_math_page
 #var build_program : File
 var program : Object
 var collisions : Object
+# 
+var matter 
+var count : int
 #var contact_with_another : File
 #var model_of_substance : File
 var models : Object
@@ -70,7 +76,7 @@ func Setup_Outline():
 		#for particle in Particles:
 			#Particles[particle].draw_particle()
 	
-func _on_Simulation_ready():
+func _on_ready():
 	#fund_chemistry = File.new()
 	if FileAccess.file_exists("res://AlchemyLab.tscn"):
 		alchemy = load("res://AlchemyLab.tscn").instantiate()
@@ -103,13 +109,26 @@ func _on_Simulation_ready():
 		print('models are not there...')
 	
 	
+	### Number of Substances in the Simulation...
+	number_of_substances = 2
+	check_substances = 0
+	
+	
 	add_child(program)
 	add_child(math_book)
 	add_child(collisions)
 	add_child(models)
-	add_child(alchemy)
-
-	
+	matter = Node.new()
+	matter.set_name('Matter')
+	add_child(matter)
+	while check_substances < number_of_substances:
+		add_child(alchemy)
+		check_substances = check_substances + 1
+		remove_child(alchemy)
+		alchemy.free()
+		alchemy = load("res://AlchemyLab.tscn").instantiate()
+		
+	count = 0
 	Setup_Outline()
 	
 	
@@ -119,7 +138,7 @@ func _on_Simulation_ready():
 	set_physics_process(true)
 	
 
-func _process(delta):
+func _process(_delta):
 	
 	#print('cycle')
 	#$"Substance".queue_redraw()
@@ -140,18 +159,31 @@ func _process(delta):
 func _physics_process(delta):
 	#print()
 	#print('turn')
-	$"Program".Grid_Reset($"Substance")
-	$"Program".Particles_to_Grid(snapped(delta,.001),$"Substance")
-	$"Program".Grid_Update(delta,$"Substance")
-	$"Program".Collision_with_Wall($"Substance")
+	$"Program".Grid_Reset(matter.get_children()[count])
+	$"Program".Particles_to_Grid(snapped(delta,.001),matter.get_children()[count])
+	$"Program".Grid_Update(delta,matter.get_children()[count])
+	$"Program".Collision_with_Wall(matter.get_children()[count])
 	#$"Program".Collision_with_Other_Particles($"Substance")
-	$"Program".Particle_Reset($"Substance")
-	$"Program".Grid_to_Particle(snapped(delta,.001),$"Substance")
+	$"Program".Particle_Reset(matter.get_children()[count])
+	$"Program".Grid_to_Particle(snapped(delta,.001),matter.get_children()[count])
 	
-	$"Substance".queue_redraw()
+	matter.get_children()[count].queue_redraw()
+	###
+	count = wrapi(count+1,0,len(matter.get_children()))
+	
+	#$"Program".Grid_Reset($"Substance")
+	#$"Program".Particles_to_Grid(snapped(delta,.001),$"Substance")
+	#$"Program".Grid_Update(delta,$"Substance")
+	#$"Program".Collision_with_Wall($"Substance")
+	#$"Program".Collision_with_Other_Particles($"Substance")
+	#$"Program".Particle_Reset($"Substance")
+	#$"Program".Grid_to_Particle(snapped(delta,.001),$"Substance")
+	
+	#$"Substance".queue_redraw()
 	
 #	
 #func build_time(delta):
 #	check_time=+ delta
 #	if check_time > 1.0:
 #		check_time = 0
+
