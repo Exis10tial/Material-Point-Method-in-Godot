@@ -113,5 +113,10 @@ V.8.3.7:
 V.8.4.0:
 |
 ---- Increased the allowable number of different substances ( from 1 to whatever),
-     (already had the ability for substances to be represented/show by any number of particles from 1 to whatever :: when substances contain 1 particle , it can be any size; when the substances contain more particles they are not at any size, all of them will be the same.)
+     (already had the ability for substances to be represented/show by any number of particles from 1 to whatever also when substances contain 1 particle, it can be any size; when the substances contain more particles they are not at any size, all of them will be the same.)
+     v4.0.1.stable.official [cacf49999]
 
+V.8.4.0:
+|
+---- moved to 4.1.0 beta from 4.0.1 stable;  
+     v4.1.beta1.official [828ec2c5d]
