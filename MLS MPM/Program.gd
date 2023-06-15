@@ -14,7 +14,7 @@ var grid_nodes : Dictionary = {}
 var station : Vector2
 #var identify_grid_reach : Array = []
 #var gravity : Vector2
-var gravity : Vector2 = Vector2(0.00,9.80) * 100
+var gravity : Vector2 = Vector2(0.00,9.80)# * 100
 #var gravity : Vector2 = Vector2(0.00,-9.80)* 100
 #var gravity : Vector2 = Vector2(9.80,0.0) * 100
 #var gravity : Vector2 = Vector2(-9.80,0.0) * 100
@@ -101,11 +101,11 @@ func _on_Program_ready():
 	basis_coefficient = 4.0
 	basis_function_version = 1
 	
-	#grid_cells = ProjectSettings.get_setting('display/window/size/viewport_width') * ProjectSettings.get_setting('display/window/size/viewport_height')
-	#grid_spacing = 1
+	grid_cells = ProjectSettings.get_setting('display/window/size/viewport_width') * ProjectSettings.get_setting('display/window/size/viewport_height')
+	grid_spacing = 1
 	
-	grid_cells = 16*9
-	grid_spacing = 120
+	#grid_cells = 16*9
+	#grid_spacing = 120
 	
 	
 	### setup up the barrier... 
@@ -129,7 +129,7 @@ func _on_Program_ready():
 	#barriers['coefficient of restitution'] = 'disappear'
 	window_center = Vector2(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0,ProjectSettings.get_setting('display/window/size/viewport_height')/2.0)
 	for wall in barriers['window outline'].keys():
-		barriers['window outline'][wall]['coefficient of restitution'] = 1.00
+		barriers['window outline'][wall]['coefficient of restitution'] = 1.0
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.50
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.0
 		#barriers['window outline'][wall]['coefficient of static friction'] = 1.0
@@ -557,40 +557,35 @@ func Collision_with_Wall(material:Object):
 					topleft.x = material.particle_lineation[particle].origin.x - ((material.appearance.x /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation()))) - ((material.appearance.y /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					topleft.y = material.particle_lineation[particle].origin.y -((material.appearance.x /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation()))) + ((material.appearance.y /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					
-					
 					if topright.x > barriers['window outline']['right']['outline'] or bottomright.x > barriers['window outline']['right']['outline'] or bottomleft.x > barriers['window outline']['right']['outline'] or topleft.x > barriers['window outline']['right']['outline'] :
 						### the particle braches the right of the window...
 						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('right',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+						var collision_results =  particle_interaction.Collision_with_Walls('right',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
 						#print(collision_results,' testing collision')
-						if barriers['window outline']['right']['coefficient of restitution'] >= 1.0 and material.coefficient_of_restitution >= 1.0:
-							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
-						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
+						grid_nodes[node]['velocity'] = collision_results
+						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
 					elif topright.y > barriers['window outline']['bottom']['outline'] or bottomright.y > barriers['window outline']['bottom']['outline'] or bottomleft.y > barriers['window outline']['bottom']['outline'] or topleft.y > barriers['window outline']['bottom']['outline'] :
 						### the particle braches the bottom of the window...
 						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('bottom',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+						var collision_results =  particle_interaction.Collision_with_Walls('bottom',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
 						#print(collision_results,' bottom testing collision')
-						if barriers['window outline']['bottom']['coefficient of restitution'] >= 1.0 and material.coefficient_of_restitution >= 1.0:
-							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
-						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
+						grid_nodes[node]['velocity'] = collision_results
+						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
 					elif topright.x < barriers['window outline']['left']['outline'] or bottomright.x < barriers['window outline']['left']['outline'] or bottomleft.x < barriers['window outline']['left']['outline'] or topleft.x < barriers['window outline']['left']['outline'] :
 						### the particle braches the left of the window...
 						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('left',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+						var collision_results =  particle_interaction.Collision_with_Walls('left',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
 						#print(collision_results,' testing collision')
-						if barriers['window outline']['bottom']['coefficient of restitution'] >= 1.0 and material.coefficient_of_restitution >= 1.0:
-							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
-						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
+						grid_nodes[node]['velocity'] = collision_results
+						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
 					elif topright.y < barriers['window outline']['top']['outline'] or bottomright.y < barriers['window outline']['top']['outline'] or bottomleft.y < barriers['window outline']['top']['outline'] or topleft.y < barriers['window outline']['top']['outline'] :
 						### the particle braches the top of the window...
 						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('top',material,particle,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+						var collision_results =  particle_interaction.Collision_with_Walls('top',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
 						#print(collision_results,' testing collision')
-						if barriers['window outline']['bottom']['coefficient of restitution'] >= 1.0 and material.coefficient_of_restitution >= 1.0:
-							material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['initial velocity'] + collision_results
-						grid_nodes[node]['velocity'] =  grid_nodes[node]['velocity'] + collision_results
-					
+						grid_nodes[node]['velocity'] = collision_results
+						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
+		
 		identify_number = wrapi(identify_number+1,0,len(grid_nodes.keys())+1)
 	
 

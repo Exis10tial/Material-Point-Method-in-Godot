@@ -65,13 +65,14 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(1000,1000)
 	#domain_size = Vector2(512,512)
 	#domain_size = Vector2(128,128)
-	#domain_size = Vector2(100,100)
-	#domain_size = Vector2(81,81)
+	domain_size = Vector2(100,100)
+	#domain_size = Vector2(82,82)
+	#domain_size = Vector2(75,75)
 	#domain_size = Vector2(50,50)
 	#domain_size = Vector2(39,39)
-	#domain_size = Vector2(25,25)
+	#domain_size = Vector2(25,30)
 	#domain_size = Vector2(16,16)
-	domain_size = Vector2(10,10)
+	#domain_size = Vector2(10,10)
 	#domain_size = Vector2(10,8)
 	#domain_size = Vector2(9,9)
 	#domain_size = Vector2(7,7)
@@ -213,8 +214,8 @@ func _on_alchemy_lab_ready():
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
 		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
 		
-		#one_substance = true
-		gathered_into_chunks = true
+		one_substance = true
+		#gathered_into_chunks = true
 		
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
@@ -415,11 +416,11 @@ func _on_alchemy_lab_ready():
 		#initial_velocity = Vector2(9.8,0.0)# * 10
 		#initial_velocity = Vector2(0,9.8)# * 10
 		#initial_velocity = Vector2(-9.80,0.0)# * 10
-		#initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
+		initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
 		#initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
 		
 		substance.appearance = appearance
-		
+		substance.cell_size = appearance.x
 		#substance.mass_in_pieces = 1.0#substance.mass / (appearance.x * appearance.y)
 		#substance.volume_in_pieces = substance.volume / (appearance.x * appearance.y)
 		
@@ -427,10 +428,8 @@ func _on_alchemy_lab_ready():
 		random_point_of_x = randf_range((appearance.x/2.0),(ProjectSettings.get_setting('display/window/size/viewport_width')-appearance.x/2.0))
 		random_point_of_y = randf_range((appearance.y/2.0),(ProjectSettings.get_setting('display/window/size/viewport_height')-appearance.y/2.0))
 		
-		print(get_tree().get_root().get_node("Simulation").number_of_substances,' number of substances check')
-		
+		#var place_in_middle = true
 		var place_in_middle = false
-		
 		
 		if place_in_middle == true:
 			### places the substance in the middle of the screen...
