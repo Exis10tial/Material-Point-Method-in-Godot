@@ -110,7 +110,7 @@ func _on_ready():
 	
 	
 	### Number of Substances in the Simulation...
-	number_of_substances = 2
+	number_of_substances = 1
 	check_substances = 0
 	
 	
@@ -163,14 +163,17 @@ func _physics_process(delta):
 	$"Program".Particles_to_Grid(snapped(delta,.001),matter.get_children()[count])
 	$"Program".Grid_Update(delta,matter.get_children()[count])
 	$"Program".Collision_with_Wall(matter.get_children()[count])
-	#$"Program".Collision_with_Other_Particles($"Substance")
+	if (count - 1) == len(matter.get_children()):
+		#### collision between the particles takes place...
+		pass
+		#$"Program".Collision_with_Other_Particles($"Substance")
 	$"Program".Particle_Reset(matter.get_children()[count])
 	$"Program".Grid_to_Particle(snapped(delta,.001),matter.get_children()[count])
 	
 	matter.get_children()[count].queue_redraw()
 	###
 	count = wrapi(count+1,0,len(matter.get_children()))
-	
+	#print(count,' count check')
 	#$"Program".Grid_Reset($"Substance")
 	#$"Program".Particles_to_Grid(snapped(delta,.001),$"Substance")
 	#$"Program".Grid_Update(delta,$"Substance")

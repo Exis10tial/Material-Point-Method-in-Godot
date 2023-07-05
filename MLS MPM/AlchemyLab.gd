@@ -65,9 +65,10 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(1000,1000)
 	#domain_size = Vector2(512,512)
 	#domain_size = Vector2(128,128)
-	domain_size = Vector2(100,100)
+	#domain_size = Vector2(100,100)
 	#domain_size = Vector2(82,82)
 	#domain_size = Vector2(75,75)
+	#domain_size = Vector2(60,60)
 	#domain_size = Vector2(50,50)
 	#domain_size = Vector2(39,39)
 	#domain_size = Vector2(25,30)
@@ -79,7 +80,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(6,6)
 	#domain_size = Vector2(5,5)
 	#domain_size = Vector2(4,4)
-	#domain_size = Vector2(3,3)
+	domain_size = Vector2(3,3)
 	#domain_size = Vector2(2,2)
 	#domain_size = Vector2(1,1)
 	
@@ -95,11 +96,12 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 	### the size of the substance is parsed into evenly cut squares/cubes = (Length == Width)
 	
 	if substance_size.x == substance_size.y and substance_size.x != 1 and substance_size.y != 1 and into_pieces == true :
+		
 		### this is if the length/width of the particle are the same...
 		### the substance can be in reduced form...
 		var n = 0.0
 		
-		### Check b y division of 2 first...
+		### Check b y subdivision of 2 first...
 		while pow(2,n) <= substance_size.x:
 			#by_subdivision = true
 			if pow(2,n) == substance_size.x:
@@ -130,10 +132,11 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 				for number in range(1,substance_size.x+1):
 					if int(substance_size.x) % number == 0:
 						find_x_factors.append(number)
+				#print(find_x_factors,' find_x_factors')
 				for number in range(1,substance_size.y+1):
 					if int(substance_size.y) % number == 0:
 						find_y_factors.append(number)
-				
+				#print(find_y_factors,' find_y_factors')
 				### Remove 1 and (itself) from the list
 				if len(find_x_factors) > 2:
 					find_x_factors.pop_back()
@@ -162,14 +165,16 @@ func Cross_Section_Of_Substance(into_pieces:bool,substance_size:Vector2):
 											
 				#by_square_root= true
 	else:
+		#print('check greatest common')
 		# find the greatest common factor between the domain sizes::
 		for number in range(1,substance_size.x+1):
 			if int(substance_size.x) % number == 0:
 				find_x_factors.append(number)
+		#print(find_x_factors,' find_x_factors')
 		for number in range(1,substance_size.y+1):
 			if int(substance_size.y) % number == 0:
 				find_y_factors.append(number)
-		
+		#print(find_y_factors,' find_y_factors')
 		### Remove 1 and (itself) from the list
 		if len(find_x_factors) > 2:
 			find_x_factors.pop_back()
@@ -208,21 +213,36 @@ func _on_alchemy_lab_ready():
 	
 		Initial_Collection_Of_Substance()
 		
-		### alters how many substances ...
-		# one_substance is 1 substance no matter the domain size...
+		### alters how many particles of the substances ...
 		# default ::one_substance = false , gathered_into_chunks = true:: Is using the greatest common factor between domain_size x and domain_size.y to acquire a number of substances/cell size..
+		
+		# one_substance is 1 substance no matter the domain size...
 		# gathered_into_chunks: First a if both domain_size are the same first check power of 2 , then square root is check , then to the default...
-		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y
+		# if one substance and gathered into chunks is false, number of substances is domain_size.x * domain_size.y and the cell_size 1 ???
+		# cell_size of 1 causes problems:: so the lowest cell_size of the particles of a substance possible is 2.
 		
-		one_substance = true
-		#gathered_into_chunks = true
-		
+		if get_tree().get_root().get_node("Simulation").number_of_substances > 1:
+			if get_tree().get_root().get_node("Simulation").check_substances == 0:
+				one_substance = true
+				#gathered_into_chunks = true
+				pass
+			else:
+				#one_substance = true
+				gathered_into_chunks = true
+				pass
+		else:
+			#one_substance = true
+			#gathered_into_chunks = true
+			pass
+				
 		if gathered_into_chunks == false and one_substance == false:
 			### the substance is cut into particles with size of 1...
 			cell_size = 1
 			number_of_particles = int(domain_size.x * domain_size.y)
 			appearance = Vector2(1.0,1.0)
 			particle_alignment = domain_size.y
+			
+			
 		elif gathered_into_chunks == true and one_substance == false:
 			### the substance is cut into chunks size if either
 			# power of domain.x,domain.y:
@@ -270,7 +290,7 @@ func _on_alchemy_lab_ready():
 				
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particles no matter the domain size...
-			cell_size = 1
+			cell_size = domain_size.x
 			number_of_particles = 1
 			appearance = Vector2(domain_size.x,domain_size.y)
 			particle_alignment = domain_size.y
@@ -280,13 +300,12 @@ func _on_alchemy_lab_ready():
 			number_of_particles = int(domain_size.x * domain_size.y)
 			appearance = Vector2(1.0,1.0)
 			particle_alignment = domain_size.y
-		
-		
+			
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
 		#"""
-		substance.coefficient_of_restitution = 1.0
+		substance.coefficient_of_restitution = .85
 		substance.coefficient_of_static_friction = 0.5
 		substance.coefficient_of_kinetic_friction = 0.5
 		substance.physical_state = 'none'
@@ -368,7 +387,7 @@ func _on_alchemy_lab_ready():
 			### the substance is cut into particles with size of 1...
 			
 			#substance.mass = (domain_size.x * domain_size.y)# * 2.0
-			substance.mass = 1.0
+			substance.mass = randi_range(1,10)#1.0
 			
 			#print('one particle')
 			#print(substance.mass,' mass. check')
@@ -382,14 +401,14 @@ func _on_alchemy_lab_ready():
 			# square root of domain.x,domain.y:
 			# or greatest common factor of domain.x,domain.y ....
 			#substance.mass = (appearance.x * appearance.y)
-			substance.mass = 1.0
+			substance.mass = randi_range(1,10)#1.0
 			#substance.mass_in_pieces = substance.mass / substance.substance_limit
 			
 		elif gathered_into_chunks == false and one_substance == true:
 			### substance is 1 particle no matter the domain size...
 			
 			#
-			substance.mass = 1.0#(appearance.x * appearance.y)#set to anything...
+			substance.mass = randi_range(1,10)#1.0#(appearance.x * appearance.y)#set to anything...
 			#substance.mass_in_pieces = substance.mass / substance.substance_limit
 			#print('one substance')
 			###print(substance.mass,' mass. check')
@@ -400,7 +419,7 @@ func _on_alchemy_lab_ready():
 			### the substance is cut into particles with size of 1
 			#print('one particle fault line')
 			#substance.mass = (domain_size.x * domain_size.y)
-			substance.mass = 1.0
+			substance.mass = randi_range(1,10)#1.0
 			#substance.mass_in_pieces = substance.mass / substance.substance_limit 
 			
 			
@@ -411,12 +430,12 @@ func _on_alchemy_lab_ready():
 		#substance.volume = 1.0
 		substance.volume = substance.mass
 		
-		initial_velocity = Vector2(0,0)
-		#initial_velocity = Vector2(0,-9.8)# * 10
-		#initial_velocity = Vector2(9.8,0.0)# * 10
+		#initial_velocity = Vector2(0,0)
 		#initial_velocity = Vector2(0,9.8)# * 10
+		#initial_velocity = Vector2(9.8,0.0)# * 10
+		#initial_velocity = Vector2(0,-9.8)# * 10
 		#initial_velocity = Vector2(-9.80,0.0)# * 10
-		initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80))# * 10
+		initial_velocity = Vector2(randf_range(-9.80,9.80),randf_range(-9.80,9.80)) * 10
 		#initial_velocity = Vector2(randf_range(-4.9,4.90),randf_range(-4.90,4.90))
 		
 		substance.appearance = appearance

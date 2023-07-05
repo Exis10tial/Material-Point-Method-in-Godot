@@ -9,7 +9,7 @@ var constitutive_models
 ### Eulerian/Cartesian Grid...
 #var Grid_Nodes : Dictionary = {}
 var grid_cells : int
-var grid_spacing : int
+var grid_spacing : float
 var grid_nodes : Dictionary = {}
 var station : Vector2
 #var identify_grid_reach : Array = []
@@ -63,6 +63,7 @@ var transfer_momentum
 var building_weights : Vector2
 var weight_interpolation : Dictionary = {'weight':0.0,'gradient':0.0}
 var forces = [0,0,0,0]
+var affine : Vector2
 #var weight_interpolation : float
 #var gradient_weight_interpolation : float
 var building_momentum
@@ -101,8 +102,8 @@ func _on_Program_ready():
 	basis_coefficient = 4.0
 	basis_function_version = 1
 	
-	grid_cells = ProjectSettings.get_setting('display/window/size/viewport_width') * ProjectSettings.get_setting('display/window/size/viewport_height')
-	grid_spacing = 1
+	grid_spacing = (ProjectSettings.get_setting('display/window/size/viewport_width')*2.0) * ((ProjectSettings.get_setting('display/window/size/viewport_height')*2.0))
+	#grid_spacing = grid_cells
 	
 	#grid_cells = 16*9
 	#grid_spacing = 120
@@ -129,7 +130,7 @@ func _on_Program_ready():
 	#barriers['coefficient of restitution'] = 'disappear'
 	window_center = Vector2(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0,ProjectSettings.get_setting('display/window/size/viewport_height')/2.0)
 	for wall in barriers['window outline'].keys():
-		barriers['window outline'][wall]['coefficient of restitution'] = 1.0
+		barriers['window outline'][wall]['coefficient of restitution'] = 1.5
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.50
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.0
 		#barriers['window outline'][wall]['coefficient of static friction'] = 1.0
@@ -176,51 +177,42 @@ func Weight_Interpolation(splines:String,version:int,updated_relation:Vector2):#
 		if version == 1:
 			### The Material Point Method for Simulating Continuum Materials pg 33 equation 123
 			
-			if 1.5 <= abs(updated_relation.x):
+			#if 1.5*grid_spacing <= absf(updated_relation.x):
+			if 1.5 <= absf(updated_relation.x):
 				### particles is not in range of the particle to influence.
 				#print('3')
 				building_weights.x =  0.0
 			
-			elif abs(updated_relation.x) <= .50 and abs(updated_relation.x) < 1.5:
+			#elif .50*grid_spacing <= absf(updated_relation.x) and absf(updated_relation.x) < 1.5*grid_spacing:
+			elif .50 <= absf(updated_relation.x) and absf(updated_relation.x) < 1.5:
 				#print('2')
-				building_weights.x = snappedf((.50 *  pow((1.50 - abs(updated_relation.x)),2.0)),.01)
-				
-			#if int(relative.x) >= (0*cell_size) and int(relative.x) <= (1*cell_size):
-			#if abs(relative.x) == (0*cell_size) and abs(relative.x) <= ((cell_size/4.0)):
-			elif 0 <= abs(updated_relation.x) and abs(updated_relation.x) < .50:
+				building_weights.x = snappedf((.50 *  pow((1.50 - absf(updated_relation.x)),2.0)),.0001)
+				#building_weights.x = .50 *  pow( (1.50 - absf(updated_relation.x)),2.0)
+			
+			#elif 0 <= absf(updated_relation.x) and absf(updated_relation.x) < .50*grid_spacing:
+			elif 0 <= absf(updated_relation.x) and absf(updated_relation.x) < .50:
 				#print('1')
-				building_weights.x = snappedf((.75 - snappedf(pow(abs(updated_relation.x),2.0),.01)),.01)
+				building_weights.x = snappedf((.75 - snappedf(pow(absf(updated_relation.x),2.0),.01)),.0001)
 				#print(building_weights,' a building_weights')
-			#elif int(relative.x) >= (-.50)*(cell_size) and int(relative.x) <= (.50)*(cell_size):
-			#elif abs(relative.x) > ((cell_size/4.0)) and abs(relative.x) <= ((cell_size/2.0)):
-			
-			#elif int(relative.x) >= (.50)*(cell_size) and int(relative.x) <= (1.50)*(cell_size):
-			#elif abs(relative.x) > ((cell_size/2.0)):# and int(relative.x) <= (cell_size/2.0):
-			
+				#building_weights.x = .75 - pow(absf(updated_relation.x),2.0)
 				
+			#if 1.5*grid_spacing <= abs(updated_relation.y):
 			if 1.5 <= abs(updated_relation.y):
 				#print('8')
 				building_weights.y = 0.0
 			
-			elif abs(updated_relation.y) <= .50 and abs(updated_relation.y) < 1.5:
+			#elif .50*grid_spacing <= absf(updated_relation.y) and absf(updated_relation.y) < 1.5*grid_spacing:
+			elif .50 <= absf(updated_relation.y) and absf(updated_relation.y) < 1.5:
 				#print('7')
-				building_weights.y = snappedf((.50 * pow((1.50 - abs(updated_relation.y) ),2.0)),.01)
-				
-			#if int(relative.y) >= (-1.50)*(cell_size) and int(relative.y) <= (-.50)*(cell_size):
-			#if int(relative.y) >= (0*cell_size) and int(relative.x) <= (1*cell_size):
-			#if abs(relative.y) == (0*cell_size) and abs(relative.y) <= ((cell_size/4.0)):
-			elif 0 <= abs(updated_relation.y) and abs(updated_relation.y) < .50:
+				building_weights.y = snappedf((.50 * pow((1.50 - absf(updated_relation.y) ),2.0)),.0001)
+				#building_weights.y = .50 * pow( (1.50 - absf(updated_relation.y) ),2.0)
+			
+			#elif 0 <= absf(updated_relation.y) and absf(updated_relation.y) < .50*grid_spacing:
+			elif 0 <= absf(updated_relation.y) and absf(updated_relation.y) < .50:
 				#print('6')
-				building_weights.y = snappedf((.75 - snappedf(pow(abs(updated_relation.y),2.0),.01)),.01)
+				building_weights.y = snappedf((.75 - snappedf(pow(absf(updated_relation.y),2.0),.01)),.0001)
 				#print(building_weights,' a building_weights')
-			#elif int(relative.y) >= (-.50)*(cell_size) and int(relative.y) <= (.50)*(cell_size):
-			#elif int(relative.y) >= (1*cell_size) and int(relative.x) <= (2*cell_size):
-			#elif abs(relative.y) > ((cell_size/4.0)) and abs(relative.y) <= ((cell_size/2.0)):
-			
-			#elif int(relative.y) >= (.50)*(cell_size) and int(relative.y) <= (1.50)*(cell_size):
-			#elif int(relative.y) >= (2*cell_size):#-(cell_size/4.0) and int(relative.y) <= (cell_size/2.0):
-			#elif abs(relative.y) > ((cell_size/2.0)):
-			
+				#building_weights.y = .75 - pow(absf(updated_relation.y),2.0)
 		elif version == 2:
 			### thru Analysis and Reduction of Quadrature Errors in the Material Point Method. steffan .W.pdf-pg(8.equation 16)
 			pass
@@ -228,14 +220,12 @@ func Weight_Interpolation(splines:String,version:int,updated_relation:Vector2):#
 		###...
 		#print(building_weights.x,' building weights x')
 		#print(building_weights.y,' building weights y')
-		#weight_interpolation['weight'] = ((1.0/cell_size)*building_weights.x ) * ((1.0/cell_size)*building_weights.y)
-		#weight_interpolation['weight'] =(building_weights.x/cell_size) * (building_weights.y/cell_size)
-		weight_interpolation['weight'] = snappedf((building_weights.x * building_weights.y),.01)
 		
-		### unneeded in mls mpm cause of the affine and force combination...
-		#weight_interpolation['gradient'] =((1.0/cell_size) * ((1.0/cell_size)*building_weights.y)) * (((1.0/cell_size)*building_weights.x ) * (1.0/cell_size))
-		#weight_interpolation['gradient'] = Vector2((( (1.0/cell_size) * ((1.0/cell_size)*building_weights.x ) ) * ((1.0/cell_size)*building_weights.y)),   ((1.0/cell_size)*building_weights.x ) *  ((1.0/cell_size) * ((1.0/cell_size)*building_weights.y)))
+		weight_interpolation['weight'] = snappedf((building_weights.x * building_weights.y),.0001)
+		#weight_interpolation['weight'] = (building_weights.x * building_weights.y)
+		#print(building_weights.y,' building weights y')
 		
+
 	elif splines == "cubic":
 		pass
 	
@@ -275,7 +265,9 @@ func Grid_Reset(material:Object):#,matrix_math:Object):#,the_grid:Dictionary):
 		
 		# from the base node the 9 surrounding nodes...
 		#material.particle_mechanics[particle]['eulerian'] = [Vector2(round(material.particle_lineation[particle].origin.x),round(material.particle_lineation[particle].origin.y))]
-		#"""
+		#print(euler_base,' euler_base')
+		
+		"""
 		material.particle_mechanics[particle]['eulerian'] = [Vector2(euler_base.x-1,euler_base.y+1),
 		Vector2(euler_base.x,euler_base.y+1),
 		Vector2(euler_base.x+1,euler_base.y+1),
@@ -287,8 +279,30 @@ func Grid_Reset(material:Object):#,matrix_math:Object):#,the_grid:Dictionary):
 		Vector2(euler_base.x+1,euler_base.y-1),
 		]
 		#"""
-		
-		
+		"""
+		material.particle_mechanics[particle]['eulerian'] = [Vector2(euler_base.x,euler_base.y),
+		Vector2(euler_base.x+grid_spacing,euler_base.y),
+		Vector2(euler_base.x+(grid_spacing*2),euler_base.y),
+		Vector2(euler_base.x,euler_base.y-grid_spacing),
+		Vector2(euler_base.x+grid_spacing,euler_base.y-grid_spacing),
+		Vector2(euler_base.x+(grid_spacing*2),euler_base.y-grid_spacing),
+		Vector2(euler_base.x,euler_base.y-(grid_spacing*(grid_spacing*2))),
+		Vector2(euler_base.x+grid_spacing,euler_base.y-(grid_spacing*2)),
+		Vector2(euler_base.x+(grid_spacing*2),euler_base.y-(grid_spacing*2)),
+		]
+		#"""
+		#"""
+		material.particle_mechanics[particle]['eulerian'] = [Vector2(euler_base.x-grid_spacing,euler_base.y-grid_spacing),
+		Vector2(euler_base.x,euler_base.y-grid_spacing),
+		Vector2(euler_base.x+grid_spacing,euler_base.y-grid_spacing),
+		Vector2(euler_base.x-grid_spacing,euler_base.y),
+		Vector2(euler_base.x,euler_base.y),
+		Vector2(euler_base.x+grid_spacing,euler_base.y),
+		Vector2(euler_base.x-grid_spacing,euler_base.y+grid_spacing),
+		Vector2(euler_base.x,euler_base.y+grid_spacing),
+		Vector2(euler_base.x+grid_spacing,euler_base.y+grid_spacing),
+		]
+		#"""
 		#print(material.particle_lineation[particle].origin,' origin check')
 		#print(euler_base,' euler_base check')
 		#print()
@@ -359,7 +373,7 @@ func Particles_to_Grid(time_passed:float,material:Object):
 		var differentiate_transposed_energy  = [0,0,0,0]
 		var q_differentiated_stressed_summed = [0,0,0,0]
 		
-		var affline_force_contribution = Vector2(0,0)
+		var affline_force_contribution = [0,0,0,0]
 		#print(' ')
 		#for other_particle in material.particle_mechanics.keys():
 		
@@ -386,80 +400,89 @@ func Particles_to_Grid(time_passed:float,material:Object):
 		elif material.physical_state == 'gas':
 			energy_density_is_known = true
 			pass
-			
-			
+		#print(affline_force_contribution,' affline_force_contribution check')
+		
 		if energy_density_is_known == true:
+			### MLS MPM:  fuses the scattering of the affine momentum and particle force contribution
+			# weight_interpolation * (Q)* (relation_between_grid_node_and_particle)
+			#Q = time * particle intial volume * D^-1 * differentiate(energy density)/differentiate(F) * F * F_transposed + partical mass * C
+			# D^-1 = (4/pow(grid_spacing,2)) * particle.I^-1
+			
 			var volumed_energy = matrix_math.Multiply_Matrix_by_Scalar(energy_denisty_coeficient,material.volume,true)
 			var F_transposed = matrix_math.Transposed_Matrix(material.particle_mechanics[particle]['F'])
-			
+				
 			var transposed_volumed_energy = matrix_math.Multiply_Matrix(volumed_energy,F_transposed)
-			
-			var basis_coefficient = 4.0 / pow(grid_spacing,2)
+				
+			var basis_coefficient = 4.0 / pow(material.appearance.x,2)
 			#print(basis_coefficient,' basis_coefficient check')
 			var inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
 			var differentiate_weight_interpolation = matrix_math.Multiply_Matrix_by_Scalar(inverse_I_coefficient,basis_coefficient,true)
-			
+				
 			differentiate_transposed_energy = matrix_math.Multiply_Matrix(transposed_volumed_energy,differentiate_weight_interpolation)
 			differentiate_transposed_energy = matrix_math.Multiply_Matrix_by_Scalar(differentiate_transposed_energy,-1.0,true)
-			
+				
 			var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
-			
-			affline_force_contribution = matrix_math.Add_Matrix(differentiate_transposed_energy,q_mass_C) 
+				
+			affine = matrix_math.Add_Matrix(differentiate_transposed_energy,q_mass_C) 
 			#print(affline_force_contribution,' affine check')
 		else:
 			### MLS MPM:  fuses the scattering of the affine momentum and particle force contribution
-			# weight_interpolation * (Q)* (relation_between_particle_grid_node)
-			#Q = time * D^-1 * particle initial volume * differentiate(energy density)/differentiate(F) * F * F_transposed + mass * C (original form)
-			#  or ; if energy density is unknown.
-			#Q = - sum of ( time * volume of material occupied at p * stess * (differentiate)weight_interpolation) + mass * C
+			# weight_interpolation * (Q)* (relation_between_grid_node_and_particle)
+			#  if energy density is unknown.
+			#Q = - sum of (volume of material occupied at p * stess * (differentiate)weight_interpolation + mass * C)
 			#(differentiate)weight_interpolation = weight_interpolation * D^-1 * (relation_between_particle_grid_node)
 			# D^-1 = (4/pow(cell_size,2)) * particle.I^-1
-		
-			var q_timed_volumed = material.particle_mechanics[particle]['volume'] * time_passed
-			var q_volumed_stress =  matrix_math.Multiply_Matrix_by_Scalar( material.particle_mechanics[particle]['stress'],q_timed_volumed,true)
-			
-			var basis_coefficient = 4.0 / pow(grid_spacing,2)
-			#print(basis_coefficient,' basis_coefficient check')
+				
+			#var q_timed_volumed =  time_passed * material.particle_mechanics[particle]['volume']
+			var q_volumed_stress =  matrix_math.Multiply_Matrix_by_Scalar( material.particle_mechanics[particle]['stress'],material.particle_mechanics[particle]['volume'],true)
+			var q_volumed_stress_coefficient = matrix_math.Multiply_Matrix_by_Scalar(q_volumed_stress,4.0,true)
+			var q_stressed_coefficient = matrix_math.Divide_Matrix_by_Scalar(q_volumed_stress_coefficient,pow(grid_spacing,2),true)
+				
 			var inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
-			var differentiate_weight_interpolation = matrix_math.Multiply_Matrix_by_Scalar(inverse_I_coefficient,basis_coefficient,true)
-			
-			var q_differentiated_stresse_coefficient = matrix_math.Multiply_Matrix(q_volumed_stress,differentiate_weight_interpolation)
-			
-			q_differentiated_stressed_summed = matrix_math.Add_Matrix(q_differentiated_stressed_summed,q_differentiated_stresse_coefficient)
-			q_differentiated_stressed_summed = matrix_math.Multiply_Matrix_by_Scalar(q_differentiated_stressed_summed,-1.0,true)
-			
+			var weighted_stressed_I = matrix_math.Multiply_Matrix(inverse_I_coefficient,q_stressed_coefficient)
+			var negative_weighted_stressed_I = matrix_math.Divide_Matrix_by_Scalar(weighted_stressed_I,-1.0,true)
+			#weighted_stressed_I = weighted_stressed_I +
+				
 			var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
-			
-			affline_force_contribution = matrix_math.Add_Matrix(q_differentiated_stressed_summed,q_mass_C)
-		#print(affline_force_contribution,' affine check')
-			
-		
+				
+			affline_force_contribution = matrix_math.Add_Matrix(negative_weighted_stressed_I,q_mass_C)
+				
+
+		#print(material.particle_mechanics[particle]['eulerian'],' material.particle_mechanics[particle][eulerian]')
 		for node in material.particle_mechanics[particle]['eulerian']:
 			#print()
 			#print(different_number,' number check')
+			#print(material.particle_lineation[particle].origin,' material.particle_lineation[particle].origin')
+			#print(node,' node')
+			
+			#relation_between_particle_and_grid_node = Vector2(snapped(material.particle_lineation[particle].origin.x - (node.x+(grid_spacing/2.0)),.01),snapped(material.particle_lineation[particle].origin.y - (node.y+(grid_spacing/2.0)),.01))
+			#relation_between_grid_node_and_particle = Vector2(snapped((node.x+(grid_spacing/2.0)) - material.particle_lineation[particle].origin.x,.01),snapped((node.y+(grid_spacing/2.0)) - material.particle_lineation[particle].origin.y,.01))
 			
 			relation_between_particle_and_grid_node = Vector2(snapped(material.particle_lineation[particle].origin.x - node.x,.01),snapped(material.particle_lineation[particle].origin.y - node.y,.01))
 			relation_between_grid_node_and_particle = Vector2(snapped(node.x - material.particle_lineation[particle].origin.x,.01),snapped(node.y - material.particle_lineation[particle].origin.y,.01))
 			
-			var updated_relation = (1.0/grid_spacing) * relation_between_particle_and_grid_node
-					
-			#print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node check')
-			stored_relation.append(relation_between_particle_and_grid_node)
-		
-			Weight_Interpolation(basis,basis_function_version,updated_relation)#,grid_spacing)
-			#print(weight_interpolation['weight'],' weight_interpolation check' )
 			
+			
+			#print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node check')
+			var updated_relation = (1.0/grid_spacing) * relation_between_particle_and_grid_node
+			#print((1.0/grid_spacing),' (1.0/grid_spacing) check')
+			#print(updated_relation,' updated_relation check')
+			Weight_Interpolation(basis,basis_function_version,updated_relation)#,grid_spacing)
+			#print(weight_interpolation['weight'],' weight_interpolation[weight] check')
+
+			#affline_force_contribution = matrix_math.Add_Matrix(affline_force_contribution,q_weighted_mass_C)
+				
+			var weighted_affine_force = matrix_math.Multiply_Matrix_by_Scalar(affline_force_contribution,weight_interpolation['weight'],true)
+			affine = matrix_math.Multiply_Matrix_by_Vector2_to_Vector2(weighted_affine_force,relation_between_grid_node_and_particle)
+				
 			### MPM lumped mass
 			#grid_nodes[node]['mass'] = grid_nodes[node]['mass'] + (material.mass * weight_interpolation['weight'])
-				
+			
 			### MLS MPM lumped mass
 			#print(material.mass, ' material.mass check')
 			#print(material.particle_mechanics[particle]['euler data']['mass'], ' [euler data][mass] check')
 			#print(weight_interpolation['weight'], ' weight_interpolation[weight] check')
-			grid_nodes[node]['mass'] = grid_nodes[node]['mass'] + (material.mass * weight_interpolation['weight'])
-			
-			stored_node.append(node)
-			var affine = matrix_math.Multiply_Matrix_by_Vector2_to_Vector2(affline_force_contribution,relation_between_grid_node_and_particle)
+			grid_nodes[node]['mass'] = snappedf((grid_nodes[node]['mass'] + (material.mass * weight_interpolation['weight'])),.001)
 			
 			#print(material.particle_mechanics[particle]['initial velocity'], ' initial velocity check')
 			#print(grid_nodes[node]['mass'], ' mass check')
@@ -467,25 +490,10 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			
 			grid_nodes[node]['momentum'] = grid_nodes[node]['momentum'] + (grid_nodes[node]['mass'] * (material.particle_mechanics[particle]['initial velocity'] + affine))
 			
-			#different_number = different_number + 1
 			
-		#while number < len(material.particle_mechanics[particle]['eulerian']):
-			### MPM momentum.
-			#material.particle_mechanics[particle]['euler data']['momentum'] = material.particle_mechanics[particle]['euler data']['momentum'] + (material.particle_mechanics[particle]['euler data']['mass'] * ( material.initial_velocity + ( matrix_math.Multiply_Matrix_by_Vector2_to_Vector2(material.particle_mechanics[particle]['C'],stored_relation[number]))))
-				
-			### MLS MPM momentum
-			#var C_velocity = material.particle_mechanics[particle]['velocity'] + matrix_math.Multiply_Matrix_by_Vector2_to_Vector2(material.particle_mechanics[particle]['C'],stored_relation[number])
-			#var C_velocity = material.initial_velocity + matrix_math.Multiply_Matrix_by_Vector2_to_Vector2(material.particle_mechanics[particle]['C'],stored_relation[number])
-				
-			#material.particle_mechanics[particle]['euler data']['momentum'] = material.particle_mechanics[particle]['euler data']['momentum'] + (C_velocity * material.particle_mechanics[particle]['euler data']['mass'])
-			#print(material.particle_mechanics[particle]['euler data']['momentum'],' [euler data][momentum] check')
-			
-			### MLS MPM thru affine momentum and particle force contribution
-			#grid_nodes[stored_node[number]]['momentum'] = grid_nodes[stored_node[number]]['momentum'] + (grid_nodes[stored_node[number]]['mass'] * (material.initial_velocity + (stored_affine[number]*stored_relation[number])))
-			
-			#number = number + 1
-		
 		identify_number = wrapi(identify_number+1,0,len(material.particle_mechanics.keys())+1)
+	#print(len(grid_nodes.keys()),' number of gride nodes',grid_nodes )
+	
 
 #func Grid_Update(material:Object,the_grid:Dictionary):#,outside_forces:Vector2):
 func Grid_Update(time_passed:float,material:Object):
@@ -493,17 +501,28 @@ func Grid_Update(time_passed:float,material:Object):
 	#print('Grid_Update check')
 	#Grid Update:
 	#print()
+	#print(len(grid_nodes.keys()),' number of gride nodes')
 	for node in grid_nodes.keys():
 	
 		if grid_nodes[node]['mass'] > 0.0:
-			#print(grid_nodes[node], ' [momentum] check')
+		#	print()
+			#print(grid_nodes[node]['momentum'], ' [momentum] check')
 			#print(grid_nodes[node]['mass'], ' [mass] check')
 			#print(time_passed, ' time_passed check')
 			#print(gravity, ' gravity check')
+			#print(node,' ',grid_nodes[node]['momentum'], ' momentum before check')
 			#print((time_passed *( grid_nodes[node]['mass'] * gravity)), ' (time_passed * grid_nodes[node][mass] * gravity) check')
 			grid_nodes[node]['momentum'] = grid_nodes[node]['momentum'] + (time_passed * (grid_nodes[node]['mass'] * gravity))
-			grid_nodes[node]['velocity'] = grid_nodes[node]['momentum'] / grid_nodes[node]['mass']
-			#print(node,' ',grid_nodes[node], ' node update check')
+			#print(grid_nodes[node]['momentum'], ' [momentum] before mass check')
+			if grid_nodes[node]['mass'] > 1.0:
+			#	print('a')
+				grid_nodes[node]['velocity'] = grid_nodes[node]['momentum'] / grid_nodes[node]['mass']
+			else:
+			#	print('b')
+			#	print(( 1.0/ grid_nodes[node]['mass']),' check')
+				grid_nodes[node]['velocity'] = grid_nodes[node]['momentum'] * ( 1.0/ grid_nodes[node]['mass'])
+			#print(node,' ',grid_nodes[node]['momentum'], ' momentum update check')
+			#print(node,' ',grid_nodes[node]['velocity'], ' velocity update check')
 	
 #func Collision_Detection(material:Object,the_grid:Dictionary):
 #func Collision_with_Wall(material:Object,the_grid:Dictionary):
@@ -564,6 +583,7 @@ func Collision_with_Wall(material:Object):
 						#print(collision_results,' testing collision')
 						grid_nodes[node]['velocity'] = collision_results
 						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
+						
 					elif topright.y > barriers['window outline']['bottom']['outline'] or bottomright.y > barriers['window outline']['bottom']['outline'] or bottomleft.y > barriers['window outline']['bottom']['outline'] or topleft.y > barriers['window outline']['bottom']['outline'] :
 						### the particle braches the bottom of the window...
 						### collision with the wall...
@@ -571,6 +591,7 @@ func Collision_with_Wall(material:Object):
 						#print(collision_results,' bottom testing collision')
 						grid_nodes[node]['velocity'] = collision_results
 						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
+						
 					elif topright.x < barriers['window outline']['left']['outline'] or bottomright.x < barriers['window outline']['left']['outline'] or bottomleft.x < barriers['window outline']['left']['outline'] or topleft.x < barriers['window outline']['left']['outline'] :
 						### the particle braches the left of the window...
 						### collision with the wall...
@@ -578,6 +599,7 @@ func Collision_with_Wall(material:Object):
 						#print(collision_results,' testing collision')
 						grid_nodes[node]['velocity'] = collision_results
 						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
+					
 					elif topright.y < barriers['window outline']['top']['outline'] or bottomright.y < barriers['window outline']['top']['outline'] or bottomleft.y < barriers['window outline']['top']['outline'] or topleft.y < barriers['window outline']['top']['outline'] :
 						### the particle braches the top of the window...
 						### collision with the wall...
@@ -585,7 +607,8 @@ func Collision_with_Wall(material:Object):
 						#print(collision_results,' testing collision')
 						grid_nodes[node]['velocity'] = collision_results
 						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
-		
+						
+					
 		identify_number = wrapi(identify_number+1,0,len(grid_nodes.keys())+1)
 	
 
@@ -648,9 +671,11 @@ func Particle_Reset(material:Object):
 		particle = material.particle_mechanics.keys()[identify_number]
 		
 		material.particle_mechanics[particle]['mass'] = material.mass
+		#material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
 		material.particle_mechanics[particle]['velocity'] = Vector2(0.0,0.0)
-		material.particle_mechanics[particle]['B'] = [0,0,0,0]
 		
+		material.particle_mechanics[particle]['B'] = [0,0,0,0]
+		#material.particle_mechanics[particle]['C'] = [0,0,0,0]
 		### loop counter...
 		identify_number = wrapi(identify_number+1,0,len(material.particle_mechanics.keys())+1)
 
@@ -673,60 +698,68 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		particle = material.particle_mechanics.keys()[identify_number]
 	
 		sum_of_c_weighted_velocity_matrix = [0,0,0,0]
-		var stored_relation = []
+		#var stored_relation = []
 		var number = 0
 		#print('')
 		#print( 'start g2p')
 		#print('')
 		#print(material.particle_mechanics[particle]['velocity'],' velocity')
-		
+		#print(material.particle_mechanics[particle]['velocity'],' material.particle_mechanics[particle][velocity] check start')
+		#print(material.particle_mechanics[particle]['B'],' B before check')
 		for node in material.particle_mechanics[particle]['eulerian']:
-			if grid_nodes[node]['mass'] > 0.0:
-				relation_between_particle_and_grid_node = Vector2(snapped(material.particle_lineation[particle].origin.x - node.x,.01),snapped(material.particle_lineation[particle].origin.y - node.y,.01))
-				relation_between_grid_node_and_particle = Vector2(snapped(node.x - material.particle_lineation[particle].origin.x,.01),snapped(node.y - material.particle_lineation[particle].origin.y,.01))
-				
-				stored_relation.append(relation_between_particle_and_grid_node)
-				
-				var updated_relation = (1.0/grid_spacing) * relation_between_particle_and_grid_node
-						
-				Weight_Interpolation(basis,basis_function_version,updated_relation)#,grid_spacing)
-					
-				### MPM,MLS MPM paraticle velocity update
-				# particle Velocity = sum of ( grid velocity * weight_interpolation )
-				#B = sum of (weight interpolation * grid velocity * relation between particles transposed )
-					
-				material.particle_mechanics[particle]['velocity'] = material.particle_mechanics[particle]['velocity'] + ( grid_nodes[node]['velocity'] * weight_interpolation['weight'])
-				#print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node check')
-				#print(material.particle_mechanics[particle]['velocity'],' material.particle_mechanics[particle][velocity] check')
-				var velocity_relation = matrix_math.Multiply_Vector2_by_Vector2_to_Matrix(material.particle_mechanics[particle]['velocity'],false,relation_between_grid_node_and_particle,true)
-				#print(material.particle_mechanics[particle]['B'],' B check')
-				#print(velocity_relation,' velocity_relation check')
-				material.particle_mechanics[particle]['B'] = matrix_math.Add_Matrix(material.particle_mechanics[particle]['B'],velocity_relation)
-					
-		
-		#while number < len(material.particle_mechanics[particle]['eulerian']):
-			# MPM B, MLS MPM
-			#material.particle_mechanics[particle]['B'] = material.particle_mechanics[particle]['velocity']
-			#print(stored_relation[number],' stored_relation[number] check')
-			#var velocity_relation = matrix_math.Multiply_Vector2_by_Vector2_to_Matrix(material.particle_mechanics[particle]['velocity'],false,stored_relation[number],true)
+			#if grid_nodes[node]['mass'] > 0.0:
+			#print()
+			#print(node,' node check')
+			#relation_between_particle_and_grid_node = Vector2(snapped(material.particle_lineation[particle].origin.x - (node.x+(grid_spacing/2.0)),.01),snapped(material.particle_lineation[particle].origin.y - (node.y+(grid_spacing/2.0)),.01))
+			#relation_between_grid_node_and_particle = Vector2(snapped((node.x+(grid_spacing/2.0)) - material.particle_lineation[particle].origin.x,.01),snapped((node.y+(grid_spacing/2.0)) - material.particle_lineation[particle].origin.y,.01))
+			
+			relation_between_particle_and_grid_node = Vector2(snapped(material.particle_lineation[particle].origin.x - node.x,.01),snapped(material.particle_lineation[particle].origin.y - node.y,.01))
+			relation_between_grid_node_and_particle = Vector2(snapped(node.x - material.particle_lineation[particle].origin.x,.01),snapped(node.y - material.particle_lineation[particle].origin.y,.01))
+			
+			
+			#print(relation_between_grid_node_and_particle,' relation_between_grid_node_and_particle check')
+			
+			var updated_relation = (1.0/grid_spacing) * relation_between_grid_node_and_particle
+			#print(updated_relation,' updated_relation check')
+			Weight_Interpolation(basis,basis_function_version,updated_relation)#,grid_spacing)
+			#print(weight_interpolation['weight'],' weight_interpolation[weight] check')
+			
+			### MPM,MLS MPM paraticle velocity update
+			# particle Velocity = sum of ( grid velocity * weight_interpolation )
+			#B = sum of (weight interpolation * grid velocity * relation between particles transposed )
+			#print(grid_nodes[node]['velocity'],' grid_nodes[node][velocity] check')
+			material.particle_mechanics[particle]['velocity'] = material.particle_mechanics[particle]['velocity'] + ( grid_nodes[node]['velocity'] * weight_interpolation['weight'])
+			#print(material.particle_mechanics[particle]['velocity'],' material.particle_mechanics[particle][velocity] check just added')
+			#print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node check')
+			#print(material.particle_mechanics[particle]['velocity'],' material.particle_mechanics[particle][velocity] check')
+			var velocity_relation = matrix_math.Multiply_Vector2_by_Vector2_to_Matrix(material.particle_mechanics[particle]['velocity'],false,relation_between_grid_node_and_particle,true)
 			#print(material.particle_mechanics[particle]['B'],' B check')
 			#print(velocity_relation,' velocity_relation check')
-			#material.particle_mechanics[particle]['B'] = matrix_math.Add_Matrix(material.particle_mechanics[particle]['B'],velocity_relation)
-				
-			#number = number + 1
-				
+			material.particle_mechanics[particle]['B'] = matrix_math.Add_Matrix(material.particle_mechanics[particle]['B'],velocity_relation)
+			#print(material.particle_mechanics[particle]['B'],' B during check')
+			
+			
+		#print()
+		#print(material.particle_mechanics[particle]['velocity'],' material.particle_mechanics[particle][velocity] check')
 		#MLS MPM 
-		#particle.C = D^-1 * B
-		# B =  sum of the_grid( particle.velocity * flipped_kernel_distance^T )
-		# D^-1 = (4/pow(cell_size,2)) * particle.I^-1
+		#particle.C = B * D^-1
+		# B =  sum of the_grid( (particle.velocity*weight_interpolation) * flipped_kernel_distance^T )
+		# D^-1 = (4/pow(grid_spacing,2)) * particle.I^-1
 		### Compute C
-		c_cell_coefficient =  snapped((basis_coefficient / pow(grid_spacing,2.0)),.01)
-		c_inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
-		c_cell_inverse_coefficient = matrix_math.Multiply_Matrix_by_Scalar(c_inverse_I_coefficient,c_cell_coefficient,true)
 		
-		#print(material.particle_mechanics[particle]['B'],' B check')
+		var b_cell_coefficient = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['B'],4.0,true)
+		var b_coefficient = matrix_math.Divide_Matrix_by_Scalar(b_cell_coefficient,pow(grid_spacing,2.0),true)
+		c_inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
+		#print(c_inverse_I_coefficient,' c_cell_inverse_coefficient check')
+		material.particle_mechanics[particle]['C'] = matrix_math.Multiply_Matrix(b_coefficient,c_inverse_I_coefficient)
+		#c_cell_coefficient =  snapped((4.0 / pow(material.appearance.x,2.0)),.01)
+		#c_cell_coefficient =  snapped((4.0 / pow(grid_spacing,2.0)),.01)
+		#c_inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
+		#c_cell_inverse_coefficient = matrix_math.Multiply_Matrix_by_Scalar(c_inverse_I_coefficient,c_cell_coefficient,true)
+		
+		#print(material.particle_mechanics[particle]['B'],' B after check')
 		#print(c_cell_inverse_coefficient,' c_cell_inverse_coefficient check')
-		material.particle_mechanics[particle]['C'] = matrix_math.Multiply_Matrix(c_cell_inverse_coefficient,material.particle_mechanics[particle]['B'])
+		#material.particle_mechanics[particle]['C'] = matrix_math.Multiply_Matrix(c_cell_inverse_coefficient,material.particle_mechanics[particle]['B'])
 		#print(material.particle_mechanics[particle]['C'],' C check')
 		
 		
@@ -766,9 +799,6 @@ func Grid_to_Particle(time_passed:float,material:Object):
 			constitutive_models.Update_Plasticity(material,particle,material.type_of_substance)
 			#print(material.particle_mechanics[particle]['F'],' F after P check')
 			updating_plasticity = false
-		
-		
-		
 		
 		
 		#print(material.particle_mechanics[particle]['F'],' F check')
