@@ -125,3 +125,9 @@ V.8.5.0:
 |
 ---- adjustments to how Particle Collision with the Wall (window outline)
      v4.1.beta1.official [828ec2c5d]
+
+V.8.6.0:
+|
+--- slight corrections to the math of the mpm program
+--- also updated how the grid is handled.
+    v4.1.rc1.official [1f9e540f1]
