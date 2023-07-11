@@ -67,7 +67,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(128,128)
 	#domain_size = Vector2(100,100)
 	#domain_size = Vector2(82,82)
-	#domain_size = Vector2(75,75)
+	domain_size = Vector2(75,75)
 	#domain_size = Vector2(60,60)
 	#domain_size = Vector2(50,50)
 	#domain_size = Vector2(39,39)
@@ -80,7 +80,7 @@ func Initial_Collection_Of_Substance():
 	#domain_size = Vector2(6,6)
 	#domain_size = Vector2(5,5)
 	#domain_size = Vector2(4,4)
-	domain_size = Vector2(3,3)
+	#domain_size = Vector2(3,3)
 	#domain_size = Vector2(2,2)
 	#domain_size = Vector2(1,1)
 	
@@ -232,7 +232,7 @@ func _on_alchemy_lab_ready():
 				pass
 		else:
 			#one_substance = true
-			#gathered_into_chunks = true
+			gathered_into_chunks = true
 			pass
 				
 		if gathered_into_chunks == false and one_substance == false:
@@ -304,8 +304,8 @@ func _on_alchemy_lab_ready():
 		###
 		###...
 		substance = load("res://Substance.tscn").instantiate()
-		#"""
-		substance.coefficient_of_restitution = .85
+		"""
+		substance.coefficient_of_restitution = 1.0
 		substance.coefficient_of_static_friction = 0.5
 		substance.coefficient_of_kinetic_friction = 0.5
 		substance.physical_state = 'none'
@@ -314,7 +314,7 @@ func _on_alchemy_lab_ready():
 		substance.poisson_ratio = 0.0
 		substance.youngs_modulus = 0.0
 		#"""
-		"""
+		#"""
 		substance.coefficient_of_restitution = 9.0 #rubber
 		substance.coefficient_of_static_friction = 0.80 #rubber
 		substance.coefficient_of_kinetic_friction = 0.60 #rubber

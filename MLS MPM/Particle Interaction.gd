@@ -92,9 +92,9 @@ func Collision_with_Walls(breach,mote,particle_boundary,baluster,structure,cell_
 		collision_static_friction = baluster['window outline']['top']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['top']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		
-		#baluster['window outline']['top']['velocity'] = Vector2(0.0,0.0)
+		#if structure['velocity'].y > 0:
 		
-		baluster['window outline']['top']['velocity'] = Vector2(0.0,10) 
+		baluster['window outline']['top']['velocity'] = Vector2(0,0)
 		wall_center = Vector2(particle_boundary.origin.x,0.0)
 		
 		if collision_restitution >= 1.0 :
@@ -157,7 +157,7 @@ func Collision_with_Walls(breach,mote,particle_boundary,baluster,structure,cell_
 		collision_static_friction = baluster['window outline']['right']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['right']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		
-		baluster['window outline']['right']['velocity'] = Vector2(-10.0,0.0)
+		baluster['window outline']['right']['velocity'] = Vector2(0,0.0)
 		
 		wall_center = Vector2(baluster['window outline']['right']['outline'],particle_boundary.origin.y)
 		
@@ -218,7 +218,7 @@ func Collision_with_Walls(breach,mote,particle_boundary,baluster,structure,cell_
 		collision_static_friction = baluster['window outline']['bottom']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['bottom']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		
-		baluster['window outline']['bottom']['velocity'] = Vector2(0,-10)
+		baluster['window outline']['bottom']['velocity'] = Vector2(0,0)
 		
 		wall_center = Vector2(particle_boundary.origin.x,baluster['window outline']['bottom']['outline'])
 		
@@ -276,7 +276,7 @@ func Collision_with_Walls(breach,mote,particle_boundary,baluster,structure,cell_
 		collision_static_friction = baluster['window outline']['left']['coefficient of static friction'] * mote.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['window outline']['left']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
 		
-		baluster['window outline']['left']['velocity'] = Vector2(10.0,0.0)
+		baluster['window outline']['left']['velocity'] = Vector2(0,0)
 		
 		wall_center = Vector2(0.0,particle_boundary.origin.y)
 		

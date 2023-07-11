@@ -14,7 +14,7 @@ var grid_nodes : Dictionary = {}
 var station : Vector2
 #var identify_grid_reach : Array = []
 #var gravity : Vector2
-var gravity : Vector2 = Vector2(0.00,9.80)# * 100
+var gravity : Vector2 = Vector2(0.00,9.80)# * 10
 #var gravity : Vector2 = Vector2(0.00,-9.80)* 100
 #var gravity : Vector2 = Vector2(9.80,0.0) * 100
 #var gravity : Vector2 = Vector2(-9.80,0.0) * 100
@@ -102,8 +102,8 @@ func _on_Program_ready():
 	basis_coefficient = 4.0
 	basis_function_version = 1
 	
-	grid_spacing = (ProjectSettings.get_setting('display/window/size/viewport_width')*2.0) * ((ProjectSettings.get_setting('display/window/size/viewport_height')*2.0))
-	#grid_spacing = grid_cells
+	grid_cells = (ProjectSettings.get_setting('display/window/size/viewport_width')*2.0) * ((ProjectSettings.get_setting('display/window/size/viewport_height')*2.0))
+	grid_spacing = grid_cells #+ (grid_cells/2.0)
 	
 	#grid_cells = 16*9
 	#grid_spacing = 120
@@ -130,16 +130,16 @@ func _on_Program_ready():
 	#barriers['coefficient of restitution'] = 'disappear'
 	window_center = Vector2(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0,ProjectSettings.get_setting('display/window/size/viewport_height')/2.0)
 	for wall in barriers['window outline'].keys():
-		barriers['window outline'][wall]['coefficient of restitution'] = 1.5
+		barriers['window outline'][wall]['coefficient of restitution'] = 1.0
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.50
 		#barriers['window outline'][wall]['coefficient of restitution'] = 0.0
 		#barriers['window outline'][wall]['coefficient of static friction'] = 1.0
-		barriers['window outline'][wall]['coefficient of static friction'] = 0.80
+		barriers['window outline'][wall]['coefficient of static friction'] = 0.65
 		#barriers['window outline'][wall]['coefficient of static friction'] = 0.0
 		#barriers['window outline'][wall]['coefficient of kinetic friction'] = 1.0
-		barriers['window outline'][wall]['coefficient of kinetic friction'] = .650
+		barriers['window outline'][wall]['coefficient of kinetic friction'] = .80
 		#barriers['window outline'][wall]['coefficient of kinetic friction'] = 0.0
-		barriers['window outline'][wall]['mass'] = 1.00
+		barriers['window outline'][wall]['mass'] = 100.00
 		#barriers['window outline'][wall]['mass'] = 1.00
 		barriers['window outline']['top']['outline'] = 0.0
 		barriers['window outline']['right']['outline'] = ProjectSettings.get_setting('display/window/size/viewport_width')
@@ -408,22 +408,33 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			#Q = time * particle intial volume * D^-1 * differentiate(energy density)/differentiate(F) * F * F_transposed + partical mass * C
 			# D^-1 = (4/pow(grid_spacing,2)) * particle.I^-1
 			
-			var volumed_energy = matrix_math.Multiply_Matrix_by_Scalar(energy_denisty_coeficient,material.volume,true)
-			var F_transposed = matrix_math.Transposed_Matrix(material.particle_mechanics[particle]['F'])
-				
-			var transposed_volumed_energy = matrix_math.Multiply_Matrix(volumed_energy,F_transposed)
-				
-			var basis_coefficient = 4.0 / pow(material.appearance.x,2)
-			#print(basis_coefficient,' basis_coefficient check')
-			var inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
-			var differentiate_weight_interpolation = matrix_math.Multiply_Matrix_by_Scalar(inverse_I_coefficient,basis_coefficient,true)
-				
-			differentiate_transposed_energy = matrix_math.Multiply_Matrix(transposed_volumed_energy,differentiate_weight_interpolation)
-			differentiate_transposed_energy = matrix_math.Multiply_Matrix_by_Scalar(differentiate_transposed_energy,-1.0,true)
-				
+			var timed_volume_coefficient = time_passed * material.volume * 4.0 / pow(grid_spacing,2.0)
+			var timed_volume_I = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['I'],timed_volume_coefficient,true)
+			var energy_density_I = matrix_math.Multiply_Matrix(energy_denisty_coeficient,timed_volume_I)
+			
+			var  F_transposed = matrix_math.Transposed_Matrix(material.particle_mechanics[particle]['F'])
+			
+			var energy_density_I_transposed = matrix_math.Multiply_Matrix(energy_density_I,F_transposed)
+			
 			var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
 				
-			affine = matrix_math.Add_Matrix(differentiate_transposed_energy,q_mass_C) 
+			affline_force_contribution = matrix_math.Add_Matrix(energy_density_I_transposed,q_mass_C)
+			#var volumed_energy = matrix_math.Multiply_Matrix_by_Scalar(energy_denisty_coeficient,material.volume,true)
+			#var F_transposed = matrix_math.Transposed_Matrix(material.particle_mechanics[particle]['F'])
+				
+			#var transposed_volumed_energy = matrix_math.Multiply_Matrix(volumed_energy,F_transposed)
+				
+			#var basis_coefficient = 4.0 / pow(material.appearance.x,2)
+			#print(basis_coefficient,' basis_coefficient check')
+			#var inverse_I_coefficient = matrix_math.Inverse_Matrix(material.particle_mechanics[particle]['I'])
+			#var differentiate_weight_interpolation = matrix_math.Multiply_Matrix_by_Scalar(inverse_I_coefficient,basis_coefficient,true)
+				
+			#differentiate_transposed_energy = matrix_math.Multiply_Matrix(transposed_volumed_energy,differentiate_weight_interpolation)
+			#differentiate_transposed_energy = matrix_math.Multiply_Matrix_by_Scalar(differentiate_transposed_energy,-1.0,true)
+				
+			#var q_mass_C = matrix_math.Multiply_Matrix_by_Scalar(material.particle_mechanics[particle]['C'],material.mass,true)
+				
+			#affine = matrix_math.Add_Matrix(differentiate_transposed_energy,q_mass_C) 
 			#print(affline_force_contribution,' affine check')
 		else:
 			### MLS MPM:  fuses the scattering of the affine momentum and particle force contribution
@@ -558,12 +569,12 @@ func Collision_with_Wall(material:Object):
 					#var bottomright = Vector2(snapped(material.particle_lineation[particle].origin.x,.01),snapped(material.particle_lineation[particle].origin.y,.01)) + Vector2((material.appearance.x/2.0),(material.appearance.y/2.0))
 					#var bottomleft = Vector2(snapped(material.particle_lineation[particle].origin.x,.01),snapped(material.particle_lineation[particle].origin.y,.01)) + Vector2(-(material.appearance.x/2.0),(material.appearance.y/2.0))
 					
-					### Rotating Particles...
+					### psition of Rotating Particles...
 					var topright = Vector2(0,0)
 					var bottomright = Vector2(0,0)
 					var bottomleft = Vector2(0,0)
 					var topleft = Vector2(0,0)
-					
+
 					topright.x = material.particle_lineation[particle].origin.x + ((material.appearance.x /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation()))) - ((material.appearance.y /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					topright.y = material.particle_lineation[particle].origin.y + ((material.appearance.x /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation()))) + ((material.appearance.y /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					
@@ -576,38 +587,30 @@ func Collision_with_Wall(material:Object):
 					topleft.x = material.particle_lineation[particle].origin.x - ((material.appearance.x /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation()))) - ((material.appearance.y /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					topleft.y = material.particle_lineation[particle].origin.y -((material.appearance.x /2.0) * sin(rad_to_deg(material.particle_lineation[particle].get_rotation()))) + ((material.appearance.y /2.0) * cos(rad_to_deg(material.particle_lineation[particle].get_rotation())))
 					
-					if topright.x > barriers['window outline']['right']['outline'] or bottomright.x > barriers['window outline']['right']['outline'] or bottomleft.x > barriers['window outline']['right']['outline'] or topleft.x > barriers['window outline']['right']['outline'] :
-						### the particle braches the right of the window...
-						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('right',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
-						#print(collision_results,' testing collision')
-						grid_nodes[node]['velocity'] = collision_results
-						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
-						
-					elif topright.y > barriers['window outline']['bottom']['outline'] or bottomright.y > barriers['window outline']['bottom']['outline'] or bottomleft.y > barriers['window outline']['bottom']['outline'] or topleft.y > barriers['window outline']['bottom']['outline'] :
-						### the particle braches the bottom of the window...
-						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('bottom',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
-						#print(collision_results,' bottom testing collision')
-						grid_nodes[node]['velocity'] = collision_results
-						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
-						
-					elif topright.x < barriers['window outline']['left']['outline'] or bottomright.x < barriers['window outline']['left']['outline'] or bottomleft.x < barriers['window outline']['left']['outline'] or topleft.x < barriers['window outline']['left']['outline'] :
-						### the particle braches the left of the window...
-						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('left',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
-						#print(collision_results,' testing collision')
-						grid_nodes[node]['velocity'] = collision_results
-						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
+					var particle_boundary = [topleft,topright,bottomright,bottomleft]
 					
-					elif topright.y < barriers['window outline']['top']['outline'] or bottomright.y < barriers['window outline']['top']['outline'] or bottomleft.y < barriers['window outline']['top']['outline'] or topleft.y < barriers['window outline']['top']['outline'] :
-						### the particle braches the top of the window...
-						### collision with the wall...
-						var collision_results =  particle_interaction.Collision_with_Walls('top',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
-						#print(collision_results,' testing collision')
-						grid_nodes[node]['velocity'] = collision_results
-						material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
-						
+					
+					for outline in particle_boundary:
+						if outline.y < barriers['window outline']['top']['outline']:
+							#print('top)')
+							#print(outline,' outline')
+							grid_nodes[node]['velocity'] = particle_interaction.Collision_with_Walls('top',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+							break
+						if outline.x > barriers['window outline']['right']['outline']:
+							#print('right)')
+							#print(outline,' outline')
+							grid_nodes[node]['velocity'] = particle_interaction.Collision_with_Walls('right',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+							break
+						if outline.y > barriers['window outline']['bottom']['outline']:
+							#print('bottom)')
+							#print(outline,' outline')
+							grid_nodes[node]['velocity'] =  particle_interaction.Collision_with_Walls('bottom',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+							break
+						if outline.x < barriers['window outline']['left']['outline']:
+							#print('left)')
+							#print(outline,' outline')
+							grid_nodes[node]['velocity'] = particle_interaction.Collision_with_Walls('left',material,material.particle_lineation[particle],barriers,grid_nodes[node],material.cell_size)
+							break
 					
 		identify_number = wrapi(identify_number+1,0,len(grid_nodes.keys())+1)
 	
@@ -671,7 +674,7 @@ func Particle_Reset(material:Object):
 		particle = material.particle_mechanics.keys()[identify_number]
 		
 		material.particle_mechanics[particle]['mass'] = material.mass
-		#material.particle_mechanics[particle]['initial velocity'] = grid_nodes[node]['velocity']
+		
 		material.particle_mechanics[particle]['velocity'] = Vector2(0.0,0.0)
 		
 		material.particle_mechanics[particle]['B'] = [0,0,0,0]
@@ -738,7 +741,7 @@ func Grid_to_Particle(time_passed:float,material:Object):
 			material.particle_mechanics[particle]['B'] = matrix_math.Add_Matrix(material.particle_mechanics[particle]['B'],velocity_relation)
 			#print(material.particle_mechanics[particle]['B'],' B during check')
 			
-			
+		material.particle_mechanics[particle]['initial velocity'] = material.particle_mechanics[particle]['velocity']
 		#print()
 		#print(material.particle_mechanics[particle]['velocity'],' material.particle_mechanics[particle][velocity] check')
 		#MLS MPM 
