@@ -2,8 +2,8 @@
 
 Looking to implementing MLS version of Material Point Method in Godot Engine.
 
-up to Version.8.5.0:
+up to Version.8.8.0:
 
 A project I wanted to work on and for that project, I ended up wanting/needed to use Material Point Method. 
 This is the MLS-version of Material Point Method I'm looking to implement. 
-I have been using Godot 4 , v4.1.beta1.official [828ec2c5d] being the latest
+I have been using Godot 4 , v4.1.stable.official [970459615] being the latest
