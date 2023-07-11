@@ -131,3 +131,10 @@ V.8.6.0:
 --- slight corrections to the math of the mpm program
 --- also updated how the grid is handled.
     v4.1.rc1.official [1f9e540f1]
+
+V.8.8.0:
+|
+---- slight changes to the grid  (apparently solved the domain size 1 exploding)
+     math correction to the math of the mpm program
+     slight changes to how the particle/s interact with wall( window outline) :: 
+     v4.1.stable.official [970459615]
