@@ -174,7 +174,9 @@ V.10.0.0:
              the length and width to determine the grid spacing. 
              As of right now if there isn't a greates common factor of the window, the idea/plan is the grid space defaults to 1.
              until something better is thought of.
-
+    
+    slight change/altered to file names (generally do the same as before)
+    old version is archived.
     As of now nothing else is back on.(Collision Detection for particles or wall,Constitutive Models, other thoughts)
 
     v4.2.stable.official [46dc27791] 
