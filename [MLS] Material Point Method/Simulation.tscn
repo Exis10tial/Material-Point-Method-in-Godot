@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7ml08itkt4by"]
+
+[ext_resource type="Script" path="res://Simulation.gd" id="1_ib0ye"]
+
+[node name="Simulation" type="Node"]
+script = ExtResource("1_ib0ye")
+
+[node name="canvas" type="Node2D" parent="."]
+visible = false
+
+[node name="container" type="Node" parent="."]

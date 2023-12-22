@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cb6dith5t2etl"]
+
+[ext_resource type="Script" path="res://PhysicalSubstance.gd" id="1_qj2dk"]
+
+[node name="(substance)" type="Node2D"]
+script = ExtResource("1_qj2dk")

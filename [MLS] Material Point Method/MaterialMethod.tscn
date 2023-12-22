@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxe2sx6j214mx"]
+
+[ext_resource type="Script" path="res://MaterialMethod.gd" id="1_q4270"]
+
+[node name="Material Method" type="Node"]
+script = ExtResource("1_q4270")
