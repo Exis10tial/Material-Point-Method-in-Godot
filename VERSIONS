@@ -143,3 +143,38 @@ V.8.8.1:
 |
 ---- slight changes to how the particle/s interact with wall( window outline) :: 
      v4.1.stable.official [970459615]
+
+
+V.9.0.0:
+|
+---- decided to updated to a new version. I sorta hit wall with multiple things.
+    ( my understanding of the particles and the grid.)
+    (weight interpolation between grid and particles.)
+    (how I created/arrange particles)
+    (collision detection/handling between the particles and also wall.)
+    (haven't properly tested any of the constitutive models yet)
+    (also creating/adding more particles without destroying FrameRate)
+    
+    so I decided restart/refresh a new version.
+
+V.10.0.0:
+|
+---- Change how I created/arranged particles :: 
+        Before in Old Version: each particle was It own entity(2D-Node). they was arrange in a square ( for simplicity)
+        
+        In the New Version: I change how particle are created/shifted. Now it is 1 polygon(2D Polygon Node)
+            and the particle are the points of the polygon.
+      
+      How I applied/practice the grid is is slightly altered::
+         Before in Old Version: start of a particle round to the closest whole numbers then 
+             collect the surrounding node. The particles would zoom/pop out of the window range the nano-second it started to run.
+             when the grid spacing was at least '8759' it would prevent the instant pop and the particles would fall at a reasonable pace.
+         
+         In the New Version: the default for the grid comes from the window size. That the greatest common factor between
+             the length and width to determine the grid spacing. 
+             As of right now if there isn't a greates common factor of the window, the idea/plan is the grid space defaults to 1.
+             until something better is thought of.
+
+    As of now nothing else is back on.(Collision Detection for particles or wall,Constitutive Models, other thoughts)
+
+    v4.2.stable.official [46dc27791] 
