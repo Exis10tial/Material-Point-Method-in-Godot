@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://tqolex7s81b5"]
-
-[ext_resource type="Script" path="res://Handle Collisions.gd" id="1_cr8tk"]
-
-[node name="Handle Collisions" type="Node"]
-script = ExtResource( "1_cr8tk" )
-
-[connection signal="ready" from="." to="." method="_on_handle_collisions_ready"]

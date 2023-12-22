@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://doxtk6xd7dhyu"]
-
-[ext_resource type="Script" path="res://Particle Interaction.gd" id="1_q7jcf"]
-
-[node name="Particle Interaction" type="Node"]
-script = ExtResource( "1_q7jcf" )

@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://c83qv845g4fye"]
-
-[ext_resource type="Script" path="res://Test Area.gd" id="1_sixgb"]
-
-[node name="Test Area" type="Node"]
-script = ExtResource("1_sixgb")
-
-[connection signal="ready" from="." to="." method="_on_Test_Area_ready"]

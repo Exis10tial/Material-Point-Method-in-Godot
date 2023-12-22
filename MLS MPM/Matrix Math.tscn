@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b8nng4mm5tiay"]
-
-[ext_resource type="Script" path="res://Matrix Math.gd" id="1_bukod"]
-
-[node name="Matrix Math" type="Node"]
-script = ExtResource( "1_bukod" )
-
-[connection signal="ready" from="." to="." method="_on_Matrix_Math_ready"]

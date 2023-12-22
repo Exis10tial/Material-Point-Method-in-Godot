@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://csfb3l777cove"]
-
-[ext_resource type="Script" path="res://Simulation.gd" id="1_v4avn"]
-
-[node name="Simulation" type="Node"]
-script = ExtResource("1_v4avn")
-
-[connection signal="ready" from="." to="." method="_on_ready"]
