@@ -7,3 +7,15 @@ up to Version.10.0.0:
 A project I wanted to work on and for that project, I ended up wanting/needed to use Material Point Method. 
 This is the MLS-version of Material Point Method I'm looking to implement. 
 I have been using Godot 4 , v4.2.stable.official [46dc27791] being the latest
+
+
+
+![mlsmpm verison 10 0 0  9 8 gravity check](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/9fc68a1a-fffa-4d91-887a-d2d99201a517)
+
+[Video Notes]
+Window Size is 1152 by 648
+Graivity is 9.8 
+Particle count is 100 
+Frames is steady 20
+Active Constitutive-Model is Neo-Hookean
+Just checking at 100 particles..
