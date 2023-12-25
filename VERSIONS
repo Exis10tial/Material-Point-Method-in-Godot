@@ -180,3 +180,9 @@ V.10.0.0:
     As of now nothing else is back on.(Collision Detection for particles or wall,Constitutive Models, other thoughts)
 
     v4.2.stable.official [46dc27791] 
+
+V.10.0.1:
+|
+---- Adjusted how to add/place/determine to amount of particles for a polygon (square) with vertex colors.
+v4.2.stable.official [46dc27791]
+
