@@ -33,32 +33,56 @@ func _ready():
 	### Creation of Mesh
 	physical_matter.effigy = Polygon2D.new()
 	
-	var starting_test_position = Vector2(ProjectSettings.get_setting('display/window/size/viewport_width')/2.0,ProjectSettings.get_setting('display/window/size/viewport_height')/2.0)
+	# create a square mesh...
+	var number_of_points = 99 
+	var points_per_side
+	var collection_of_points = []
+	var coloring_points = []
+	#make the number of particles a multiple of 4...
+	if number_of_points % 4 != 0:
+		##just the number of points to equal a multiple of 4.
+		
+		
+		var n = 0
+		
+		while 4 * n <= number_of_points:
+			n = n + 1
+		
+		number_of_points = 4 * n
+		
+	points_per_side = number_of_points / 4
 	
-	"""
-	physical_matter.effigy.set_polygon(PackedVector2Array([starting_test_position,
-	Vector2(starting_test_position.x+100,starting_test_position.y),
-	Vector2(starting_test_position.x,starting_test_position.y+100)]))
-	"""
+	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
 	
-	physical_matter.effigy.set_polygon(PackedVector2Array([starting_test_position,
-	Vector2(starting_test_position.x+50,starting_test_position.y),
-	Vector2(starting_test_position.x+100,starting_test_position.y),
-	Vector2(starting_test_position.x+100,starting_test_position.y+50),
-	Vector2(starting_test_position.x+100,starting_test_position.y+100),
-	Vector2(starting_test_position.x+50,starting_test_position.y+100),
-	Vector2(starting_test_position.x,starting_test_position.y+100),
-	Vector2(starting_test_position.x,starting_test_position.y+50)]))
+	var x_point = 0
+	var y_point = 0
 	
+	while len(collection_of_points) < number_of_points:
+		
+		if len(collection_of_points) >= points_per_side * 1 and len(collection_of_points) < points_per_side * 2:
+			### down the right: top to bottom..
+			collection_of_points.append(Vector2(starting_test_position.x+(4*x_point),starting_test_position.y+(4*y_point)))
+			y_point = y_point + 1
+		elif len(collection_of_points) >= points_per_side * 2 and len(collection_of_points) < points_per_side * 3:
+			### at the bottom : right to left
+			collection_of_points.append(Vector2(starting_test_position.x+(4*x_point),starting_test_position.y+(4*y_point)))
+			x_point = x_point - 1
+		elif len(collection_of_points) >= points_per_side * 3 and len(collection_of_points) < number_of_points:
+			### heading up : bottom to top
+			collection_of_points.append(Vector2(starting_test_position.x+(4*x_point),starting_test_position.y+(4*y_point)))
+			y_point = y_point - 1
+		else:
+			### mesh construction starts
+			### along the top : left to right...
+			collection_of_points.append(Vector2(starting_test_position.x+(4*x_point),starting_test_position.y+(4*y_point)))
+			x_point = x_point + 1
+		
+	physical_matter.effigy.set_polygon(PackedVector2Array(collection_of_points))
+	### vertex colors added...
+	for point in physical_matter.effigy.get_polygon():
+		coloring_points.append(Color(1.0,1.0,1.0))
 	
-	physical_matter.effigy.set_vertex_colors(PackedColorArray([Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0),
-	Color(1.0,1.0,1.0)]))
+	physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
 	
 	"""
 	var test_image = Image.new()
