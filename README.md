@@ -16,6 +16,7 @@ I have been using Godot 4 , v4.2.stable.official [46dc27791] being the latest
 Window Size is 1152 by 648
 Graivity is 9.8 
 Particle count is 100 
-Frames is steady 20
+Frames is 20-21
 Active Constitutive-Model is Neo-Hookean
-Just checking at 100 particles..
+
+Just checking how it looks from the previous amount of particles(8) at 100 particles..
