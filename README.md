@@ -17,6 +17,5 @@ Window Size is 1152 by 648
 Graivity is 9.8 
 Particle count is 100 
 Frames is 20-21
-Active Constitutive-Model is Neo-Hookean
 
 Just checking how it looks from the previous amount of particles(8) at 100 particles..
