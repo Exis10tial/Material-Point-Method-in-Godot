@@ -58,6 +58,8 @@ func _ready():
 	add_child(matrix_math)
 	add_child(constitutive_models)
 	add_child(material_method)
+	add_child(colliding)
+	
 	
 	forge.queue_free()
 	
@@ -83,6 +85,7 @@ func _process(delta):
 		$"Material Method".Grid_Reset(substance)
 		$"Material Method".Particles_to_Grid(delta,substance)
 		$"Material Method".Grid_Update(delta,substance)
+		$"Material Method".Collision_with_Wall(substance)
 		$"Material Method".Particle_Reset(substance)
 		$"Material Method".Grid_to_Particle(delta,substance)
 		

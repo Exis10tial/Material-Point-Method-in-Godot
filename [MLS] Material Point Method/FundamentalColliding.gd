@@ -17,13 +17,13 @@ var percentage_covered : float
 var normal_vector : Vector2
 var unit_vector : Vector2
 var unit_tangent : Vector2
-var dotted_unit_mote_velocity : float
-var dotted_tangent_mote_velocity : float
+var dotted_unit_particle_composition_velocity : float
+var dotted_tangent_particle_composition_velocity : float
 var dotted_unit_wall_velocity: float
 var dotted_tangent_wall_velocity: float
-var final_tangential_mote_velocity : float
+var final_tangential_particle_composition_velocity : float
 var final_tangential_wall_velocity : float
-var final_normal_mote_velocity : float
+var final_normal_particle_composition_velocity : float
 var final_normal_wall_velocity : float
 ### used for impartial collisions < 1.0 and > 0.0 ...
 var line_of_impact_x : float
@@ -83,254 +83,235 @@ func _on_handle_collisions_ready():
 	pass # Replace with function body.
 
 
-func Collision_with_Walls(breach,mote,particle_boundary,baluster,structure,_cell_size):
+func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 	###...
 	if breach == 'top':
 		
-		collision_restitution = baluster['window outline']['top']['coefficient of restitution'] * mote.coefficient_of_restitution
-		collision_static_friction = baluster['window outline']['top']['coefficient of static friction'] * mote.coefficient_of_static_friction
-		collision_kinetic_friction = baluster['window outline']['top']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
+		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
+		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
+		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		#if structure['velocity'].y > 0:
+		#if particle_composition.mechanics[designation]['velocity'].y > 0:
 		
-		#baluster['window outline']['top']['velocity'] = Vector2(0,0)
-		#baluster['window outline']['top']['velocity'] = Vector2(0,-structure['velocity'].y)
+		#baluster['velocity'] = Vector2(0,0)
+		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
 		
 		### for when collision_restitution == 1.0
-		baluster['window outline']['top']['velocity'] = Vector2(0,-structure['velocity'].y) * 1.0
+		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.0
 		
-		wall_center = Vector2(particle_boundary.origin.x,0.0)
+		wall_center = Vector2(particle_composition.effigy.get_polygon()[designation].x,0.0)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_boundary.origin)
+			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
-			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
-			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
-			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['top']['velocity'])
-			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['top']['velocity'])
+			#dotted_unit_particle_composition_velocity = unit_vector.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_unit_particle_composition_velocity = snapped(unit_vector.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			#dotted_tangent_particle_composition_velocity = unit_tangent.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_tangent_particle_composition_velocity = snapped(unit_tangent.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			dotted_unit_wall_velocity = unit_vector.dot(baluster['velocity'])
+			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['velocity'])
 			
-			final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			final_tangential_particle_composition_velocity = dotted_tangent_particle_composition_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
-			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['top']['mass']) + 2.0 * baluster['window outline']['top']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['top']['mass'])
-			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['top']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['top']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['top']['mass'])
+			final_normal_particle_composition_velocity = (dotted_unit_particle_composition_velocity * (particle_composition.mechanics[designation]['mass'] - baluster['mass']) + 2.0 * baluster['mass'] * dotted_unit_wall_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
+			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['mass'] - particle_composition.mechanics[designation]['mass']) + 2.0 * baluster['mass'] * dotted_unit_particle_composition_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
 			
-			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
-			#final_tangential_mote_velocity * unit_tangent
+			particle_composition.mechanics[designation]['velocity'] = (final_normal_particle_composition_velocity * unit_vector) + (final_tangential_particle_composition_velocity * unit_tangent)
+			#final_tangential_particle_composition_velocity * unit_tangent
 			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
 			
-			#print(structure['velocity']," structure['velocity']")
+			#print(particle_composition.mechanics[designation]['velocity']," particle_composition.mechanics[designation]['velocity']")
 		
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			
 			
-			x_component = structure['velocity'].x
-			y_component = -baluster['window outline']['top']['coefficient of restitution'] *  structure['velocity'].y 
+			x_component = particle_composition.mechanics[designation]['velocity'].x
+			y_component = -baluster['coefficient of restitution'] *  particle_composition.mechanics[designation]['velocity'].y 
 			
-			structure['velocity'] = Vector2(x_component,y_component)
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
 			
-			x_component = structure['mass'] / (structure['mass'] + baluster['window outline']['top']['mass']) * structure['velocity'].x
-			y_component = structure['mass'] / (structure['mass'] + baluster['window outline']['top']['mass']) * structure['velocity'].y
+			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
+			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
 			
-			structure['velocity'] = Vector2(x_component,y_component)
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 	if breach == 'right':
 		
-		collision_restitution = baluster['window outline']['right']['coefficient of restitution'] * mote.coefficient_of_restitution
-		collision_static_friction = baluster['window outline']['right']['coefficient of static friction'] * mote.coefficient_of_static_friction
-		collision_kinetic_friction = baluster['window outline']['right']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
+		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
+		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
+		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		#baluster['window outline']['right']['velocity'] = Vector2(0,0.0)
-		#baluster['window outline']['right']['velocity'] = Vector2(-structure['velocity'].x,0)
-		baluster['window outline']['right']['velocity'] = Vector2(-structure['velocity'].x,0) * 1.00
+		#baluster['velocity'] = Vector2(0,0.0)
+		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
+		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 1.00
 		
-		wall_center = Vector2(baluster['window outline']['right']['outline'],particle_boundary.origin.y)
+		wall_center = Vector2(baluster['outline'],particle_composition.effigy.get_polygon()[designation].y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_boundary.origin)
+			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
-			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
-			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
-			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['right']['velocity'])
-			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['right']['velocity'])
+			#dotted_unit_particle_composition_velocity = unit_vector.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_unit_particle_composition_velocity = snapped(unit_vector.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			#dotted_tangent_particle_composition_velocity = unit_tangent.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_tangent_particle_composition_velocity = snapped(unit_tangent.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			dotted_unit_wall_velocity = unit_vector.dot(baluster['velocity'])
+			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['velocity'])
 			
-			final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			final_tangential_particle_composition_velocity = dotted_tangent_particle_composition_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
-			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['right']['mass']) + 2.0 * baluster['window outline']['right']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['right']['mass'])
-			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['right']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['right']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['right']['mass'])
+			final_normal_particle_composition_velocity = (dotted_unit_particle_composition_velocity * (particle_composition.mechanics[designation]['mass'] - baluster['mass']) + 2.0 * baluster['mass'] * dotted_unit_wall_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
+			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['mass'] - particle_composition.mechanics[designation]['mass']) + 2.0 * baluster['mass'] * dotted_unit_particle_composition_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
 			
-			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			particle_composition.mechanics[designation]['velocity'] = (final_normal_particle_composition_velocity * unit_vector) + (final_tangential_particle_composition_velocity * unit_tangent)
 			
-			#final_tangential_mote_velocity * unit_tangent
+			#final_tangential_particle_composition_velocity * unit_tangent
 			#(final_normal_wall_velocity * unit_vector) + (final_tangential_wall_velocity * unit_tangent)
 			
-			#print(structure['velocity']," structure['velocity']")
+			#print(particle_composition.mechanics[designation]['velocity']," particle_composition.mechanics[designation]['velocity']")
 		
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			
 			"""
-			incoming_angle = rad_to_deg(asin(structure['velocity'].y/structure['velocity'].length()))
-			outgoing_angle = snapped(rad_to_deg(atan(baluster['window outline']['right']['coefficient of restitution'] * tan(deg_to_rad(incoming_angle)))),.1)
+			incoming_angle = rad_to_deg(asin(particle_composition.mechanics[designation]['velocity'].y/particle_composition.mechanics[designation]['velocity'].length()))
+			outgoing_angle = snapped(rad_to_deg(atan(baluster['coefficient of restitution'] * tan(deg_to_rad(incoming_angle)))),.1)
 			"""
-			x_component =  -baluster['window outline']['right']['coefficient of restitution'] * structure['velocity'].x
-			y_component = structure['velocity'].y
-			structure['velocity'] = Vector2(x_component,y_component)
+			x_component =  -baluster['coefficient of restitution'] * particle_composition.mechanics[designation]['velocity'].x
+			y_component = particle_composition.mechanics[designation]['velocity'].y
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
 			
-			x_component = structure['mass'] / (structure['mass'] + baluster['window outline']['right']['mass']) * structure['velocity'].x
-			y_component = structure['mass'] / (structure['mass'] + baluster['window outline']['right']['mass']) * structure['velocity'].y
+			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
+			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
 			
-			structure['velocity'] = Vector2(x_component,y_component)
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 	if breach == 'bottom':
 		
-		collision_restitution = baluster['window outline']['bottom']['coefficient of restitution'] * mote.coefficient_of_restitution
-		collision_static_friction = baluster['window outline']['bottom']['coefficient of static friction'] * mote.coefficient_of_static_friction
-		collision_kinetic_friction = baluster['window outline']['bottom']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
+		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
+		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
+		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		#baluster['window outline']['bottom']['velocity'] = Vector2(0,0)
-		#baluster['window outline']['bottom']['velocity'] = Vector2(0,-structure['velocity'].y)
+		#baluster['velocity'] = Vector2(0,0)
+		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
 		
-		baluster['window outline']['bottom']['velocity'] = Vector2(0,-structure['velocity'].y) * 1.00
+		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
 		
 		#print(collision_restitution,' check collision_restitution')
 		
-		wall_center = Vector2(particle_boundary.origin.x,baluster['window outline']['bottom']['outline'])
-		#wall_center = Vector2(baluster['window outline']['right']['outline']/2,baluster['window outline']['bottom']['outline'])
+		wall_center = Vector2(particle_composition.effigy.get_polygon()[designation].x,baluster['outline'])
+		#wall_center = Vector2(baluster['outline']/2,baluster['outline'])
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			#print('bounce back')
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_boundary.origin)
+			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
 			#print(unit_vector,' unit_vector check')
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
-			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
-			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
-			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['bottom']['velocity'])
-			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['bottom']['velocity'])
+			#dotted_unit_particle_composition_velocity = unit_vector.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_unit_particle_composition_velocity = snapped(unit_vector.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			#dotted_tangent_particle_composition_velocity = unit_tangent.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_tangent_particle_composition_velocity = snapped(unit_tangent.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			dotted_unit_wall_velocity = unit_vector.dot(baluster['velocity'])
+			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['velocity'])
 			
-			final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			final_tangential_particle_composition_velocity = dotted_tangent_particle_composition_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
 			
-			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['bottom']['mass']) + 2.0 * baluster['window outline']['bottom']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['bottom']['mass'])
-			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['bottom']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['bottom']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['bottom']['mass'])
+			final_normal_particle_composition_velocity = (dotted_unit_particle_composition_velocity * (particle_composition.mechanics[designation]['mass'] - baluster['mass']) + 2.0 * baluster['mass'] * dotted_unit_wall_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
+			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['mass'] - particle_composition.mechanics[designation]['mass']) + 2.0 * baluster['mass'] * dotted_unit_particle_composition_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
 			
-			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			particle_composition.mechanics[designation]['velocity'] = (final_normal_particle_composition_velocity * unit_vector) + (final_tangential_particle_composition_velocity * unit_tangent)
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			#line_of_impact = wall_center
-			"""
-			print(' ')
-			print(structure['velocity'],' velocity')
-			#print(wall_center,' wall_center')
 			
-			print('base ',Vector2(structure['velocity'].x,0))
-			print('altitude ',Vector2(0,structure['velocity'].y))
-			print('hypotenuse ',structure['velocity'].length() )
+			x_component = particle_composition.mechanics[designation]['velocity'].x
+			y_component =  -baluster['coefficient of restitution'] * particle_composition.mechanics[designation]['velocity'].y
 			
-			print( rad_to_deg(asin(structure['velocity'].y/structure['velocity'].length())),' sin-1')
-			print( rad_to_deg(acos(structure['velocity'].x/structure['velocity'].length())),' cos-1')
-			print( rad_to_deg(atan(structure['velocity'].y/structure['velocity'].x)),' tan-1')
-			
-			incoming_angle = rad_to_deg(acos(structure['velocity'].x/structure['velocity'].length()))
-			outgoing_angle = snapped(rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * tan(deg_to_rad(incoming_angle)))),.1) 
-			#incoming_angle = abs(snapped(rad_to_deg(line_of_impact.angle_to_point(particle_boundary.origin)),1))
-			#outgoing_angle = snapped(rad_to_deg(atan(baluster['window outline']['bottom']['coefficient of restitution'] * tan(deg_to_rad(incoming_angle)))),.1)
-			#print(incoming_angle,' incoming_angle')
-			"""
-			
-			x_component = structure['velocity'].x
-			y_component =  -baluster['window outline']['bottom']['coefficient of restitution'] * structure['velocity'].y
-			
-			structure['velocity'] = Vector2(x_component,y_component)
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
 			
-			x_component = structure['mass'] / (structure['mass'] + baluster['window outline']['bottom']['mass']) * structure['velocity'].x
-			y_component = structure['mass'] / (structure['mass'] + baluster['window outline']['bottom']['mass']) * structure['velocity'].y
+			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
+			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
 			
-			structure['velocity'] = Vector2(x_component,y_component)
-			#print(structure['velocity']," structure['velocity']")
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
+			#print(particle_composition.mechanics[designation]['velocity']," particle_composition.mechanics[designation]['velocity']")
 	
 	
 	if breach == 'left':
 		
-		collision_restitution = baluster['window outline']['left']['coefficient of restitution'] * mote.coefficient_of_restitution
-		collision_static_friction = baluster['window outline']['left']['coefficient of static friction'] * mote.coefficient_of_static_friction
-		collision_kinetic_friction = baluster['window outline']['left']['coefficient of kinetic friction'] * mote.coefficient_of_kinetic_friction
+		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
+		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
+		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		#baluster['window outline']['left']['velocity'] = Vector2(0,0)
-		#baluster['window outline']['left']['velocity'] = Vector2(-structure['velocity'].x,0)
-		baluster['window outline']['left']['velocity'] = Vector2(-structure['velocity'].x,0) * 1.00
+		#baluster['velocity'] = Vector2(0,0)
+		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
+		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 1.00
 		
 		
-		wall_center = Vector2(0.0,particle_boundary.origin.y)
+		wall_center = Vector2(0.0,particle_composition.effigy.get_polygon()[designation].y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_boundary.origin)
+			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
-			#dotted_unit_mote_velocity = unit_vector.dot(structure['velocity'])
-			dotted_unit_mote_velocity = snapped(unit_vector.dot(structure['velocity']),.001)
-			#dotted_tangent_mote_velocity = unit_tangent.dot(structure['velocity'])
-			dotted_tangent_mote_velocity = snapped(unit_tangent.dot(structure['velocity']),.001)
-			dotted_unit_wall_velocity = unit_vector.dot(baluster['window outline']['left']['velocity'])
-			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['window outline']['left']['velocity'])
+			#dotted_unit_particle_composition_velocity = unit_vector.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_unit_particle_composition_velocity = snapped(unit_vector.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			#dotted_tangent_particle_composition_velocity = unit_tangent.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_tangent_particle_composition_velocity = snapped(unit_tangent.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			dotted_unit_wall_velocity = unit_vector.dot(baluster['velocity'])
+			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['velocity'])
 			
-			final_tangential_mote_velocity = dotted_tangent_mote_velocity
+			final_tangential_particle_composition_velocity = dotted_tangent_particle_composition_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
 			
-			final_normal_mote_velocity = (dotted_unit_mote_velocity * (structure['mass'] - baluster['window outline']['left']['mass']) + 2.0 * baluster['window outline']['left']['mass'] * dotted_unit_wall_velocity ) / (structure['mass'] + baluster['window outline']['left']['mass'])
-			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['window outline']['left']['mass'] - structure['mass']) + 2.0 * baluster['window outline']['left']['mass'] * dotted_unit_mote_velocity ) / (structure['mass'] + baluster['window outline']['left']['mass'])
+			final_normal_particle_composition_velocity = (dotted_unit_particle_composition_velocity * (particle_composition.mechanics[designation]['mass'] - baluster['mass']) + 2.0 * baluster['mass'] * dotted_unit_wall_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
+			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['mass'] - particle_composition.mechanics[designation]['mass']) + 2.0 * baluster['mass'] * dotted_unit_particle_composition_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
 			
-			structure['velocity'] = (final_normal_mote_velocity * unit_vector) + (final_tangential_mote_velocity * unit_tangent)
+			particle_composition.mechanics[designation]['velocity'] = (final_normal_particle_composition_velocity * unit_vector) + (final_tangential_particle_composition_velocity * unit_tangent)
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			
-			x_component = -baluster['window outline']['left']['coefficient of restitution'] * structure['velocity'].x
-			y_component = structure['velocity'].y
+			x_component = -baluster['coefficient of restitution'] * particle_composition.mechanics[designation]['velocity'].x
+			y_component = particle_composition.mechanics[designation]['velocity'].y
 			
-			structure['velocity'] = Vector2(x_component,y_component)
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
 			
-			x_component = structure['mass'] / (structure['mass'] + baluster['window outline']['left']['mass']) * structure['velocity'].x
-			y_component = structure['mass'] / (structure['mass'] + baluster['window outline']['left']['mass']) * structure['velocity'].y
+			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
+			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
 			
-			structure['velocity'] = Vector2(x_component,y_component)
-			#structure['velocity'] = final_velocity
+			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
+			#particle_composition.mechanics[designation]['velocity'] = final_velocity
 	
-	return structure['velocity']
+	return particle_composition.mechanics[designation]['velocity']
 	
 	

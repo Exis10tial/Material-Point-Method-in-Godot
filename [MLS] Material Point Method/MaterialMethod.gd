@@ -1,10 +1,12 @@
 extends Node
 
 
-
+### Wall Mechanics...
+var wall : Dictionary = {}
 ### gravity of the simulation...
-var gravity : Vector2 = Vector2(0,9.8)
+var gravity : Vector2 = Vector2(1000.0,0.0)
 ### establishing grid...
+var inverted_grid : float
 var basis : String 
 var basis_coefficient :float
 var basis_function_version : int
@@ -17,7 +19,7 @@ var particle = 'null'
 ### Usage caused by models...]
 var updating_plasticity : bool
 ### for weight interpolation...
-var weight_interpolation : Dictionary
+var weight_interpolation : float
 ### Functions of Ponts to Grid...
 var relation_between_particle_and_grid_node : Vector2
 var relation_between_grid_node_and_particle : Vector2
@@ -69,77 +71,96 @@ func By_Greatest_Common_Factor(multinomial_x,multinomial_y):
 	return size
 
 
-func Weight_Interpolation(splines:String,version:int,updated_relation:Vector2):#,cell_size:float):
+func Kernel(splines:String,version:int,relation:float):#,cell_size:float):
 	#reset parameters
-	var building_weights = Vector2(0.0,0.0)
-	### Weight Interpolation...
+	var piecewise : float = 0
 	
-	if splines == "quadratic":
+	### Weight Interpolation...
+	if splines == "cubic":
+		if version == 1:
+			### The Material Point Method for Simulating Continuum Materials pg 33 equation 122
+			if relation >= (-2*grid_spacing)/grid_spacing and relation < (-1*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes a
+				piecewise = ((1.0/2.0)*pow(relation,3)) - pow(relation,2) + (2.0/3.0)
+			elif relation >= (-1*grid_spacing)/grid_spacing and relation <= (1*grid_spacing)/grid_spacing:
+				### location :: area around node center... 
+				piecewise = (1.0/6.0) * pow((2-relation),3)
+			elif relation > (1*grid_spacing)/grid_spacing and relation <= (2*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes b
+				piecewise = ((1.0/2.0)*pow(relation,3)) - pow(relation,2) + (2.0/3.0)
+			else:
+				### location ::
+				piecewise = 0
+			
+			if relation >= (-2*grid_spacing)/grid_spacing and relation < (-1*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes a
+				piecewise = ((1.0/2.0)*pow(relation,3)) - pow(relation,2) + (2.0/3.0)
+			elif relation >= (-1*grid_spacing)/grid_spacing and relation <= (1*grid_spacing)/grid_spacing:
+				### location :: area around node center... 
+				piecewise = (1.0/6.0) * pow((2-relation),3)
+			elif relation > (1*grid_spacing)/grid_spacing and relation <= (2*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes b
+				piecewise = ((1.0/2.0)*pow(relation,3)) - pow(relation,2) + (2.0/3.0)
+			else:
+				### location ::
+				piecewise = 0
+				
+		if version == 2:
+			### thru Analysis and Reduction of Quadrature Errors in the Material Point Method. steffan .W.pdf-page 9.equation 17)
+			pass
+		
+	elif splines == "quadratic":
 		if version == 1:
 			### The Material Point Method for Simulating Continuum Materials pg 33 equation 123 
-			### unchanged
 			
-			#if 1.5*grid_spacing <= absf(updated_relation.x):
-			if 1.5*grid_spacing <= absf(updated_relation.x):
-				### particles is not in range of the particle to influence.
-				building_weights.x =  0.0
+			if relation >= (-1.5*grid_spacing)/grid_spacing and relation < (-.50*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes a
+				piecewise = (3.0/4.0) + pow(relation,2)
+			elif relation >= (-.5*grid_spacing)/grid_spacing and relation <= (.5*grid_spacing)/grid_spacing:
+				### location :: area around node center... 
+				piecewise = (1.0/2.0) * pow(((3.0/2.0) - relation),2)
+			elif relation > (.50*grid_spacing)/grid_spacing and relation <= (1.5*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes b
+				piecewise = (3.0/4.0) - pow(relation,2)
+			else:
+				### location ::
+				piecewise = 0
 			
-			#elif .50*grid_spacing <= absf(updated_relation.x) and absf(updated_relation.x) < 1.5*grid_spacing:
-			elif .50*grid_spacing <= absf(updated_relation.x) and absf(updated_relation.x) < 1.5*grid_spacing:
-				building_weights.x = snappedf((.50 *  pow((1.50 - absf(updated_relation.x)),2.0)),.0001)
-				#building_weights.x = .50 *  pow( (1.50 - absf(updated_relation.x)),2.0)
-			
-			#elif 0 <= absf(updated_relation.x) and absf(updated_relation.x) < .50*grid_spacing:
-			elif 0*grid_spacing <= absf(updated_relation.x) and absf(updated_relation.x) < .50*grid_spacing:
-				building_weights.x = snappedf((.75 - snappedf(pow(absf(updated_relation.x),2.0),.01)),.0001)
-				#building_weights.x = .75 - pow(absf(updated_relation.x),2.0)
+			if relation >= (-1.5*grid_spacing)/grid_spacing and relation < (-.5*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes a
+				piecewise = (3.0/4.0) + pow(relation,2)
+			elif relation >= (-.50*grid_spacing)/grid_spacing and relation <= (.5*grid_spacing)/grid_spacing:
+				### location :: area around node center... 
+				piecewise = (1.0/2.0) * pow(((3.0/2.0) - relation),2)
+			elif relation > (.5*grid_spacing)/grid_spacing and relation <= (1.5*grid_spacing)/grid_spacing:
+				### location :: inbetween node center edge to halfway inbetween nodes b
+				piecewise = (3.0/4.0) - pow(relation,2)
+			else:
+				### location ::
+				piecewise = 0
 				
-			if 1.5*grid_spacing <= abs(updated_relation.y):
-				building_weights.y = 0.0
-			
-			elif .50*grid_spacing <= absf(updated_relation.y) and absf(updated_relation.y) < 1.5*grid_spacing:
-				building_weights.y = snappedf((.50 * pow((1.50 - absf(updated_relation.y) ),2.0)),.0001)
-				#building_weights.y = .50 * pow( (1.50 - absf(updated_relation.y) ),2.0)
-			
-			elif 0*grid_spacing <= absf(updated_relation.y) and absf(updated_relation.y) < .50*grid_spacing:
-				building_weights.y = snappedf((.75 - snappedf(pow(absf(updated_relation.y),2.0),.01)),.0001)
-				#building_weights.y = .75 - pow(absf(updated_relation.y),2.0)
-		
 		elif version == 2:
 			### thru Analysis and Reduction of Quadrature Errors in the Material Point Method. steffan .W.pdf-pg(8.equation 16)
-			# slight change
-			if updated_relation.x > (-0.50*grid_spacing) and updated_relation.x < (0*grid_spacing):
-				### location :: inbetween node center edge to halfway inbetween nodes a
-				building_weights.x = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(updated_relation.x,2))) + ((3.0/(2.0*grid_spacing))*updated_relation.x) + (9.0/8.0)
-			elif updated_relation.x == (0*grid_spacing):# and updated_relation.x <= (.50*grid_spacing):
-				### location :: area around node center... 
-				building_weights.x =   -((1 / (pow(grid_spacing,2))) * pow(updated_relation.x,2)) + (3.0/4.0)
-			elif updated_relation.x > (0*grid_spacing) and updated_relation.x < (.50*grid_spacing):
-				### location :: inbetween node center edge to halfway inbetween nodes b
-				building_weights.x = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(updated_relation.x,2))) - ((3.0/(2.0*grid_spacing))*updated_relation.x) + (9.0/8.0)
+			if relation >= (-1.5*grid_spacing)/grid_spacing and relation < (-.50*grid_spacing)/grid_spacing:
+				piecewise = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(relation,2))) + ((3.0/(2.0*grid_spacing))*relation) + (9.0/8.0)
+			elif relation >= (-.50*grid_spacing)/grid_spacing and relation <= (.50*grid_spacing)/grid_spacing:
+				piecewise=  (1.0/pow(grid_spacing,2) * pow(relation,2)) + (3.0/4.0)
+			elif relation > (.50*grid_spacing)/grid_spacing and relation <= (1.5*grid_spacing)/grid_spacing:
+				piecewise = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(relation,2))) - ((3.0/(2.0*grid_spacing))*relation) + (9.0/8.0)
 			else:
-				### location :: space/area between 4 nodes.
-				building_weights.x = 0
-			
-			if updated_relation.y > (-0.50*grid_spacing) and updated_relation.y < (0*grid_spacing):
-				### location :: inbetween node center edge to halfway inbetween nodes a
-				building_weights.y = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(updated_relation.y,2))) + ((3.0/(2.0*grid_spacing))*updated_relation.y) + (9.0/8.0)
-			elif updated_relation.y == (0*grid_spacing):# and updated_relation.y <= (.50*grid_spacing):
-				### location :: area around node center... 
-				building_weights.y = -((1 / (pow(grid_spacing,2))) * pow(updated_relation.x,2)) + (3.0/4.0)
-			elif updated_relation.y > (0*grid_spacing) and updated_relation.y < (.50*grid_spacing):
-				### location :: inbetween node center edge to halfway inbetween nodes b
-				building_weights.y = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(updated_relation.y,2))) - ((3.0/(2.0*grid_spacing))*updated_relation.y) + (9.0/8.0)
+				piecewise = 0
+			if relation >= (-1.5*grid_spacing)/grid_spacing and relation < (-.50*grid_spacing)/grid_spacing:
+				piecewise = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(relation,2))) + ((3.0/(2.0*grid_spacing))*relation) + (9.0/8.0)
+			#elif relation == (0*grid_spacing)/grid_spacing:# and relation <= (.50*grid_spacing):
+			elif relation >= (-.50*grid_spacing)/grid_spacing and relation <= (.50*grid_spacing)/grid_spacing:
+				piecewise = (1.0/pow(grid_spacing,2) * pow(relation,2)) + (3.0/4.0)
+			elif relation > (0.50*grid_spacing)/grid_spacing and relation <= (1.5*grid_spacing)/grid_spacing:
+				piecewise = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(relation,2))) - ((3.0/(2.0*grid_spacing))*relation) + (9.0/8.0)
 			else:
-				### location :: space/area between 4 nodes.
-				building_weights.y = 0
-			
-		weight_interpolation['weight'] = snappedf((building_weights.x * building_weights.y),.001)
+				### location :: 
+				piecewise = 0
 		
-	elif splines == "cubic":
-		pass
-	
-	return weight_interpolation
+	return piecewise
 	
 
 
@@ -150,11 +171,82 @@ func _ready():
 	var exact_cells : bool 
 	#var _by_greatest_common_factor
 	
+	### Wall Mechanics...defaults
+	wall['top'] = { 'barrier': 0,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['right'] = {'barrier':get_tree().get_root().get_window().size.x,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['bottom'] = {'barrier':get_tree().get_root().get_window().size.y,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['left'] = {'barrier': 0,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
 	
-	##basis = "cubic"
-	##basis_coefficient = 3.0
+	for outline in wall:
+		if outline == 'top':
+			#""" null-void
+			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of static friction'] = .43
+			wall[outline]['coefficient of kinetic friction'] = .26
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+			""" hyperelastic  - natural rubber
+			wal[outline]['coefficient of restitution'] = 0.9
+			wall[outline]['coefficient of static friction'] = 0.8
+			wall[outline]['coefficient of kinetic friction'] = 0.6
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+		if outline == 'right':
+			#""" null-void
+			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of static friction'] = .43
+			wall[outline]['coefficient of kinetic friction'] = .26
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+			""" hyperelastic  - natural rubber
+			wal[outline]['coefficient of restitution'] = 0.9
+			wall[outline]['coefficient of static friction'] = 0.8
+			wall[outline]['coefficient of kinetic friction'] = 0.6
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+		if outline == 'bottom':
+			#""" null-void
+			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of static friction'] = .43
+			wall[outline]['coefficient of kinetic friction'] = .26
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+			""" hyperelastic - natural rubber
+			wal[outline]['coefficient of restitution'] = 0.9
+			wall[outline]['coefficient of static friction'] = 0.8
+			wall[outline]['coefficient of kinetic friction'] = 0.6
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+		if outline == 'left':
+			#""" null-void
+			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of static friction'] = .43
+			wall[outline]['coefficient of kinetic friction'] = .26
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
+			""" hyperelastic  - natural rubber
+			wal[outline]['coefficient of restitution'] = 0.9
+			wall[outline]['coefficient of static friction'] = 0.8
+			wall[outline]['coefficient of kinetic friction'] = 0.6
+			wall[outline]['mass'] = 1.00
+			wall[outline]['velocity'] = Vector2(0.0,0.0)
+			#"""
 	
-	basis = "quadratic" #: [piecewise linear,quadratic B-spline, cubic B-spline]
+	
+
+
+
+
+	
+	### Grid Mechanics...
+	basis = 'quadratic' #"cubic" #: [piecewise linear,quadratic B-spline, cubic B-spline]
 	basis_coefficient = 4.0 #:: [ uadratic B-spline - 4,  cubic B-spline - 3
 	basis_function_version = 2
 	
@@ -197,10 +289,11 @@ func _ready():
 			
 	elif gathered_into_chunks == false and exact_cells == true:
 		#the cell size is 1....
-		pass
-
-
-
+		grid_spacing = 1
+	
+	
+	inverted_grid = 1.0/grid_spacing
+	
 
 func Grid_Reset(material:Object):#,matrix_math:Object):
 	### reseting the grid data...
@@ -208,6 +301,7 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 	identify_number = 0
 	particle = 'null'
 	grid = {}
+
 	var surrounding_nodes
 	while true:
 		if identify_number >= len(material.mechanics.keys()):
@@ -216,38 +310,30 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 		particle = material.mechanics.keys()[identify_number]
 		
 		### relation between the particle wth the grid...
-		if grid_spacing > 1:
-			###...
-			#"""
-			# find the nearest node (non-float number)
-			var euler_base = material.effigy.get_polygon()[particle] 
-			#var test_euler = material.effigy.get_polygon()[particle] / grid_spacing
-			var results_euler = Vector2(roundi(material.effigy.get_polygon()[particle].x / grid_spacing),roundi(material.effigy.get_polygon()[particle].y / grid_spacing)   )
-			var end_euler = results_euler * grid_spacing
+		var euler_base = material.effigy.get_polygon()[particle] 
 			
-			surrounding_nodes = [Vector2( (round(euler_base.x/grid_spacing)*grid_spacing) -grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
-				Vector2( (round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
-				Vector2( (round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
-				Vector2((round(euler_base.x/grid_spacing)*grid_spacing)-grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)),
-				Vector2((round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)),
-				Vector2((round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)),
-				Vector2((round(euler_base.x/grid_spacing)*grid_spacing)-grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)+grid_spacing),
-				Vector2((round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)+grid_spacing),
-				Vector2((round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)+grid_spacing),
+		surrounding_nodes = [Vector2( (round(euler_base.x/grid_spacing)*grid_spacing) -grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
+			Vector2( (round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
+			Vector2( (round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
+			Vector2((round(euler_base.x/grid_spacing)*grid_spacing)-grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)),
+			Vector2((round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)),
+			Vector2((round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)),
+			Vector2((round(euler_base.x/grid_spacing)*grid_spacing)-grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)+grid_spacing),
+			Vector2((round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)+grid_spacing),
+			Vector2((round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)+grid_spacing),
 			]
-		else:
-			pass
-		
+			
 		material.mechanics[particle]['eulerian'] = surrounding_nodes.duplicate(true)
 		
 		for node in surrounding_nodes:
+			### Grid Mechanics
 			if grid.has(node) == false:
 				### this grid node is to be affected by the particle.
 				grid[node] = {'mass': 0.0,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'forces':Vector2(0.0,0.0),'angular momentum':Vector2(0,0),'normal force':0.0}.duplicate(true)
 			else:
 				### already recoqnized...
 				pass
-		
+				
 		# inf , nan check...
 		for location in range(0,(len(material.mechanics[particle]['F']))):
 			if is_inf(material.mechanics[particle]['F'][location]) == true or is_nan(material.mechanics[particle]['F'][location]) == true:
@@ -280,8 +366,6 @@ func Particles_to_Grid(time_passed:float,material:Object):
 		#### the sum of aspects that is resetted...
 		var energy_density_is_known = false
 		var energy_denisty_coeficient = [0,0,0,0]
-		#var affine_momentum_fuse = Vector2(0.0,0.0)
-		
 		var affline_force_contribution = [0,0,0,0]
 		
 		#constitutive models...
@@ -350,16 +434,34 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			relation_between_particle_and_grid_node = Vector2((snapped(material.effigy.get_polygon()[particle].x - grid_axis.x,.01)),snapped(material.effigy.get_polygon()[particle].y - grid_axis.y,.01)) / grid_spacing
 			relation_between_grid_node_and_particle = Vector2(snapped(grid_axis.x - material.effigy.get_polygon()[particle].x,.01),snapped(grid_axis.y - material.effigy.get_polygon()[particle].y,.01)) / grid_spacing
 			
-			Weight_Interpolation(basis,basis_function_version,relation_between_particle_and_grid_node)#,grid_spacing)
+			"""
+			inverted_grid = 1.0/grid_spacing
 			
-			var weighted_affine_force = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(affline_force_contribution,weight_interpolation['weight'],true)
+			
+			var test_a = inverted_grid * relation_between_particle_and_grid_node
+			#print()
+			if particle in range(0,24):
+				pass
+				print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node')
+				print(inverted_grid,' inverted_grid')
+				print(test_a,' inverted_grid * relation_between_particle_and_grid_node')
+			"""
+			
+			
+			weight_interpolation = Kernel(basis,basis_function_version,(inverted_grid*relation_between_particle_and_grid_node.x))*Kernel(basis,basis_function_version,inverted_grid*relation_between_particle_and_grid_node.y)
+			
+
+			#Weight_Interpolation(basis,basis_function_version,relation_between_particle_and_grid_node)
+			
+			
+			var weighted_affine_force = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(affline_force_contribution,weight_interpolation,true)
 			var affine = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Vector2_to_Vector2(weighted_affine_force,relation_between_grid_node_and_particle)
 				
 			### MPM lumped mass
 			#grid[node]['mass'] = grid[node]['mass'] + (material.mass * weight_interpolation['weight'])
 			
 			### MLS MPM lumped mass
-			grid[grid_axis]['mass'] = snappedf((grid[grid_axis]['mass'] + (material.mass * weight_interpolation['weight'])),.001)
+			grid[grid_axis]['mass'] = snappedf((grid[grid_axis]['mass'] + (material.mass * weight_interpolation)),.001)
 			
 			grid[grid_axis]['momentum'] = grid[grid_axis]['momentum'] + (grid[grid_axis]['mass'] * (material.mechanics[particle]['initial velocity'] + affine))
 			
@@ -383,28 +485,30 @@ func Collision_with_Wall(material:Object):
 	### how the particles interacts....
 	
 	identify_number = 0
-	var node = null
-	
 	while true:
-		if identify_number >= len(grid.keys()):
+		if identify_number >= len(material.mechanics.keys()):
 			break
 		
-		node = grid.keys()[identify_number]
+		particle = material.mechanics.keys()[identify_number]
+		
+		if material.effigy.get_polygon()[particle].y <= wall['top']['barrier']:
+			#print('colliding top')
+			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('top',material,particle, wall['top'])
+		if material.effigy.get_polygon()[particle].x >= wall['right']['barrier']:
+			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('right',material,particle, wall['right'])
+		if material.effigy.get_polygon()[particle].y >= wall['bottom']['barrier']:
+			#print('colliding bottom')
+			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('bottom',material,particle,wall['bottom'])
+			#print(material.mechanics[particle]['velocity'] ,' velocity')
+		if material.effigy.get_polygon()[particle].x <= wall['left']['barrier']:
+			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('left',material,particle, wall['left'])
+		
+		
+		### loop counter...
+		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
+		#identify_number = wrapi(identify_number+1,0,len(in_the_area_of['top'])+len(in_the_area_of['right'])+len(in_the_area_of['bottom'])+len(in_the_area_of['left'])+1)
+		
 	
-		if grid[node]['mass'] > 0.0:
-			
-			for identified_particle in material.mechanics.keys():
-				#identify the particle/s
-				if node == material.mechanics[identified_particle]['eulerian'][4]:
-					
-					pass
-					
-		identify_number = wrapi(identify_number+1,0,len(grid.keys())+1)
-	
-
-
-
-
 
 
 func Particle_Reset(material:Object):
@@ -418,12 +522,11 @@ func Particle_Reset(material:Object):
 		
 		particle = material.mechanics.keys()[identify_number]
 		
-		material.mechanics[particle]['mass'] = material.mass / len(material.mechanics.keys())
-		
-		material.mechanics[particle]['velocity'] = Vector2(0.0,0.0)
-		material.mechanics[particle]['angular momentum'] = [0,0,0,0]
+		material.mechanics[particle]['mass'] = material.mass / len(material.effigy.get_polygon())
+		#material.mechanics[particle]['velocity'] = Vector2(0.0,0.0)
 		material.mechanics[particle]['B'] = [0,0,0,0]
 		#material.particle_mechanics[particle]['C'] = [0,0,0,0]
+		
 		### loop counter...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
 	
@@ -431,26 +534,38 @@ func Particle_Reset(material:Object):
 
 
 func Grid_to_Particle(time_passed:float,material:Object):
-	
 	identify_number = 0
 	particle = 'null'
+	
 	while true:
 		if identify_number >= len(material.mechanics.keys()):
 			break
 		
 		particle = material.mechanics.keys()[identify_number]
-		
+		#print()
+		if particle in range(0,24):
+			#print(particle,' particle')
+			pass
 		for node_location in material.mechanics[particle]['eulerian']:
 			
 			relation_between_particle_and_grid_node = Vector2(snapped(material.effigy.get_polygon()[particle].x - node_location.x,.01),snapped(material.effigy.get_polygon()[particle].y - node_location.y,.01)) / grid_spacing
 			relation_between_grid_node_and_particle = Vector2(snapped(node_location.x - material.effigy.get_polygon()[particle].x,.01),snapped(node_location.y - material.effigy.get_polygon()[particle].y,.01)) / grid_spacing
+			if particle in range(0,24):
+				#print(material.effigy.get_polygon()[particle], ' particle')
+				#print(node_location,' node location')
+				#print(relation_between_particle_and_grid_node,' relation_between_particle_and_grid_node')
+				pass
 			
-			Weight_Interpolation(basis,basis_function_version,relation_between_particle_and_grid_node)#,grid_spacing)
+			weight_interpolation = Kernel(basis,basis_function_version,(inverted_grid*relation_between_particle_and_grid_node.x))*Kernel(basis,basis_function_version,inverted_grid*relation_between_particle_and_grid_node.y)
 			
+			#Weight_Interpolation(basis,basis_function_version,relation_between_particle_and_grid_node)#,grid_spacing)
+			if particle in range(0,24):
+				#print(weight_interpolation,' weight check')
+				pass
 			### MPM,MLS MPM paraticle velocity update
 			# particle Velocity = sum of ( grid velocity * weight_interpolation )
 			#B = sum of (weight interpolation * grid velocity * relation between particles transposed )
-			material.mechanics[particle]['velocity'] = material.mechanics[particle]['velocity'] + ( grid[node_location]['velocity'] * weight_interpolation['weight'])
+			material.mechanics[particle]['velocity'] = material.mechanics[particle]['velocity'] + ( grid[node_location]['velocity'] * weight_interpolation)
 			
 			var velocity_relation = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Vector2_by_Vector2_to_Matrix(grid[node_location]['velocity'],false,relation_between_grid_node_and_particle,true)
 			
@@ -467,13 +582,16 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		var c_inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
 		
 		material.mechanics[particle]['C'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(b_coefficient,c_inverse_I_coefficient)
-		
+		if particle in range(0,24):
+			#print(material.mechanics[particle]['velocity'],' material.mechanics[particle][velocity]')
+			pass
 		
 		###particle position update...
 		var new_particle_position = Vector2(0,0)
 		
 		new_particle_position.x = snapped((material.effigy.get_polygon()[particle].x + snapped((time_passed * material.mechanics[particle]['velocity'].x),.01)  ),.01)
 		new_particle_position.y = snapped((material.effigy.get_polygon()[particle].y + snapped((time_passed * material.mechanics[particle]['velocity'].y),.01)  ),.01)
+		
 		### set polygon...
 		updated_polygon.append(new_particle_position)
 		

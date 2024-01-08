@@ -29,12 +29,11 @@ func _ready():
 	#define physical properties of the entire polygon...
 	#associate material point properties to each polygon vertex...
 	
-	
 	### Creation of Mesh
 	physical_matter.effigy = Polygon2D.new()
 	
 	# create a square mesh...
-	var number_of_points = 99 
+	var number_of_points = 48 
 	var points_per_side
 	var collection_of_points = []
 	var coloring_points = []
@@ -106,7 +105,7 @@ func _ready():
 	### constitution/composition of the substance...
 	#constitutive models to simulate...
 		
-	""" null-void
+	#""" null-void
 	physical_matter.coefficient_of_restitution = 1.0
 	physical_matter.coefficient_of_static_friction = 0.5
 	physical_matter.coefficient_of_kinetic_friction = 0.75
@@ -116,7 +115,7 @@ func _ready():
 	physical_matter.poisson_ratio = 0.0
 	physical_matter.youngs_modulus = 0.0
 	#"""
-	#""" hyperelastic model
+	""" hyperelastic model
 	physical_matter.coefficient_of_restitution = .9 #rubber
 	physical_matter.coefficient_of_static_friction = 0.8 #rubber
 	physical_matter.coefficient_of_kinetic_friction = 0.6 #rubber
@@ -172,7 +171,7 @@ func _ready():
 	for node_count in range(0,len(physical_matter.effigy.get_polygon())):
 		
 		physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.effigy.get_polygon())
-		physical_matter.inner_workings['velocity'] = Vector2(0,0)
+		physical_matter.inner_workings['velocity'] = Vector2(0.0,0.0)
 		physical_matter.inner_workings['initial velocity'] = Vector2(0,0)
 		physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.effigy.get_polygon())
 		physical_matter.inner_workings['stress'] = [1.0,1.0,1.0,1.0]
