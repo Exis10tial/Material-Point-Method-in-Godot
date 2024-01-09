@@ -10,12 +10,9 @@ I have been using Godot 4 , v4.2.stable.official [46dc27791] being the latest
 
 some progress clips.
 
-https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/5e06e844-0a51-4008-ba60-67b76b200c31
+![2024-01-08 18-48-27  coefficient of restitution ==  1](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/1b8c8716-0439-4db3-b43c-d44cdcad2aee)
 
-
-
-https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/3b321c1a-5ade-4cd3-90d4-99f1f0d73e4d
-
+![2024-01-08 19-03-15  coefficient of restitution ==  62](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/9eecd14b-1c6d-4b62-a9fb-1c85d06550fc)
 
 
 [Video 1 and 2 Notes]
@@ -25,6 +22,7 @@ Particle count is 48
 Frames is 40-43
 
 The flicker of the polygon is cause of how the polygon is drawn.
+not testing a model. just chewcking movement of the polygon.
 
 The First clip is when the walls has a 'coefficient of restitution' is equal to 1
 
