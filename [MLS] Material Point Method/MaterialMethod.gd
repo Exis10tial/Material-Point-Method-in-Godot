@@ -4,7 +4,7 @@ extends Node
 ### Wall Mechanics...
 var wall : Dictionary = {}
 ### gravity of the simulation...
-var gravity : Vector2 = Vector2(1000.0,0.0)
+var gravity : Vector2 = Vector2(0.0,9.8)
 ### establishing grid...
 var inverted_grid : float
 var basis : String 
@@ -180,7 +180,7 @@ func _ready():
 	for outline in wall:
 		if outline == 'top':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of restitution'] = .32
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
 			wall[outline]['mass'] = 1.00
