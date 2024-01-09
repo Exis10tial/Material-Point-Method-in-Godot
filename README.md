@@ -8,14 +8,24 @@ A project I wanted to work on and for that project, I ended up wanting/needed to
 This is the MLS-version of Material Point Method I'm looking to implement. 
 I have been using Godot 4 , v4.2.stable.official [46dc27791] being the latest
 
+some progress clips.
+
+https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/5e06e844-0a51-4008-ba60-67b76b200c31
 
 
-![mlsmpm verison 10 0 0  9 8 gravity check](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/9fc68a1a-fffa-4d91-887a-d2d99201a517)
 
-[Video Notes]
+https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/3b321c1a-5ade-4cd3-90d4-99f1f0d73e4d
+
+
+
+[Video 1 and 2 Notes]
 Window Size is 1152 by 648
 Graivity is 9.8 
-Particle count is 100 
-Frames is 20-21
+Particle count is 48 
+Frames is 40-43
 
-Just checking how it looks from the previous amount of particles(8) at 100 particles..
+The flicker of the polygon is cause of how the polygon is drawn.
+
+The First clip is when the walls has a 'coefficient of restitution' is equal to 1
+
+The Second clip is when the walls has a 'coefficient of restitution' is equal to .62
