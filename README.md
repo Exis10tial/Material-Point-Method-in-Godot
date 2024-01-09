@@ -22,7 +22,7 @@ Particle count is 48
 Frames is 40-43
 
 The flicker of the polygon is cause of how the polygon is drawn.
-not testing a model. just chewcking movement of the polygon.
+not testing a model. just checking movement of the polygon.
 
 The First clip is when the walls has a 'coefficient of restitution' is equal to 1
 
