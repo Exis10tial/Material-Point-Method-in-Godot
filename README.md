@@ -14,6 +14,10 @@ some progress clips.
 
 
 
+https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/76fb8464-4d5f-476e-b62a-e9a8436ca527
+
+
+
 
 [Video Notes]
 Window Size is 1152 by 648
