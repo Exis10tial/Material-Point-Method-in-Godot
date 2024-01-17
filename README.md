@@ -12,9 +12,8 @@ some progress clips.
 
 
 
+![2024-01-17 17-56-13 cofficient of restitution ==  32 , 1 0](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/56bb41b8-372c-4793-8f7b-0d89b29a0082)
 
-
-https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/76fb8464-4d5f-476e-b62a-e9a8436ca527
 
 
 
