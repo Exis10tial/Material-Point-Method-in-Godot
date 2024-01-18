@@ -26,3 +26,4 @@ Particle count is 3
 this basic triangle is a better way to show off the collision between the walls.
 the top has a coefficient of restitution of .32,
 the bottom has a coefficient of restitution of 1.0.
+not simulating a model.
