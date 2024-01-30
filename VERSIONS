@@ -186,8 +186,18 @@ V.10.0.1:
 ---- Adjusted how to add/place/determine to amount of particles for a polygon (square) with vertex colors.
 v4.2.stable.official [46dc27791]
 
-V.10.1.:
+V.10.1.0:
 |
 ---- Altered how weight interpolation happen works.
      Collision is active/happens between the particle(polygon) Wall-(Window-Outline/Border)
+v4.2.stable.official [46dc27791]
+
+V.10.3.0:
+|
+---- For now a basic polygon(triangle) is used to display polygons, Now the polygon can be subdivided in to ways.
+    1 :: the triangle is subdivided at the medians turning the points of the polygon for 3 to 6.
+    2 :: the triangle is subdivided at the centroid, creating new polygons going from 1 to 6 polygons.
+    Both should be able to subdivided further, as much as needed.. 
+    Method 1 the vertex count should go 3-6-12-24-48-96-.....
+    Method 2 the polygon count should go 1-6-36-216-696-4176-....
 v4.2.stable.official [46dc27791]
