@@ -97,15 +97,15 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
 		
 		### for when collision_restitution == 1.0
-		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.0
+		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 0.50
 		
-		wall_center = Vector2(particle_composition.effigy.get_polygon()[designation].x,0.0)
+		wall_center = Vector2(particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].x,0.0)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
+			normal_vector = Vector2(wall_center - particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']])
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
@@ -151,15 +151,15 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		
 		#baluster['velocity'] = Vector2(0,0.0)
 		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
-		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 1.00
+		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 0.50
 		
-		wall_center = Vector2(baluster['outline'],particle_composition.effigy.get_polygon()[designation].y)
+		wall_center = Vector2(baluster['outline'],particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
+			normal_vector = Vector2(wall_center - particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']])
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
@@ -210,18 +210,18 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		#baluster['velocity'] = Vector2(0,0)
 		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
 		
-		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
+		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 0.50
 		
 		#print(collision_restitution,' check collision_restitution')
 		
-		wall_center = Vector2(particle_composition.effigy.get_polygon()[designation].x,baluster['outline'])
+		wall_center = Vector2(particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].x,baluster['outline'])
 		#wall_center = Vector2(baluster['outline']/2,baluster['outline'])
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			#print('bounce back')
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
+			normal_vector = Vector2(wall_center - particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']])
 			#print(unit_vector,' unit_vector check')
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
@@ -267,16 +267,15 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		
 		#baluster['velocity'] = Vector2(0,0)
 		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
-		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 1.00
+		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 0.50
 		
-		
-		wall_center = Vector2(0.0,particle_composition.effigy.get_polygon()[designation].y)
+		wall_center = Vector2(0.0,particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
-			normal_vector = Vector2(wall_center - particle_composition.effigy.get_polygon()[designation])
+			normal_vector = Vector2(wall_center - particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']])
 			
 			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)

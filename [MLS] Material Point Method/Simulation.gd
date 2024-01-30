@@ -64,6 +64,7 @@ func _ready():
 	forge.queue_free()
 	
 	
+	
 	set_process(true)
 	set_physics_process(false)
 
