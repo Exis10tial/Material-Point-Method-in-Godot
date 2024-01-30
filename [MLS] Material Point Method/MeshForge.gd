@@ -144,8 +144,8 @@ func _ready():
 	]
 	
 	### different/seperate ways to break down an original polygon...
-	var subdivide_only : bool = false
-	var subdivide_into_pieces : bool = true
+	var subdivide_only : bool = true
+	var subdivide_into_pieces : bool = false
 	
 	### if both are false use the default given points...
 	#both can be true:: subdivide into pieces first then add subdivide points...
@@ -159,7 +159,7 @@ func _ready():
 	
 	if subdivide_only == true and subdivide_into_pieces == false: 
 		###...
-		var subdivide_rank = 1
+		var subdivide_rank = 2
 		var median_of_ = Vector2(0,0)  
 		var number_of_vertices = 3
 		
@@ -226,7 +226,7 @@ func _ready():
 			part_d = 0
 				
 			while true:
-				if len(build_vertices) >= number_of_vertices:
+				if len(build_vertices) >= len(polygon['vertices'])+len(polygon['medians']):
 					break
 					
 				if created_count >= 2:
@@ -440,7 +440,7 @@ func _ready():
 	### constitution/composition of the substance...
 	#constitutive models to simulate...
 		
-	#""" null-void
+	""" null-void
 	physical_matter.coefficient_of_restitution = 1.0
 	physical_matter.coefficient_of_static_friction = 0.5
 	physical_matter.coefficient_of_kinetic_friction = 0.75
@@ -450,7 +450,7 @@ func _ready():
 	physical_matter.poisson_ratio = 0.0
 	physical_matter.youngs_modulus = 0.0
 	#"""
-	""" hyperelastic model
+	#""" hyperelastic model
 	physical_matter.coefficient_of_restitution = .9 #rubber
 	physical_matter.coefficient_of_static_friction = 0.8 #rubber
 	physical_matter.coefficient_of_kinetic_friction = 0.6 #rubber
@@ -523,8 +523,8 @@ func _ready():
 			var particle = effigy.get_polygon()[identify_particle]
 			
 			physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.associate_polygon_to_particle.keys())
-			physical_matter.inner_workings['velocity'] = Vector2(0.0,0.0)
-			physical_matter.inner_workings['initial velocity'] = Vector2(0,0)
+			physical_matter.inner_workings['velocity'] = Vector2(100.0,0.0)
+			physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
 			physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.associate_polygon_to_particle.keys())
 			physical_matter.inner_workings['stress'] = [1.0,1.0,1.0,1.0]
 			physical_matter.inner_workings['B'] = [0,0,0,0]
