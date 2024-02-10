@@ -205,5 +205,6 @@ v4.2.stable.official [46dc27791]
 v.10.3.5:
 |
 ---- added friction against the wall.
+     also able to adjust the color of each vertex of the polygon(s).
 v4.2.stable.official [46dc27791]
 
