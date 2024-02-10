@@ -201,3 +201,9 @@ V.10.3.0:
     Method 1 the vertex count should go 3-6-12-24-48-96-.....
     Method 2 the polygon count should go 1-6-36-216-696-4176-....
 v4.2.stable.official [46dc27791]
+
+v.10.3.5:
+|
+---- added friction against the wall.
+v4.2.stable.official [46dc27791]
+
