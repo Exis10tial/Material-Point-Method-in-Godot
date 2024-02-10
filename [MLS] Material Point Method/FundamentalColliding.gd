@@ -97,7 +97,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
 		
 		### for when collision_restitution == 1.0
-		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 0.50
+		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)# * 0.50
 		
 		wall_center = Vector2(particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].x,0.0)
 		
@@ -151,7 +151,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		
 		#baluster['velocity'] = Vector2(0,0.0)
 		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
-		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 0.50
+		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)# * 0.50
 		
 		wall_center = Vector2(baluster['outline'],particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].y)
 		
@@ -210,7 +210,8 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		#baluster['velocity'] = Vector2(0,0)
 		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
 		
-		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 0.50
+		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)# * 0.50
+		#baluster['velocity'] = Vector2(0,0)# * 0.50
 		
 		#print(collision_restitution,' check collision_restitution')
 		
@@ -267,7 +268,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		
 		#baluster['velocity'] = Vector2(0,0)
 		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
-		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 0.50
+		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)# * 0.50
 		
 		wall_center = Vector2(0.0,particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].y)
 		
@@ -314,3 +315,74 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 	return particle_composition.mechanics[designation]['velocity']
 	
 	
+
+
+func Apply_Friction(surrounding_wall,in_contact_with_wall,wall_side_2,wall_side_3,particle_mass,particle_velocity,gravitation,substance_static_coefficient,substance_kinetic_coefficient):
+	### find the angle of the wall...
+	var angle_of_wall
+	var wall_start
+	var wall_end
+	if in_contact_with_wall == 'top' or in_contact_with_wall == 'bottom':
+		wall_start = Vector2(surrounding_wall[wall_side_2]['barrier'],surrounding_wall[in_contact_with_wall]['barrier'],)
+		wall_end = Vector2(surrounding_wall[wall_side_3]['barrier'],surrounding_wall[in_contact_with_wall]['barrier'])
+	elif in_contact_with_wall == 'left' or in_contact_with_wall == 'right':
+		wall_start = Vector2(surrounding_wall[in_contact_with_wall]['barrier'],surrounding_wall[wall_side_2]['barrier'])
+		wall_end = Vector2(surrounding_wall[in_contact_with_wall]['barrier'],surrounding_wall[wall_side_3]['barrier'])
+	
+	if in_contact_with_wall == 'top' or in_contact_with_wall == 'bottom':
+		var midpoint_of_wall = Vector2((wall_start.x + wall_end.x) / 2.0,(wall_start.y + wall_end.y) / 2.0)
+		var wall_half_start = wall_start - midpoint_of_wall
+		var wall_half_end = wall_end - midpoint_of_wall
+					
+		angle_of_wall = atan2( (wall_half_end.y*wall_half_start.x) - (wall_end.x*wall_half_start.y) , (wall_half_end.x*wall_half_start.x) + (wall_half_end.y*wall_half_start.y))
+	elif in_contact_with_wall == 'left' or in_contact_with_wall == 'right':
+		angle_of_wall = wall_start.angle_to_point(wall_end)
+		
+	### find the angle of the particle velocity
+	var angle_of_particle = atan2(particle_velocity.y,particle_velocity.x)
+	
+	#print(int(rad_to_deg(angle_of_particle)),' particle')
+	#print(int(rad_to_deg(angle_of_wall)),' angle_of_wall')
+	### if the particle is moving parallel to the wall in either direction...
+	if int(rad_to_deg(angle_of_particle)) in range(rad_to_deg(angle_of_wall)-2,rad_to_deg(angle_of_wall)+3,1) or int(rad_to_deg(angle_of_particle)) in range(0-2,0+3,1):
+		
+		### if the particle is moving parallel to the wall and is in contact with the wall...
+		var weight = particle_mass * gravitation.length()
+		var normal_force = weight
+		var particle_force
+		var wall_friction
+		var particle_friction
+		### The wall friction depends on the direction of the wall...
+		### friction is in the opposite direction of force...
+		if surrounding_wall[in_contact_with_wall]['velocity'].x == 0:
+			### if the wall isn't moving..
+			wall_friction = normal_force * surrounding_wall[in_contact_with_wall]['coefficient of static friction']
+		elif surrounding_wall[in_contact_with_wall]['velocity'].x > 0:
+			### if the wall is moving positive...
+			wall_friction = -1.0 * normal_force * surrounding_wall[in_contact_with_wall]['coefficient of kinetic friction']
+		elif surrounding_wall[in_contact_with_wall]['velocity'].x < 0:
+			### if the wall is moving negative...
+			wall_friction = normal_force * surrounding_wall[in_contact_with_wall]['coefficient of kinetic friction']
+		### The particle friction depends on the direction of the wall...
+		if particle_velocity.x == 0:
+			particle_friction = normal_force * substance_static_coefficient
+		elif particle_velocity.x > 0:
+			particle_friction = -1.0 * normal_force * substance_kinetic_coefficient
+		elif particle_velocity.x < 0:
+			particle_friction = normal_force * substance_kinetic_coefficient
+		
+		var total_friction_force = wall_friction + particle_friction
+					
+		particle_force = particle_velocity.length() * particle_mass
+		
+		if particle_force >= total_friction_force:
+			particle_force = particle_force - total_friction_force
+		elif particle_force < total_friction_force:
+			particle_force = 0.0
+					
+		###
+		return  Vector2( cos(int(rad_to_deg(angle_of_particle))) * particle_force,
+		sin(int(rad_to_deg(angle_of_particle))) * particle_force)
+			
+	else:
+		return particle_velocity

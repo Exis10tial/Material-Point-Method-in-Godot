@@ -4,7 +4,7 @@ extends Node
 ### Wall Mechanics...
 var wall : Dictionary = {}
 ### gravity of the simulation...
-var gravity : Vector2 = Vector2(0.0,9.8)
+var gravity : Vector2 = Vector2(9.8,0.0)
 ### establishing grid...
 var inverted_grid : float
 var basis : String 
@@ -181,7 +181,7 @@ func _ready():
 	for outline in wall:
 		if outline == 'top':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = .32
+			wall[outline]['coefficient of restitution'] = .64
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
 			wall[outline]['mass'] = 1.00
@@ -196,7 +196,7 @@ func _ready():
 			#"""
 		if outline == 'right':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of restitution'] = .50
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
 			wall[outline]['mass'] = 1.00
@@ -211,7 +211,7 @@ func _ready():
 			#"""
 		if outline == 'bottom':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of restitution'] = .8
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
 			wall[outline]['mass'] = 1.00
@@ -226,7 +226,7 @@ func _ready():
 			#"""
 		if outline == 'left':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = 1.0
+			wall[outline]['coefficient of restitution'] = .50
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
 			wall[outline]['mass'] = 1.00
@@ -470,17 +470,32 @@ func Collision_with_Wall(material:Object):
 		
 		particle = material.mechanics.keys()[identify_number]
 		
+		### checks iof the particle comes in contract with the wall...
 		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y <= wall['top']['barrier']:
-			#print('colliding top')
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('top',material,particle,wall['top'])
+			### Apply friction along the the top...
+			if gravity.y < 0:
+				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'top','left','right',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
+			
 		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x >= wall['right']['barrier']:
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('right',material,particle, wall['right'])
+			### Apply friction along the the right...
+			if gravity.x > 0:
+				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'right','top','bottom',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
+			
 		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y >= wall['bottom']['barrier']:
 			#print('colliding bottom')
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('bottom',material,particle,wall['bottom'])
 			#print(material.mechanics[particle]['velocity'] ,' velocity')
+			### Apply friction along the the bottom...
+			if gravity.y > 0:
+				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'bottom','left','right',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
+			
 		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x <= wall['left']['barrier']:
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('left',material,particle, wall['left'])
+			### Apply friction along the the left...
+			if gravity.x < 0:
+				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'left','top','bottom',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
 			
 			
 		### loop counter...
@@ -508,8 +523,7 @@ func Particle_Reset(material:Object):
 		### loop counter...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
 	
-	#updated_polygon = PackedVector2Array([])
-
+	
 
 func Grid_to_Particle(time_passed:float,material:Object):
 	identify_number = 0
@@ -551,10 +565,11 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		var c_inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
 			
 		material.mechanics[particle]['C'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(b_coefficient,c_inverse_I_coefficient)
-			
+		
 		###particle position update...
 		var new_particle_position = Vector2(0,0)
-			
+		
+		#print( material.mechanics[particle]['velocity'],' ')
 		new_particle_position.x = snapped((material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x + snapped((time_passed * material.mechanics[particle]['velocity'].x),.01)  ),.01)
 		new_particle_position.y = snapped((material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y + snapped((time_passed * material.mechanics[particle]['velocity'].y),.01)  ),.01)
 			
@@ -563,7 +578,8 @@ func Grid_to_Particle(time_passed:float,material:Object):
 			
 		### MLS-deformation update...
 		#particle.F = (particle.I + time_passed * particle.C ) * particle.F
-			
+		
+		
 		var f_term_1 = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['C'],time_passed,true)
 		var f_term_2 = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(material.mechanics[particle]['I'],f_term_1)
 		material.mechanics[particle]['F'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(f_term_2,material.mechanics[particle]['F'])

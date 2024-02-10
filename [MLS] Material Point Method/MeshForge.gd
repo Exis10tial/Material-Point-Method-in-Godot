@@ -144,7 +144,7 @@ func _ready():
 	]
 	
 	### different/seperate ways to break down an original polygon...
-	var subdivide_only : bool = true
+	var subdivide_only : bool = false
 	var subdivide_into_pieces : bool = false
 	
 	### if both are false use the default given points...
@@ -158,8 +158,8 @@ func _ready():
 	
 	
 	if subdivide_only == true and subdivide_into_pieces == false: 
-		###...
-		var subdivide_rank = 2
+		### The polygon is subdivided into pieces but it remains 1 object...
+		var subdivide_rank = 3
 		var median_of_ = Vector2(0,0)  
 		var number_of_vertices = 3
 		
@@ -264,9 +264,8 @@ func _ready():
 
 
 	elif subdivide_only == false and subdivide_into_pieces == true:
-		###...
-		###...
-		var centroid_rank = 1
+		### The polygon is subdivided into pieces, each piece becomes it own polygon
+		var centroid_rank = 2
 		var centroid_point = Vector2(0,0)
 		var median_of_a = Vector2(0,0) 
 		var median_of_b = Vector2(0,0) 
@@ -361,16 +360,18 @@ func _ready():
 				poly_index = wrapi(poly_index+1,0,len(previous_poly_set.keys())+1)
 			
 			### the establish polygon from new vertices...
-			var color
+			#randomize()
+			#var color = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
+			var color = Color(1.0,1.0,1.0)
 			for polygon_shape_index in range(0,len(poly_triangles)):
 				physical_matter.effigy = Polygon2D.new()
 				coloring_points = []
 				
 				physical_matter.effigy.set_polygon(PackedVector2Array(poly_triangles[polygon_shape_index]['vertices']))
-				
+				#randomize()
 				for vertex in poly_triangles[polygon_shape_index]['vertices']:
-					coloring_points.append(Color(1.0,1.0,1.0))
-		
+					#coloring_points.append(color)
+					coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
 				physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
 		
 				
@@ -380,18 +381,21 @@ func _ready():
 		pass
 		
 	elif subdivide_only == false and subdivide_into_pieces == false:
-		
+		### The original polygon is used...
 		physical_matter.effigy.set_polygon(PackedVector2Array(collection_of_points))
 		
 		### vertex colors added...
 		for point in physical_matter.effigy.get_polygon():
-			coloring_points.append(Color(1.0,1.0,1.0))
+			#coloring_points.append(Color(1.0,1.0,1.0))
+			coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
 		
 		physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
 		
 		physical_matter.effigy_basket.append(physical_matter.effigy)
 		
 
+
+	###
 	### polygon/particle mechanics...
 	var polygon_index = 0
 	var particle_index = 0
@@ -523,7 +527,7 @@ func _ready():
 			var particle = effigy.get_polygon()[identify_particle]
 			
 			physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.associate_polygon_to_particle.keys())
-			physical_matter.inner_workings['velocity'] = Vector2(100.0,0.0)
+			physical_matter.inner_workings['velocity'] = Vector2(0.0,0.0)
 			physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
 			physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.associate_polygon_to_particle.keys())
 			physical_matter.inner_workings['stress'] = [1.0,1.0,1.0,1.0]
