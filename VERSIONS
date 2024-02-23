@@ -208,3 +208,10 @@ v.10.3.5:
      also able to adjust the color of each vertex of the polygon(s).
 v4.2.stable.official [46dc27791]
 
+v.10.4.0:
+|
+---- altered how collision is handled (betweeen the particle and wall) when the collision of restitution is
+     inbetween 0 and 1. 
+     (before was just only trigonometry),
+     now the 'zero momentum frame' is used then trigonmetry.
+v4.2.stable.official [46dc27791]
