@@ -90,7 +90,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
 		
 		### used for collision_restitution ( < 1 and > 0 )...
-		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)
+		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 2.0
 		
 		wall_center = Vector2(particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].x,0.0)
 		
@@ -135,7 +135,8 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var angle_coefficient = tan(deg_to_rad(incoming_angle))
 			var updated_angle_coefficient = collision_restitution * angle_coefficient
 			var outgoing_angle = int(rad_to_deg(atan(updated_angle_coefficient)))
-				
+			if incoming_angle > 90:
+				outgoing_angle = outgoing_angle*-1
 			x_component = zero_particle_before * cos(deg_to_rad(outgoing_angle))
 			y_component = zero_particle_before * sin(deg_to_rad(outgoing_angle))
 			
@@ -155,7 +156,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
 		
 		### used for collision_restitution ( < 1 and > 0 )...
-		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
+		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 2.0
 		
 		wall_center = Vector2(baluster['outline'],particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].y)
 		
@@ -199,7 +200,8 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var angle_coefficient = tan(deg_to_rad(incoming_angle))
 			var updated_angle_coefficient = collision_restitution * angle_coefficient
 			var outgoing_angle = int(rad_to_deg(atan(updated_angle_coefficient)))
-				
+			if incoming_angle > 90:
+				outgoing_angle = outgoing_angle*-1
 			x_component = zero_particle_before * cos(deg_to_rad(outgoing_angle))
 			y_component = zero_particle_before * sin(deg_to_rad(outgoing_angle))
 			
@@ -216,7 +218,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
 		
 		### used for collision_restitution ( < 1 and > 0 )...
-		#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y)# * 0.50
+		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 2.0
 		
 		wall_center = Vector2(particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].x,baluster['outline'])
 		
@@ -241,7 +243,6 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			### zero_momentum_frame... 
-			
 			### acquire the zero momentum velocity...
 			var zero_particle_coefficient = particle_composition.mechanics[designation]['mass'] * particle_composition.mechanics[designation]['velocity'].length()
 			var zero_wall_coefficient = baluster['mass'] * baluster['velocity'].length()
@@ -254,9 +255,11 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			### also to find the x y components of the particle after...
 			var incoming_angle =  int(rad_to_deg(atan2(particle_composition.mechanics[designation]['velocity'].y,particle_composition.mechanics[designation]['velocity'].x)))
 			var angle_coefficient = tan(deg_to_rad(incoming_angle))
+			
 			var updated_angle_coefficient = collision_restitution * angle_coefficient
 			var outgoing_angle = int(rad_to_deg(atan(updated_angle_coefficient)))
-				
+			if incoming_angle > 90:
+				outgoing_angle = outgoing_angle*-1
 			x_component = zero_particle_before * cos(deg_to_rad(outgoing_angle))
 			y_component = zero_particle_before * sin(deg_to_rad(outgoing_angle))
 			
@@ -277,7 +280,7 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_restitution = baluster['coefficient of restitution'] * particle_composition.coefficient_of_restitution
 		
 		### used for collision_restitution ( < 1 and > 0 )...
-		#baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0)
+		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 2.0
 		
 		wall_center = Vector2(0.0,particle_composition.effigy_basket[particle_composition.mechanics[designation]['correspond']].get_polygon()[particle_composition.mechanics[designation]['relation within']].y)
 		
@@ -318,7 +321,8 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var angle_coefficient = tan(deg_to_rad(incoming_angle))
 			var updated_angle_coefficient = collision_restitution * angle_coefficient
 			var outgoing_angle = int(rad_to_deg(atan(updated_angle_coefficient)))
-				
+			if incoming_angle > 90:
+				outgoing_angle = outgoing_angle*-1
 			x_component = zero_particle_before * cos(deg_to_rad(outgoing_angle))
 			y_component = zero_particle_before * sin(deg_to_rad(outgoing_angle))
 			
