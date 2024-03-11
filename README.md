@@ -2,7 +2,7 @@
 
 Looking to implementing MLS version of Material Point Method in Godot Engine.
 
-up to Version.10.4.1:
+up to Version.10.6.0:
 
 A project I wanted to work on and for that project, I ended up wanting/needed to use Material Point Method. 
 This is the MLS-version of Material Point Method I'm looking to implement. 
@@ -11,18 +11,19 @@ I have been using Godot 4 , v4.2.stable.official [46dc27791] being the latest
 some progress clips.
 
 video 1
-![testing subdivision into pieces  2024-01-29 19-52-32](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/43515a5b-125d-4d3f-a726-ea6af552072c)
+![1 6 0  random scattering -2024-03-11 15-22-33](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/1258e0d3-94e6-4b7c-a7f9-009a39401e16)
+
 
 video 2
-![testing subdivision thru medians  2024-01-29 19-29-29](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/c8842231-86b4-4bfb-9d39-8a102dc6a157)
+![1 6 0   drop 2024-03-11 15-30-13](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/3cf9459d-53f3-4894-ba8c-0b66a162c26f)
 
 
 [Video Notes]
 Window Size is 1152 by 648
-Graivity is 9.8 
-video 1 - Particle count is 6
-video 2 - Particle count is 18
 
-video 1 is showing a triangle(polygon) subdivided at the medians.
-video 2 is showing a triangle(polygon) that is subdivided into smaller triangles(polygons(
-not simulating a model.
+Now the particles is represented as rectangles(Rect2)-size of 1.
+no models is being used.
+Both videos contains particle count of 100.
+100 particles is at 20-23 fps.
+1st video there is no gravity or velocity affecting these particles. The particles just randomly jitter in place.
+2nd video does have gravity (0.0,9.8), but still no velocity on the particles. The particles drop cause of gravity then bounce cause of walls.
