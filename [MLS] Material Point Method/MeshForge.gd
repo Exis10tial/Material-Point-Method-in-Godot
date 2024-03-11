@@ -73,51 +73,9 @@ func polygon_form():
 
 
 
-func mesh_form():
-	### Creation of Mesh
-	
-	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
-	
-	var intial_position = [Vector2(starting_test_position.x,starting_test_position.y),
-	Vector2(starting_test_position.x+50,starting_test_position.y),
-	Vector2(starting_test_position.x,starting_test_position.y+50)]
 
-	
-	### determines how many times the inital triangle is subdivide 
-	### thru the centroid of the triangle
-	
-	# the base triangle is 0...
-	var centroid__rank = 0
-	### number of vertices is determined by the ranks of centroids...
-	### for triangle base limit is 3...
-	var number_of_vertices = 3
-	
-	if centroid__rank == 0:
-		pass
-	elif centroid__rank == 1:
-		### number of vertices
-		### +3 === median points of the triangle
-		### +1 == centroid points of the triangle
-		number_of_vertices = number_of_vertices + 3 + 1
-	
-	var construct_mesh = SurfaceTool.new()
-	construct_mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for vertex in intial_position:
-		construct_mesh.set_color(Color(1,1,1))
-		construct_mesh.add_vertex(Vector3(vertex.x,vertex.y,0))
-	
-	physical_matter.effigy = construct_mesh.commit()
-	physical_matter.effigy_data.create_from_surface(physical_matter.effigy,0)
-	
-
-
-
-func _ready():
-	
-	physical_matter = load("res://PhysicalSubstance.tscn").instantiate()
-	
-	### Construction of a partices...*
-	#define overall outline shape of polygon.
+func Enhanced_Polygon():
+		#define overall outline shape of polygon.
 		#shapes contain a mimumin of points...
 		#line = 3 points
 		#triangle = 6 points
@@ -136,11 +94,12 @@ func _ready():
 	var previous_poly_set = {}
 	
 	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
+	physical_matter.default_distance = 100
 	
 	###form a initial poly-triangle
 	collection_of_points = [Vector2(starting_test_position.x,starting_test_position.y),
-	Vector2(starting_test_position.x+100,starting_test_position.y),
-	Vector2(starting_test_position.x,starting_test_position.y+100)
+	Vector2(starting_test_position.x+physical_matter.default_distance,starting_test_position.y),
+	Vector2(starting_test_position.x,starting_test_position.y+physical_matter.default_distance)
 	]
 	
 	### different/seperate ways to break down an original polygon...
@@ -154,8 +113,6 @@ func _ready():
 	### essentially doubling the amount of points: 3-6-12-24-48-96
 	
 	### if sudivide into pieces is true::the original polygon is parsed into their own smaller pieces.
-	
-	
 	
 	if subdivide_only == true and subdivide_into_pieces == false: 
 		### The polygon is subdivided into pieces but it remains 1 object...
@@ -178,25 +135,13 @@ func _ready():
 			
 			cycles = cycles + 1
 		
+		### establish a new polygon....
 		while len(poly_triangles[0]['vertices']) < number_of_vertices :
 			previous_poly_set = poly_triangles.duplicate(true)
 			poly_triangles = {}
 
 			### process of establishing median points..
-			#var poly_index = 0
-			#while true:
-				#if poly_index >= len(previous_poly_set.keys()):
-					#break
-				
 			var polygon = previous_poly_set[0]
-				
-				#median_of_a = Vector2( (previous_poly_set[polygon]['vertices'][0].x + previous_poly_set[polygon]['vertices'][1].x) / 2.0, (previous_poly_set[polygon]['vertices'][0].y + previous_poly_set[polygon]['vertices'][1].y) / 2.0)
-				#median_of_b = Vector2( (previous_poly_set[polygon]['vertices'][1].x + previous_poly_set[polygon]['vertices'][2].x) / 2.0, (previous_poly_set[polygon]['vertices'][1].y + previous_poly_set[polygon]['vertices'][2].y) / 2.0)
-				#median_of_c = Vector2( (previous_poly_set[polygon]['vertices'][2].x + previous_poly_set[polygon]['vertices'][0].x) / 2.0, (previous_poly_set[polygon]['vertices'][2].y + previous_poly_set[polygon]['vertices'][0].y) / 2.0)
-				
-				#previous_poly_set[polygon]['medians'] = [median_of_a,median_of_b,median_of_c]
-				
-				#poly_index = wrapi(poly_index+1,0,len(previous_poly_set.keys())+1)
 			var part_c = 0
 			var part_d = 1
 			var build_medians = []
@@ -246,23 +191,24 @@ func _ready():
 			poly_triangles[len(poly_triangles.keys())] = poly_triangle_parts.duplicate(true)
 					
 	
-			### the establish polygon from new vertices...
-			var color
-			for polygon_shape_index in range(0,len(poly_triangles)):
-				physical_matter.effigy = Polygon2D.new()
-				coloring_points = []
+		### the establish polygon from new vertices...
+		var color = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
+			
+		for polygon_shape_index in range(0,len(poly_triangles)):
+			physical_matter.effigy = Polygon2D.new()
+			coloring_points = []
 				
-				physical_matter.effigy.set_polygon(PackedVector2Array(poly_triangles[polygon_shape_index]['vertices']))
+			physical_matter.effigy.set_polygon(PackedVector2Array(poly_triangles[polygon_shape_index]['vertices']))
 				
-				for vertex in poly_triangles[polygon_shape_index]['vertices']:
-					coloring_points.append(Color(1.0,1.0,1.0))
+			for vertex in poly_triangles[polygon_shape_index]['vertices']:
+				coloring_points.append(color)
+				#coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
+				
+			physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
+				
+			physical_matter.effigy_basket.append(physical_matter.effigy)
 		
-				physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
 		
-				
-				physical_matter.effigy_basket.append(physical_matter.effigy)
-
-
 	elif subdivide_only == false and subdivide_into_pieces == true:
 		### The polygon is subdivided into pieces, each piece becomes it own polygon
 		var centroid_rank = 2
@@ -359,23 +305,23 @@ func _ready():
 					
 				poly_index = wrapi(poly_index+1,0,len(previous_poly_set.keys())+1)
 			
-			### the establish polygon from new vertices...
-			#randomize()
-			#var color = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
-			var color = Color(1.0,1.0,1.0)
-			for polygon_shape_index in range(0,len(poly_triangles)):
-				physical_matter.effigy = Polygon2D.new()
-				coloring_points = []
-				
-				physical_matter.effigy.set_polygon(PackedVector2Array(poly_triangles[polygon_shape_index]['vertices']))
-				#randomize()
-				for vertex in poly_triangles[polygon_shape_index]['vertices']:
-					#coloring_points.append(color)
-					coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
-				physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
+		### the establish color for the vertices of the polygons...
+		var color = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
 		
+		for polygon_shape_index in range(0,len(poly_triangles)):
+			physical_matter.effigy = Polygon2D.new()
+			coloring_points = []
 				
-				physical_matter.effigy_basket.append(physical_matter.effigy)
+			physical_matter.effigy.set_polygon(PackedVector2Array(poly_triangles[polygon_shape_index]['vertices']))
+			#randomize()
+			color = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
+		
+			for vertex in poly_triangles[polygon_shape_index]['vertices']:
+				#coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
+				coloring_points.append(color)
+			physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
+				
+			physical_matter.effigy_basket.append(physical_matter.effigy)
 	
 	elif subdivide_only == true and subdivide_into_pieces == true:
 		pass
@@ -384,10 +330,13 @@ func _ready():
 		### The original polygon is used...
 		physical_matter.effigy.set_polygon(PackedVector2Array(collection_of_points))
 		
+		var point_color = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
 		### vertex colors added...
 		for point in physical_matter.effigy.get_polygon():
 			#coloring_points.append(Color(1.0,1.0,1.0))
-			coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
+			
+			#coloring_points.append(Color(randf_range(0,1),randf_range(0,1),randf_range(0,1)))
+			coloring_points.append(point_color)
 		
 		physical_matter.effigy.set_vertex_colors(PackedColorArray(coloring_points))
 		
@@ -422,6 +371,97 @@ func _ready():
 		###loop 
 		polygon_index = wrapi(polygon_index+1,0,len(physical_matter.effigy_basket)+1)
 		
+
+
+
+func mesh_form():
+	### Creation of Mesh
+	
+	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
+	
+	var intial_position = [Vector2(starting_test_position.x,starting_test_position.y),
+	Vector2(starting_test_position.x+50,starting_test_position.y),
+	Vector2(starting_test_position.x,starting_test_position.y+50)]
+
+	
+	### determines how many times the inital triangle is subdivide 
+	### thru the centroid of the triangle
+	
+	# the base triangle is 0...
+	var centroid__rank = 0
+	### number of vertices is determined by the ranks of centroids...
+	### for triangle base limit is 3...
+	var number_of_vertices = 3
+	
+	if centroid__rank == 0:
+		pass
+	elif centroid__rank == 1:
+		### number of vertices
+		### +3 === median points of the triangle
+		### +1 == centroid points of the triangle
+		number_of_vertices = number_of_vertices + 3 + 1
+	
+	var construct_mesh = SurfaceTool.new()
+	construct_mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for vertex in intial_position:
+		construct_mesh.set_color(Color(1,1,1))
+		construct_mesh.add_vertex(Vector3(vertex.x,vertex.y,0))
+	
+	physical_matter.effigy = construct_mesh.commit()
+	physical_matter.effigy_data.create_from_surface(physical_matter.effigy,0)
+	
+
+
+
+func _ready():
+	
+	physical_matter = load("res://PhysicalSubstance.tscn").instantiate()
+	
+	### Construction of a partices...*
+	
+	### construction of the substance as a collection of individual particles...
+	##
+	# number of particles ....
+	var number_of_particles = 100
+	
+	### starting area/zone of the particles
+	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
+	
+	# determine the intial position of the particles....
+	while true:
+		if len(physical_matter.box_shaped)> number_of_particles:
+			break
+		### so particle won't start in the same location...
+		while true:
+			
+			var x = randi_range(starting_test_position.x - (number_of_particles/2),starting_test_position.x + (number_of_particles/2))
+			var y = randi_range(starting_test_position.y - (number_of_particles/2),starting_test_position.y+ (number_of_particles/2))
+			
+			if physical_matter.box_shaped.has(Vector2(x,y)) == false:
+				### there isn't another particle at that location...
+				var created_particle = Rect2(Vector2(x,y),Vector2(1,1))
+				physical_matter.box_shaped.append(created_particle)
+				break
+			else:
+				pass
+
+	### tagging a particle to a number...
+	while true:
+		if len(physical_matter.entity_container)> number_of_particles:
+			break
+			
+		physical_matter.entity_container[len(physical_matter.entity_container)] = physical_matter.box_shaped[len(physical_matter.entity_container)]
+	physical_matter.box_shaped.clear()
+	
+	### associalte particle with a color...
+	while true:
+		if len(physical_matter.entity_color) > number_of_particles:
+			break
+			
+		physical_matter.entity_color[len(physical_matter.entity_color)] = Color(1.0,1.0,1.0)
+		#physical_matter.entity_color[len(physical_matter.entity_color)] = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
+		
+
 	"""
 	var test_image = Image.new()
 	test_image.create(100,100,false,Image.FORMAT_RGBA8)
@@ -442,26 +482,36 @@ func _ready():
 	"""
 	### the entire properties of the substance...
 	### constitution/composition of the substance...
+	### notes.
+	# poisson ratio when a material is stretched in one direction it tends \
+	#     to get thinner in the other two directions.
+	#.    poisson ratio limit .5
+	# youngs modulus - is a measure of stiffness of an elastic material
+	
+	
+	
+	
+	
 	#constitutive models to simulate...
 		
-	""" null-void
-	physical_matter.coefficient_of_restitution = 1.0
+	#""" null-void
+	physical_matter.coefficient_of_restitution = .9
 	physical_matter.coefficient_of_static_friction = 0.5
-	physical_matter.coefficient_of_kinetic_friction = 0.75
+	physical_matter.coefficient_of_kinetic_friction = 0.25
 	physical_matter.physical_state = 'none'
 	physical_matter.type_of_substance = 'void'
 	physical_matter.constitutive_model = 'none'
 	physical_matter.poisson_ratio = 0.0
 	physical_matter.youngs_modulus = 0.0
 	#"""
-	#""" hyperelastic model
+	""" hyperelastic model
 	physical_matter.coefficient_of_restitution = .9 #rubber
 	physical_matter.coefficient_of_static_friction = 0.8 #rubber
 	physical_matter.coefficient_of_kinetic_friction = 0.6 #rubber
 	physical_matter.physical_state = 'solid'
 	physical_matter.constitutive_model = 'hyperelastic'
-	physical_matter.poisson_ratio = 0.5 #rubber
-	physical_matter.youngs_modulus = .50 #natural rubber
+	physical_matter.poisson_ratio = 0.48 #rubber
+	physical_matter.youngs_modulus = .01 #natural rubber
 	#"""
 	"""
 	# testing water model
@@ -504,50 +554,35 @@ func _ready():
 		
 	physical_matter.mass = 1.0
 	physical_matter.volume = 1
-	
-	var identify_effigy = 0
+	#"""
+	var identified_effigy = 0
 	
 	while true:
 	
-		if identify_effigy == len(physical_matter.effigy_basket):
+		if identified_effigy >= len(physical_matter.entity_container):
 			break
 		
-		### this is the polygon...
-		var effigy_parts = physical_matter.associate_polygon_to_particle[identify_effigy]
-		var effigy = physical_matter.effigy_basket[identify_effigy]
-		var identify_particle = 0
-		
-		### cycle thru the particles(vertex) of the polygon...
-		while true:
-			if identify_particle == len(effigy_parts):
-				break
-			
-			#var particle = effigy.get_polygon()[identify_particle]
-			var particle_indicator = effigy_parts[identify_particle]
-			var particle = effigy.get_polygon()[identify_particle]
-			
-			physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.associate_polygon_to_particle.keys())
-			physical_matter.inner_workings['velocity'] = Vector2(0.0,0.0)
-			physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
-			physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.associate_polygon_to_particle.keys())
-			physical_matter.inner_workings['stress'] = [1.0,1.0,1.0,1.0]
-			physical_matter.inner_workings['B'] = [0,0,0,0]
-			physical_matter.inner_workings['C'] = [0,0,0,0]
-			physical_matter.inner_workings['I'] = [1,0,0,1]
-			physical_matter.inner_workings['F'] = [1,0,0,1]
-			physical_matter.inner_workings['J'] = 0
-			physical_matter.inner_workings['eulerian'] = {}
-			physical_matter.inner_workings['euler data'] = {'mass': physical_matter.inner_workings['mass'],'velocity':Vector2(0.0,0.0),'momentum':[0,0]}.duplicate(true)
-			physical_matter.inner_workings['correspond'] = identify_effigy
-			
-			physical_matter.inner_workings['relation within'] = effigy.get_polygon().find(particle)
-			
-			physical_matter.mechanics[particle_indicator] = physical_matter.inner_workings.duplicate(true)
-			
-			identify_particle = wrapi(identify_particle+1,0,len(effigy_parts)+1)
-		
-		identify_effigy = wrapi(identify_effigy+1,0,len(physical_matter.effigy_basket)+1)
-		
+		var effigy = physical_matter.entity_container[identified_effigy]
 	
+		### mechanics of the pariclers...
+		physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.entity_container)
+		physical_matter.inner_workings['velocity'] = Vector2(0.0,0.0)
+		physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
+		physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.associate_polygon_to_particle.keys())
+		physical_matter.inner_workings['stress'] = [1.0,0.0,0.0,1.0]
+		physical_matter.inner_workings['B'] = [0,0,0,0]
+		physical_matter.inner_workings['C'] = [0,0,0,0]
+		physical_matter.inner_workings['I'] = [1,0,0,1]
+		physical_matter.inner_workings['F'] = physical_matter.inner_workings['I'].duplicate(true)
+		physical_matter.inner_workings['J'] = 0
+		physical_matter.inner_workings['eulerian'] = {}
+		physical_matter.inner_workings['euler data'] = {'mass': physical_matter.inner_workings['mass'],'velocity':Vector2(0.0,0.0),'momentum':[0,0]}.duplicate(true)
+		
+		physical_matter.mechanics[identified_effigy] = physical_matter.inner_workings.duplicate(true)
+			
+		
+		identified_effigy = wrapi(identified_effigy+1,0,len(physical_matter.entity_container)+1)
+		
+	#"""
 	get_tree().get_root().get_node('Simulation/container').add_child(physical_matter)
 	

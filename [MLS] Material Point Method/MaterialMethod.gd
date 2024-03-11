@@ -4,13 +4,14 @@ extends Node
 ### Wall Mechanics...
 var wall : Dictionary = {}
 ### gravity of the simulation...
-var gravity : Vector2 = Vector2(9.8,0.0)
+var gravity : Vector2 = Vector2(0.0,9.8)
 ### establishing grid...
 var inverted_grid : float
 var basis : String 
 var basis_coefficient :float
 var basis_function_version : int
 var grid : Dictionary = {}
+var unusable_grid : Array = []
 var grid_spacing : int
 var _by_greatest_common_factor : int
 ### indexing/searching mechanics/components...
@@ -173,18 +174,18 @@ func _ready():
 	#var _by_greatest_common_factor
 	
 	### Wall Mechanics...defaults
-	wall['top'] = { 'barrier': 0,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
-	wall['right'] = {'barrier':get_tree().get_root().get_window().size.x,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
-	wall['bottom'] = {'barrier':get_tree().get_root().get_window().size.y,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
-	wall['left'] = {'barrier': 0,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'outline':0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['top'] = {'outline':0, 'barrier': 0,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['right'] = {'outline':0,'barrier':get_tree().get_root().get_window().size.x,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['bottom'] = {'outline':0,'barrier':get_tree().get_root().get_window().size.y,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
+	wall['left'] = {'outline':0,'barrier': 0,'coefficient of restitution' : 0.0,'coefficient of static friction': 0.0,'coefficient of kinetic friction': 0.0,'mass':0.0,'velocity':Vector2(0.0,0.0)}
 	
 	for outline in wall:
 		if outline == 'top':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = .64
+			wall[outline]['coefficient of restitution'] = 1.00
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
-			wall[outline]['mass'] = 1.00
+			wall[outline]['mass'] = 100.00
 			wall[outline]['velocity'] = Vector2(0.0,0.0)
 			#"""
 			""" hyperelastic  - natural rubber
@@ -196,10 +197,10 @@ func _ready():
 			#"""
 		if outline == 'right':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = .50
+			wall[outline]['coefficient of restitution'] = 1.00
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
-			wall[outline]['mass'] = 1.00
+			wall[outline]['mass'] = 100.00
 			wall[outline]['velocity'] = Vector2(0.0,0.0)
 			#"""
 			""" hyperelastic  - natural rubber
@@ -211,10 +212,10 @@ func _ready():
 			#"""
 		if outline == 'bottom':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = .8
+			wall[outline]['coefficient of restitution'] = 1.00
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
-			wall[outline]['mass'] = 1.00
+			wall[outline]['mass'] = 100.00
 			wall[outline]['velocity'] = Vector2(0.0,0.0)
 			#"""
 			""" hyperelastic - natural rubber
@@ -226,10 +227,10 @@ func _ready():
 			#"""
 		if outline == 'left':
 			#""" null-void
-			wall[outline]['coefficient of restitution'] = .50
+			wall[outline]['coefficient of restitution'] = 1.00
 			wall[outline]['coefficient of static friction'] = .43
 			wall[outline]['coefficient of kinetic friction'] = .26
-			wall[outline]['mass'] = 1.00
+			wall[outline]['mass'] = 100.00
 			wall[outline]['velocity'] = Vector2(0.0,0.0)
 			#"""
 			""" hyperelastic  - natural rubber
@@ -295,7 +296,7 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 
 	var surrounding_nodes
 	
-	### cycle thru each polygon...
+	### cycle thru each particle...
 	while true:
 		if identify_number >= len(material.mechanics.keys()):
 			break
@@ -303,10 +304,11 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 		var particle = material.mechanics.keys()[identify_number]
 		
 		### relation between the particle wth the grid...
-		var euler_base = material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']]
+		#var euler_base = material.entity_container[identify_number].position
+		
+		var euler_base = material.entity_container[identify_number].position
 		
 		### mechanics to find the particle in relation to the whole...
-		
 		surrounding_nodes = [Vector2( (round(euler_base.x/grid_spacing)*grid_spacing) -grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
 			Vector2( (round(euler_base.x/grid_spacing)*grid_spacing),(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
 			Vector2( (round(euler_base.x/grid_spacing)*grid_spacing)+grid_spacing,(round(euler_base.y/grid_spacing)*grid_spacing)-grid_spacing),
@@ -319,10 +321,12 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 			]
 			
 		material.mechanics[particle]['eulerian'] = surrounding_nodes.duplicate(true)
-			
+		
 		for node in surrounding_nodes:
+			#print(node,' node surrounding check')
 			### Grid Mechanics
 			if grid.has(node) == false:
+				
 				### this grid node is to be affected by the particle.
 				grid[node] = {'mass': 0.0,'velocity':Vector2(0.0,0.0),'momentum':Vector2(0.0,0.0),'forces':Vector2(0.0,0.0),'angular momentum':Vector2(0,0),'normal force':0.0}.duplicate(true)
 			else:
@@ -332,16 +336,15 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 		# inf , nan check...
 		for location in range(0,(len(material.mechanics[particle]['F']))):
 			if is_inf(material.mechanics[particle]['F'][location]) == true or is_nan(material.mechanics[particle]['F'][location]) == true:
-				if location == 0 or location == 2:
+				if location == 0 or location == 3:
 					material.mechanics[particle]['F'][location] = 1.0
-				if location == 1 or location == 3:
+				if location == 1 or location == 2:
 					material.mechanics[particle]['F'][location] = 0.0
 			
 		#material.particle_mechanics[particle]['F'] = material.particle_mechanics[particle]['I'].duplicate(true)
 		material.mechanics[particle]['J'] = get_tree().get_root().get_node('Simulation').matrix_math.Find_Determinant(material.mechanics[particle]['F'])
 		material.mechanics[particle]['volume'] = material.volume * material.mechanics[particle]['J']
 			
-		
 		### cycle thru each polygon...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
 		
@@ -427,8 +430,8 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			
 		for grid_axis in material.mechanics[particle]['eulerian']:
 				
-			relation_between_particle_and_grid_node = Vector2((snapped(material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x - grid_axis.x,.01)),snapped(material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y - grid_axis.y,.01)) / grid_spacing
-			relation_between_grid_node_and_particle = Vector2(snapped(grid_axis.x - material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x,.01),snapped(grid_axis.y - material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y,.01)) / grid_spacing
+			relation_between_particle_and_grid_node = Vector2((snapped(material.entity_container[identify_number].position.x - grid_axis.x,.01)),snapped(material.entity_container[identify_number].position.y - grid_axis.y,.01)) / grid_spacing
+			relation_between_grid_node_and_particle = Vector2(snapped(grid_axis.x - material.entity_container[identify_number].position.x,.01),snapped(grid_axis.y - material.entity_container[identify_number].position.y,.01)) / grid_spacing
 				
 			weight_interpolation = Kernel(basis,basis_function_version,(inverted_grid*relation_between_particle_and_grid_node.x))*Kernel(basis,basis_function_version,inverted_grid*relation_between_particle_and_grid_node.y)
 				
@@ -471,32 +474,29 @@ func Collision_with_Wall(material:Object):
 		particle = material.mechanics.keys()[identify_number]
 		
 		### checks iof the particle comes in contract with the wall...
-		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y <= wall['top']['barrier']:
+		if material.entity_container[identify_number].position.y <= wall['top']['barrier']:
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('top',material,particle,wall['top'])
 			### Apply friction along the the top...
 			if gravity.y < 0:
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'top','left','right',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
 			
-		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x >= wall['right']['barrier']:
+		if material.entity_container[identify_number].position.x >= wall['right']['barrier']:
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('right',material,particle, wall['right'])
 			### Apply friction along the the right...
 			if gravity.x > 0:
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'right','top','bottom',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
 			
-		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y >= wall['bottom']['barrier']:
-			#print('colliding bottom')
+		if material.entity_container[identify_number].position.y >= wall['bottom']['barrier']:
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('bottom',material,particle,wall['bottom'])
-			#print(material.mechanics[particle]['velocity'] ,' velocity')
 			### Apply friction along the the bottom...
 			if gravity.y > 0:
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'bottom','left','right',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
 			
-		if material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x <= wall['left']['barrier']:
+		if material.entity_container[identify_number].position.x <= wall['left']['barrier']:
 			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('left',material,particle, wall['left'])
 			### Apply friction along the the left...
 			if gravity.x < 0:
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'left','top','bottom',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
-			
 			
 		### loop counter...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
@@ -515,7 +515,7 @@ func Particle_Reset(material:Object):
 		
 		particle = material.mechanics.keys()[identify_number]
 		
-		material.mechanics[particle]['mass'] = material.mass / len(material.effigy.get_polygon())
+		material.mechanics[particle]['mass'] = material.mass / len(material.entity_container)
 		#material.mechanics[particle]['velocity'] = Vector2(0.0,0.0)
 		material.mechanics[particle]['B'] = [0,0,0,0]
 		#material.particle_mechanics[particle]['C'] = [0,0,0,0]
@@ -540,62 +540,58 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		
 		for node_location in material.mechanics[particle]['eulerian']:
 				
-			relation_between_particle_and_grid_node = Vector2(snapped(material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x - node_location.x,.01),snapped(material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y - node_location.y,.01)) / grid_spacing
-			relation_between_grid_node_and_particle = Vector2(snapped(node_location.x - material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x,.01),snapped(node_location.y - material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y,.01)) / grid_spacing
+			relation_between_particle_and_grid_node = Vector2(snapped(material.entity_container[identify_number].position.x - node_location.x,.01),snapped(material.entity_container[identify_number].position.y - node_location.y,.01)) / grid_spacing
+			relation_between_grid_node_and_particle = Vector2(snapped(node_location.x - material.entity_container[identify_number].position.x,.01),snapped(node_location.y - material.entity_container[identify_number].position.y,.01)) / grid_spacing
 				
 			weight_interpolation = Kernel(basis,basis_function_version,(inverted_grid*relation_between_particle_and_grid_node.x))*Kernel(basis,basis_function_version,inverted_grid*relation_between_particle_and_grid_node.y)
-				
+			
 			### MPM,MLS MPM paraticle velocity update
 			# particle Velocity = sum of ( grid velocity * weight_interpolation )
 			#B = sum of (weight interpolation * grid velocity * relation between particles transposed )
 			material.mechanics[particle]['velocity'] = material.mechanics[particle]['velocity'] + ( grid[node_location]['velocity'] * weight_interpolation)
-				
+			
 			var velocity_relation = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Vector2_by_Vector2_to_Matrix(grid[node_location]['velocity'],false,relation_between_grid_node_and_particle,true)
 				
 			material.mechanics[particle]['B'] = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(material.mechanics[particle]['B'],velocity_relation)
-				
+			
 		#MLS MPM 
 		#particle.C = B * D^-1
 		# B =  sum of the_grid( (particle.velocity*weight_interpolation) * flipped_kernel_distance^T )
 		# D^-1 = (4/pow(grid_spacing,2)) * particle.I^-1
 		### Compute C
-			
 		var b_cell_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['B'],4.0,true)
 		var b_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Divide_Matrix_by_Scalar(b_cell_coefficient,pow(grid_spacing,2.0),true)
 		var c_inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
-			
+		#print()
+		#print(pow(grid_spacing,2.0),' pow(grid_spacing,2.0)')
+		#print(b_cell_coefficient,' b_cell_coefficient')
+		#print(b_coefficient,' b_coefficient2')
+		#print(c_inverse_I_coefficient,' c_inverse_I_coefficient')
 		material.mechanics[particle]['C'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(b_coefficient,c_inverse_I_coefficient)
 		
 		###particle position update...
 		var new_particle_position = Vector2(0,0)
 		
 		#print( material.mechanics[particle]['velocity'],' ')
-		new_particle_position.x = snapped((material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].x + snapped((time_passed * material.mechanics[particle]['velocity'].x),.01)  ),.01)
-		new_particle_position.y = snapped((material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()[material.mechanics[particle]['relation within']].y + snapped((time_passed * material.mechanics[particle]['velocity'].y),.01)  ),.01)
-			
-		### set polygon...
-		updated_polygon.append(new_particle_position)
-			
+		new_particle_position.x = snapped((material.entity_container[identify_number].position.x + snapped((time_passed * material.mechanics[particle]['velocity'].x),.01)  ),.01)
+		new_particle_position.y = snapped((material.entity_container[identify_number].position.y + snapped((time_passed * material.mechanics[particle]['velocity'].y),.01)  ),.01)
+		#
+		material.entity_container[identify_number] = Rect2(new_particle_position,Vector2(1,1))
+		
+		
+		
 		### MLS-deformation update...
 		#particle.F = (particle.I + time_passed * particle.C ) * particle.F
-		
-		
 		var f_term_1 = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['C'],time_passed,true)
 		var f_term_2 = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(material.mechanics[particle]['I'],f_term_1)
 		material.mechanics[particle]['F'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(f_term_2,material.mechanics[particle]['F'])
-			
+		
 		if updating_plasticity == true:
 			### Updating Plasticity...
 			get_tree().get_root().get_node('Simulation').constitutive_models.Update_Plasticity(material,particle,material.type_of_substance)
 			updating_plasticity = false
 		
-		if len(updated_polygon) == len(material.effigy_basket[material.mechanics[particle]['correspond']].get_polygon()):
-			### the particle is updated...
-			material.effigy_basket[material.mechanics[particle]['correspond']].set_polygon([])
-			material.effigy_basket[material.mechanics[particle]['correspond']].set_polygon(updated_polygon)
-			
-			updated_polygon = PackedVector2Array([])
-			
+		
 		### cycle thru each polygon...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
 	
