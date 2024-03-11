@@ -15,7 +15,7 @@ video 1
 
 
 video 2
-![1 6 0   drop 2024-03-11 15-30-13](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/3cf9459d-53f3-4894-ba8c-0b66a162c26f)
+![1 6 0   drop 2024-03-11 15-30-13](https://github.com/Exis10tial/Material-Point-Method-in-Godot/assets/62639345/a0951725-9d79-4f47-8fc9-9fa777ea1259)
 
 
 [Video Notes]
