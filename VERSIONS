@@ -215,3 +215,16 @@ v.10.4.0:
      (before was just only trigonometry),
      now the 'zero momentum frame' is used then trigonmetry.
 v4.2.stable.official [46dc27791]
+
+v.10.5.0:
+|
+---- this is the same as 10.4.0 I had decided to make some changes and wanted/needed a extra special archive.
+v4.2.stable.official [46dc27791]
+
+10.6.0:
+|
+---- Took out representing the particles as Polygons (Polygons2D). Now the particles is show with rectangless (Rect2)
+    correcting/altering how the updated particles reacts to the walls. Also fixed howfriction applied to the particles
+    apparently, only friction along the top and bottom was active not left or right. Now friction should work for all 
+    the walls, (top,bottom,left,right)
+v4.2.stable.official [46dc27791]
