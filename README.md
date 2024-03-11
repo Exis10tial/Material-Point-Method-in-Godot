@@ -22,8 +22,13 @@ video 2
 Window Size is 1152 by 648
 
 Now the particles is represented as rectangles(Rect2)-size of 1.
-no models is being used.
+
+No models is being used.
+
 Both videos contains particle count of 100.
+
 100 particles is at 20-23 fps.
+
 1st video there is no gravity or velocity affecting these particles. The particles just randomly jitter in place.
+
 2nd video does have gravity (0.0,9.8), but still no velocity on the particles. The particles drop cause of gravity then bounce cause of walls.
