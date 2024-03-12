@@ -27,7 +27,9 @@ No models is being used.
 
 Both videos contains particle count of 100.
 
-100 particles is at 20-23 fps.
+video 1- 100 particles is at 20-23 fps.
+
+video 2- 100 particles is at 18-20 fps.
 
 1st video there is no gravity or velocity affecting these particles. The particles just randomly jitter in place.
 
