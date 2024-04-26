@@ -86,6 +86,7 @@ func Enhanced_Polygon():
 	#define physical properties of the entire polygon...
 	#associate material point properties to each polygon vertex...
 	physical_matter.effigy = Polygon2D.new()
+	
 	var collection_of_points = []
 	var coloring_points = []
 	var poly_triangle_parts = {'vertices':null,'centroid':null,'medians':null}
@@ -94,7 +95,7 @@ func Enhanced_Polygon():
 	var previous_poly_set = {}
 	
 	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
-	physical_matter.default_distance = 100
+	physical_matter.default_distance = 1
 	
 	###form a initial poly-triangle
 	collection_of_points = [Vector2(starting_test_position.x,starting_test_position.y),
@@ -421,33 +422,57 @@ func _ready():
 	
 	### construction of the substance as a collection of individual particles...
 	##
+	if get_tree().get_root().get_node('Simulation').different_substances < 1:
+		print('check')
+	
 	# number of particles ....
-	var number_of_particles = 100
+	var number_of_particles = 10
 	
 	### starting area/zone of the particles
 	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
 	
+	#"""
+	### extraxt points...
+	var particle_locations = []
+	for y in range(0,number_of_particles):
+		for x in range(0,number_of_particles):
+			particle_locations.append(Vector2(x,y))
+	#"""
+	
+	"""
+	var avaible_scope = 20
+	var scope_x_l = starting_test_position.x - avaible_scope
+	var scope_x_r = starting_test_position.x + avaible_scope
+	var scope_y_l = starting_test_position.y - avaible_scope
+	var scope_y_r = starting_test_position.y + avaible_scope
+	"""
+	
 	# determine the intial position of the particles....
 	while true:
-		if len(physical_matter.box_shaped)> number_of_particles:
+		if len(physical_matter.box_shaped) >= (number_of_particles*number_of_particles):
+		#if len(physical_matter.box_shaped) >= number_of_particles:
 			break
 		### so particle won't start in the same location...
 		while true:
 			
-			var x = randi_range(starting_test_position.x - (number_of_particles/2),starting_test_position.x + (number_of_particles/2))
-			var y = randi_range(starting_test_position.y - (number_of_particles/2),starting_test_position.y+ (number_of_particles/2))
+			#var x = randi_range(scope_x_l,scope_x_r)
+			#var y = randi_range(scope_y_l,scope_y_r)
+			var x = starting_test_position.x - particle_locations[len(physical_matter.box_shaped)].x
+			var y = starting_test_position.y - particle_locations[len(physical_matter.box_shaped)].y
 			
 			if physical_matter.box_shaped.has(Vector2(x,y)) == false:
+			#if physical_matter.box_shaped.has(particle_locations[len(physical_matter.box_shaped)]) == false:
 				### there isn't another particle at that location...
 				var created_particle = Rect2(Vector2(x,y),Vector2(1,1))
 				physical_matter.box_shaped.append(created_particle)
 				break
 			else:
 				pass
-
+	
 	### tagging a particle to a number...
 	while true:
-		if len(physical_matter.entity_container)> number_of_particles:
+		if len(physical_matter.entity_container) >= (number_of_particles*number_of_particles):
+		#if len(physical_matter.entity_container) >= number_of_particles:
 			break
 			
 		physical_matter.entity_container[len(physical_matter.entity_container)] = physical_matter.box_shaped[len(physical_matter.entity_container)]
@@ -455,13 +480,14 @@ func _ready():
 	
 	### associalte particle with a color...
 	while true:
-		if len(physical_matter.entity_color) > number_of_particles:
+		if len(physical_matter.entity_color) >= (number_of_particles*number_of_particles):
+		#if len(physical_matter.entity_color) >= number_of_particles:
 			break
 			
-		physical_matter.entity_color[len(physical_matter.entity_color)] = Color(1.0,1.0,1.0)
-		#physical_matter.entity_color[len(physical_matter.entity_color)] = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
+		#physical_matter.entity_color[len(physical_matter.entity_color)] = Color(1.0,1.0,1.0)
+		physical_matter.entity_color[len(physical_matter.entity_color)] = Color(randf_range(0,1),randf_range(0,1),randf_range(0,1))
 		
-
+	
 	"""
 	var test_image = Image.new()
 	test_image.create(100,100,false,Image.FORMAT_RGBA8)
@@ -487,11 +513,7 @@ func _ready():
 	#     to get thinner in the other two directions.
 	#.    poisson ratio limit .5
 	# youngs modulus - is a measure of stiffness of an elastic material
-	
-	
-	
-	
-	
+
 	#constitutive models to simulate...
 		
 	#""" null-void
@@ -528,15 +550,15 @@ func _ready():
 	#"""
 	"""
 	# testing fixed-corated model - snow...
-	substance.coefficient_of_restitution = randf_range(0.53,1.76) # dry snow:(0.53-1.76) , wet snow:.30-.60 , 
-	substance.coefficient_of_static_friction = 0.03 
-	substance.coefficient_of_kinetic_friction = 0.015
-	substance.physical_state = 'solid'
-	substance.constitutive_model = 'fixed_corated'
-	substance.type_of_substance = 'snow'
-	substance.poisson_ratio = 0.2#0.5
-	substance.youngs_modulus = snapped((1.4 * pow(10.0,5.0)),.1)
-	substance.volume = snapped((4.0 * pow(10.0,2.0)),.1)
+	physical_matter.coefficient_of_restitution = randf_range(0.53,1.76) # dry snow:(0.53-1.76) , wet snow:.30-.60 , 
+	physical_matter.coefficient_of_static_friction = 0.03 
+	physical_matter.coefficient_of_kinetic_friction = 0.015
+	physical_matter.physical_state = 'solid'
+	physical_matter.constitutive_model = 'fixed_corated'
+	physical_matter.type_of_substance = 'snow'
+	physical_matter.poisson_ratio = 0.2#0.5
+	physical_matter.youngs_modulus = snapped((1.4 * pow(10.0,5.0)),.1)
+	physical_matter.volume = snapped((4.0 * pow(10.0,2.0)),.1)
 	#
 	#"""
 	"""
@@ -552,8 +574,8 @@ func _ready():
 	#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
 	#"""
 		
-	physical_matter.mass = 1.0
-	physical_matter.volume = 1
+	physical_matter.mass = 1
+	#physical_matter.volume = pow(physical_matter.mass,3)
 	#"""
 	var identified_effigy = 0
 	
@@ -562,13 +584,13 @@ func _ready():
 		if identified_effigy >= len(physical_matter.entity_container):
 			break
 		
-		var effigy = physical_matter.entity_container[identified_effigy]
+		#var effigy = physical_matter.entity_container[identified_effigy]
 	
 		### mechanics of the pariclers...
 		physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.entity_container)
-		physical_matter.inner_workings['velocity'] = Vector2(0.0,0.0)
-		physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
-		physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.associate_polygon_to_particle.keys())
+		physical_matter.inner_workings['velocity'] = Vector2(100.0,0.0)
+		#physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
+		physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.entity_container)
 		physical_matter.inner_workings['stress'] = [1.0,0.0,0.0,1.0]
 		physical_matter.inner_workings['B'] = [0,0,0,0]
 		physical_matter.inner_workings['C'] = [0,0,0,0]
@@ -577,6 +599,10 @@ func _ready():
 		physical_matter.inner_workings['J'] = 0
 		physical_matter.inner_workings['eulerian'] = {}
 		physical_matter.inner_workings['euler data'] = {'mass': physical_matter.inner_workings['mass'],'velocity':Vector2(0.0,0.0),'momentum':[0,0]}.duplicate(true)
+		physical_matter.inner_workings['particle to grid'] = {}
+		physical_matter.inner_workings['grid to particle'] = {}
+		physical_matter.inner_workings['weight interpolation'] = {}
+		#physical_matter.inner_workings['affline force contribution'] = []
 		
 		physical_matter.mechanics[identified_effigy] = physical_matter.inner_workings.duplicate(true)
 			

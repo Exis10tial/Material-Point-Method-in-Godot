@@ -11,6 +11,7 @@ var stress_coefficient : Array
 var f_transposed_coefficient : Array 
 ###
 
+
 func Neo_Hookean(speck,nub):
 	### Neo-Hookean model nonlinear hyperelastic models for predicting large deformations of elastic materials. mpm pg. 19
 	### example "rubber
@@ -20,49 +21,35 @@ func Neo_Hookean(speck,nub):
 	
 	#var pk_stress
 	
-	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
+	#mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
+	mu = nub.youngs_modulus / (2 * (1.0+nub.poisson_ratio))
 	#lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
-	lambda = (nub.youngs_modulus * nub.poisson_ratio) / (1 + nub.poisson_ratio) * (1-2*nub.poisson_ratio)
-	
+	lambda = (nub.youngs_modulus * nub.poisson_ratio) / ((1.0 + nub.poisson_ratio) * (1.0-(2.0*nub.poisson_ratio)))
 	#'''
 	#  Piola-Kirchoff stress = u*F + (n * In(J) - u )*F^-T
 	# note ln() = log()
 	# or
 	# P = u*(F - F^-T) + lambda*log (J)*F^-T ; mpm course pg. 19,equation 48
-	#f_coefficient =  get_tree().get_root().get_node("Simulation/Matrix Math").Subtract_Matrix(nub.mechanics[speck]['F'],get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.mechanics[speck]['F'])))
-	#print(mu,' mu check')
-	#print(lambda,' lambda check')
 	var transposed_f = get_tree().get_root().get_node('Simulation/Matrix Math').Transposed_Matrix(nub.mechanics[speck]['F'])
 	var inversed_trasposed_f = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(transposed_f)
-	#print(transposed_f,' transposed_f check')
-	#print(inversed_trasposed_f,' inversed_trasposed_f check')
+	
 	f_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Subtract_Matrix(nub.mechanics[speck]['F'],inversed_trasposed_f)
-	#print(f_coefficient,' f_coefficient check')
+	
 	pk_mu_coefficient =  get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(f_coefficient,mu,true)
 	
-	#print(nub.mechanics[speck]['J'],' J check')
-	
 	lambda_log_cofficient = lambda * log(nub.mechanics[speck]['J']) # snapped(n * snapped(log(nub.mechanics[speck]['J']),.001),.001)
-	#print(inversed_trasposed_f,' inversed_trasposed_f check')
-	#print(lambda_log_cofficient,' lambda_log_cofficient check')
-
+	
 	#pk_lambda_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Multiply_Matrix_by_Scalar(get_tree().get_root().get_node("Simulation/Matrix Math").Inverse_Matrix(get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.mechanics[speck]['F'])),lambda_log_cofficient,true)
 	pk_lambda_coefficient =  get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(inversed_trasposed_f,lambda_log_cofficient,true)
-	#print(pk_mu_coefficient,' pk_mu_coefficient check')
-	#print(pk_lambda_coefficient,' pk_lambda_coefficient check')
 
 	P = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(pk_mu_coefficient,pk_lambda_coefficient)
-	#print(P,' P check')
-	#print(nub.mechanics[speck]['J'],' J check')
 	#stress = (1 / J) * P * F^T ; mpm course pg 18 eq 38
 	#P = elastic energy density function
 	#j_coefficient =  clamp(snapped((1.0 / nub.mechanics[speck]['J']),.01),1.0,(snapped((1.0 / nub.mechanics[speck]['J']),.01))+1)
 	j_coefficient = 1.0 / nub.mechanics[speck]['J']
-	#print(j_coefficient,' j_coefficient check')
 	stress_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(P,j_coefficient,true)
-	#f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.mechanics[speck]['F'])
+	f_transposed_coefficient = get_tree().get_root().get_node("Simulation/Matrix Math").Transposed_Matrix(nub.mechanics[speck]['F'])
 	resulted_stress = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(stress_coefficient,transposed_f)
-	#print(resulted_stress,' results stress check')
 	# inf , nan check...
 	for location in range(0,(len(resulted_stress))):
 		if is_inf(resulted_stress[location]) == true or is_nan(resulted_stress[location]) == true:
@@ -74,7 +61,83 @@ func Neo_Hookean(speck,nub):
 
 
 
-func Update_Plasticity(nub,_name,matter):
+
+func Fixed_Corotated(speck,nub):
+	### example "snow
+	var resulted_stress
+	var mu
+	var lambda
+	var mu_hardened
+	var lambda_hardened
+	var R
+	var harden_coefficient = 10.0 # usually (3 - 10) : The hardening coefficient determines how fast the material breaks once it is plastic (larger = brittle, smaller = ductile)
+	#matrix_math = get_tree().get_root().get_node("Simulation/Matrix Math")
+	
+	
+	
+	var f_t = get_tree().get_root().get_node('Simulation/Matrix Math').Transposed_Matrix(nub.mechanics[speck]['F'])
+	#print(f_t,' f_t check')
+	var u = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(f_t,nub.mechanics[speck]['F'])
+	var dia_u = [sqrt(u[0]),0,0,sqrt(u[3])]
+	#print(dia_u,' dia_u check')
+	var inv_u =  get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(dia_u)
+	#print(inv_u,' inv_u check')
+	#var R = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(material.particle_mechanics[particle]['F'],inv_u)
+		
+	#print(r,' r check')
+	
+	mu = snapped((nub.youngs_modulus / snapped((2.0 * snapped((1.0+nub.poisson_ratio),.01)),.01) ),.01)
+	lambda = snapped(snapped((nub.youngs_modulus * nub.poisson_ratio),.01) / ( (1.0 + nub.poisson_ratio) * clamp(snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01),0.1,snapped((1.0-snapped((2.0 * nub.poisson_ratio),.01)),.01)+1) ),.01)
+	
+	mu_hardened = mu * exp( harden_coefficient * (snapped((1.0 - nub.mechanics[speck]['J']),.01)))
+	lambda_hardened = lambda * exp( harden_coefficient * (snapped((1.0 - nub.mechanics[speck]['J']),.01)))
+	
+	#var F_inverse = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(nub.particle_mechanics[speck]['F'])
+	R = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(nub.mechanics[speck]['F'],inv_u)
+	
+	#print(mu_hardened,' check mu_hardened')
+	#print(lambda_hardened,' check lambda_hardened')
+	
+	#"""
+	# energy density function
+	# P = 2 * mu_hardened * ( F - R ) + lambda_hardened * ( J - 1 ) * J * F ^-T ; mpm course pg 20 eq 52
+	
+	f_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Subtract_Matrix(nub.mechanics[speck]['F'],R)
+	
+	var mu_harded_coefficient = snapped((2.0 * mu_hardened),.01)
+	var mu_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(f_coefficient,mu_harded_coefficient,true)
+	
+	var lambda_harded_coefficient = snapped(snapped(lambda_hardened * (snapped((nub.mechanics[speck]['J'] - 1.0),.01)),.01) * nub.mechanics[speck]['J'],.01)
+	var lambda_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(f_t,lambda_harded_coefficient,true)
+	
+	P = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(mu_coefficient,lambda_coefficient)
+	#"""
+	
+	#stress = (1 / J) * P * F^T ; mpm course pg 18 eq 38
+	#P = elastic energy density function
+	j_coefficient =  clamp(snapped((1.0 / nub.mechanics[speck]['J']),.01),.001,(snapped((1.0 / nub.mechanics[speck]['J']),.01))+1)
+	stress_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(P,j_coefficient,true)
+	f_transposed_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Transposed_Matrix(nub.mechanics[speck]['F'])
+	resulted_stress = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(stress_coefficient,f_transposed_coefficient)
+	
+	if is_inf(resulted_stress[0]) == true or is_nan(resulted_stress[0]) == true:
+		resulted_stress[0] = 1.0
+	if is_inf(resulted_stress[1]) == true or is_nan(resulted_stress[1]) == true:
+		resulted_stress[1] = 1.0
+	if is_inf(resulted_stress[2]) == true or is_nan(resulted_stress[2]) == true:
+		resulted_stress[2] = 1.0
+	if is_inf(resulted_stress[3]) == true or is_nan(resulted_stress[3]) == true:
+		resulted_stress[3] = 1.0
+		
+		
+	#print(resulted_stress,' check fixed-corotated')
+	
+	return resulted_stress
+
+
+
+
+func Update_Plasticity(nub,name,matter):
 	### .
 	
 	if matter == 'snow':
