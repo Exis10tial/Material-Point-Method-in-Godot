@@ -422,16 +422,14 @@ func _ready():
 	
 	### construction of the substance as a collection of individual particles...
 	##
-	if get_tree().get_root().get_node('Simulation').different_substances < 1:
-		print('check')
 	
-	# number of particles ....
-	var number_of_particles = 10
+	# number of particles ...
+	var number_of_particles = 6
 	
 	### starting area/zone of the particles
 	var starting_test_position = Vector2(get_tree().get_root().size.x/2.0,get_tree().get_root().size.y/2.0)
 	
-	#"""
+	"""
 	### extraxt points...
 	var particle_locations = []
 	for y in range(0,number_of_particles):
@@ -439,13 +437,13 @@ func _ready():
 			particle_locations.append(Vector2(x,y))
 	#"""
 	
-	"""
-	var avaible_scope = 20
+	#"""
+	var avaible_scope = 10
 	var scope_x_l = starting_test_position.x - avaible_scope
 	var scope_x_r = starting_test_position.x + avaible_scope
 	var scope_y_l = starting_test_position.y - avaible_scope
 	var scope_y_r = starting_test_position.y + avaible_scope
-	"""
+	#"""
 	
 	# determine the intial position of the particles....
 	while true:
@@ -455,10 +453,10 @@ func _ready():
 		### so particle won't start in the same location...
 		while true:
 			
-			#var x = randi_range(scope_x_l,scope_x_r)
-			#var y = randi_range(scope_y_l,scope_y_r)
-			var x = starting_test_position.x - particle_locations[len(physical_matter.box_shaped)].x
-			var y = starting_test_position.y - particle_locations[len(physical_matter.box_shaped)].y
+			var x = randi_range(scope_x_l,scope_x_r)
+			var y = randi_range(scope_y_l,scope_y_r)
+			#var x = starting_test_position.x - particle_locations[len(physical_matter.box_shaped)].x
+			#var y = starting_test_position.y - particle_locations[len(physical_matter.box_shaped)].y
 			
 			if physical_matter.box_shaped.has(Vector2(x,y)) == false:
 			#if physical_matter.box_shaped.has(particle_locations[len(physical_matter.box_shaped)]) == false:
@@ -517,14 +515,16 @@ func _ready():
 	#constitutive models to simulate...
 		
 	#""" null-void
-	physical_matter.coefficient_of_restitution = .9
+	physical_matter.coefficient_of_restitution = randf_range(0.0,1.0)
 	physical_matter.coefficient_of_static_friction = 0.5
 	physical_matter.coefficient_of_kinetic_friction = 0.25
 	physical_matter.physical_state = 'none'
 	physical_matter.type_of_substance = 'void'
 	physical_matter.constitutive_model = 'none'
-	physical_matter.poisson_ratio = 0.0
-	physical_matter.youngs_modulus = 0.0
+	physical_matter.poisson_ratio = .50 # :: 1.0-.5
+	physical_matter.youngs_modulus = 0.0 #measure of stiffness
+	physical_matter.mass = len(physical_matter.entity_container)# / 20
+	physical_matter.volume = pow(physical_matter.mass,3)
 	#"""
 	""" hyperelastic model
 	physical_matter.coefficient_of_restitution = .9 #rubber
@@ -534,23 +534,27 @@ func _ready():
 	physical_matter.constitutive_model = 'hyperelastic'
 	physical_matter.poisson_ratio = 0.48 #rubber
 	physical_matter.youngs_modulus = .01 #natural rubber
+	physical_matter.mass = float(len(physical_matter.entity_container) / 2)
+	physical_matter.volume = pow(physical_matter.mass,3)
 	#"""
 	"""
 	# testing water model
-	substance.coefficient_of_restitution = 0.2
-	substance.coefficient_of_static_friction = 0.4
-	substance.coefficient_of_kinetic_friction = 0.2
-	substance.physical_state = 'liquid'
-	substance.constitutive_model = 'water'
+	physical_matter.coefficient_of_restitution = 0.2
+	physical_matter.coefficient_of_static_friction = 0.4
+	physical_matter.coefficient_of_kinetic_friction = 0.2
+	physical_matter.physical_state = 'liquid'
+	physical_matter.constitutive_model = 'water'
+	physical_matter.mass = float(18)
+	physical_matter.volume = 10
 	#var flow = randf_range(-10.0,10.0)
-	var flow = 100.0
+	#var flow = 100.0
 	#maintain_velocity = Vector2(flow,flow)
 	#substance.maintain_velocity = Vector2(0.0,flow)
 	#substance.volume = 1.0
 	#"""
 	"""
 	# testing fixed-corated model - snow...
-	physical_matter.coefficient_of_restitution = randf_range(0.53,1.76) # dry snow:(0.53-1.76) , wet snow:.30-.60 , 
+	physical_matter.coefficient_of_restitution = randf_range(0.30,.60) # dry snow:(0.53-1.76) , wet snow:.30-.60 , 
 	physical_matter.coefficient_of_static_friction = 0.03 
 	physical_matter.coefficient_of_kinetic_friction = 0.015
 	physical_matter.physical_state = 'solid'
@@ -558,27 +562,27 @@ func _ready():
 	physical_matter.type_of_substance = 'snow'
 	physical_matter.poisson_ratio = 0.2#0.5
 	physical_matter.youngs_modulus = snapped((1.4 * pow(10.0,5.0)),.1)
-	physical_matter.volume = snapped((4.0 * pow(10.0,2.0)),.1)
+	physical_matter.mass = float(9)
+	physical_matter.volume = 5#pow(physical_matter.mass,3)
 	#
 	#"""
 	"""
 	# testing drucker_prager_elasticity - sand...
-	substance.coefficient_of_restitution = randf_range(0.88,0.98) # wet sand (0.05,0.70)
-	substance.coefficient_of_static_friction = randf_range(0.3,0.5) # wet sand 0.40 
-	substance.coefficient_of_kinetic_friction = 0.15 #random
-	substance.physical_state = 'solid'
-	substance.constitutive_model = 'drucker_prager_elasticity'
-	substance.type_of_substance = 'sand'
-	substance.poisson_ratio = 0.29
-	substance.youngs_modulus = snapped((3.537 * pow(10.0,7.0)),.1)
-	#substance.volume = 1.0#snapped((4.0 * pow(10.0,2.0)),.1)
+	physical_matter.coefficient_of_restitution = randf_range(0.88,0.98) # wet sand (0.05,0.70)
+	physical_matter.coefficient_of_static_friction = randf_range(0.3,0.5) # wet sand 0.40 
+	physical_matter.coefficient_of_kinetic_friction = 0.15 #random
+	physical_matter.physical_state = 'solid'
+	physical_matter.constitutive_model = 'drucker_prager_elasticity'
+	physical_matter.type_of_substance = 'sand'
+	physical_matter.poisson_ratio = 0.29
+	physical_matter.youngs_modulus = snapped((3.537 * pow(10.0,7.0)),.1)
+	physical_matter.mass = float(10)
+	physical_matter.volume = pow(physical_matter.mass,3)
 	#"""
 		
-	physical_matter.mass = 1
-	#physical_matter.volume = pow(physical_matter.mass,3)
+	
 	#"""
 	var identified_effigy = 0
-	
 	while true:
 	
 		if identified_effigy >= len(physical_matter.entity_container):
@@ -588,15 +592,16 @@ func _ready():
 	
 		### mechanics of the pariclers...
 		physical_matter.inner_workings['mass'] = physical_matter.mass / len(physical_matter.entity_container)
+		#physical_matter.inner_workings['mass'] = len(physical_matter.entity_container)
+		physical_matter.inner_workings['volume'] = null
+		
 		physical_matter.inner_workings['velocity'] = Vector2(100.0,0.0)
-		#physical_matter.inner_workings['initial velocity'] = Vector2(0.0,0.0)
-		physical_matter.inner_workings['volume'] = physical_matter.volume / len(physical_matter.entity_container)
 		physical_matter.inner_workings['stress'] = [1.0,0.0,0.0,1.0]
 		physical_matter.inner_workings['B'] = [0,0,0,0]
 		physical_matter.inner_workings['C'] = [0,0,0,0]
-		physical_matter.inner_workings['I'] = [1,0,0,1]
-		physical_matter.inner_workings['F'] = physical_matter.inner_workings['I'].duplicate(true)
-		physical_matter.inner_workings['J'] = 0
+		#physical_matter.inner_workings['I'] = [1,0,0,1]
+		#physical_matter.inner_workings['F'] = physical_matter.inner_workings['I'].duplicate(true)
+		#physical_matter.inner_workings['J'] = 0
 		physical_matter.inner_workings['eulerian'] = {}
 		physical_matter.inner_workings['euler data'] = {'mass': physical_matter.inner_workings['mass'],'velocity':Vector2(0.0,0.0),'momentum':[0,0]}.duplicate(true)
 		physical_matter.inner_workings['particle to grid'] = {}

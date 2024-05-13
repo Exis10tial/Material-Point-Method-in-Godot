@@ -82,8 +82,10 @@ func By_Greatest_Common_Factor(multinomial_x,multinomial_y):
 func Kernel(splines:String,version:int,relation:Vector2):#,cell_size:float):
 	#reset parameters
 	var piecewise : Vector2 = Vector2(0,0)
-
+	
 	if splines == "quadratic":
+		#if version == :
+			#if relation.x >= positive_point_five_by_marker and relation.x < 
 		if version == 2:
 			### thru Analysis and Reduction of Quadrature Errors in the Material Point Method. steffan .W.pdf-pg(8.equation 16)
 			if relation.x >= negative_one_point_five_by_marker and relation.x < negative_point_five_by_marker:
@@ -94,6 +96,7 @@ func Kernel(splines:String,version:int,relation:Vector2):#,cell_size:float):
 				piecewise.x = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(relation.x,2))) - ((3.0/(2.0*grid_spacing))*relation.x) + one_point_one_two_fiive
 			else:
 				piecewise.x = 0
+				
 			if relation.y >= negative_one_point_five_by_marker and relation.y < negative_point_five_by_marker:
 				piecewise.y = ((1.0/ (2.0 * (pow(grid_spacing,2)))) * (pow(relation.y,2))) + ((3.0/(2.0*grid_spacing))*relation.y) + one_point_one_two_fiive
 			#elif relation.y == (0*grid_spacing)/grid_spacing:# and relation.y <= (.50*grid_spacing):
@@ -104,7 +107,7 @@ func Kernel(splines:String,version:int,relation:Vector2):#,cell_size:float):
 			else:
 				### location :: 
 				piecewise.y = 0
-		
+	
 	return piecewise
 	
 
@@ -250,11 +253,25 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 	### reseting the grid data...
 	#
 	identify_number = 0
-	grid = {}
-
+	grid.clear()
+	var brand_new : Dictionary = {}
+	grid = brand_new.duplicate()
+	
 	var surrounding_nodes
 	
-	"""
+	
+	# inf , nan check...
+	#"""
+	for location in range(0,(len(material.F))):
+		if is_inf(material.F[location]) == true or is_nan(material.F[location]) == true:
+			if location == 0 or location == 3:
+				material.F[location] = 1.0
+			if location == 1 or location == 2:
+				material.F[location] = 0.0
+	#"""
+		
+	
+	#"""
 	### cycle thru each particle...
 	while true:
 		if identify_number >= len(material.mechanics.keys()):
@@ -262,7 +279,7 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 		
 		var particle = material.mechanics.keys()[identify_number]
 	#"""
-	for particle in material.mechanics.keys():
+	#for particle in material.mechanics.keys():
 		### relation between the particle wth the grid...
 		#var euler_base = material.entity_container[identify_number].position
 		
@@ -308,22 +325,17 @@ func Grid_Reset(material:Object):#,matrix_math:Object):
 			var kerneled =  Kernel(basis,basis_function_version,relation_inverted)
 			material.mechanics[particle]['weight interpolation'][grid_index] = kerneled.x * kerneled.y
 			
-
-		# inf , nan check...
-		#"""
-		for location in range(0,(len(material.mechanics[particle]['F']))):
-			if is_inf(material.mechanics[particle]['F'][location]) == true or is_nan(material.mechanics[particle]['F'][location]) == true:
-				if location == 0 or location == 3:
-					material.mechanics[particle]['F'][location] = 1.0
-				if location == 1 or location == 2:
-					material.mechanics[particle]['F'][location] = 0.0
-		#"""
+		
 		#material.particle_mechanics[particle]['F'] = material.particle_mechanics[particle]['I'].duplicate(true)
-		material.mechanics[particle]['J'] = get_tree().get_root().get_node('Simulation').matrix_math.Find_Determinant(material.mechanics[particle]['F'])
-		material.mechanics[particle]['volume'] = material.volume * material.mechanics[particle]['J']
-			
+		#material.mechanics[particle]['J'] = get_tree().get_root().get_node('Simulation').matrix_math.Find_Determinant(material.mechanics[particle]['F'])
+		
+		#material.mechanics[particle]['J'] = get_tree().get_root().get_node('Simulation').matrix_math.Find_Determinant(material.F)
+		material.J = get_tree().get_root().get_node('Simulation').matrix_math.Find_Determinant(material.F)
+		material.mechanics[particle]['volume'] = material.volume * material.J
+		
+		
 		### cycle thru each polygon...
-		#identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
+		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
 		
 
 
@@ -375,7 +387,9 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			# D^-1 = (4/pow(grid_spacing,2)) * particle.I^-1
 				
 			var timed_volume_coefficient = time_passed * material.volume * 4.0 / pow(grid_spacing,2.0)
-			var timed_volume_I = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['I'],timed_volume_coefficient,true)
+			#var timed_volume_I = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['I'],timed_volume_coefficient,true)
+			var timed_volume_I = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.I,timed_volume_coefficient,true)
+			
 			#var timed_volume_I = [material.mechanics[particle]['I'][0]*timed_volume_coefficient,
 			#material.mechanics[particle]['I'][1]*timed_volume_coefficient,
 			#material.mechanics[particle]['I'][2]*timed_volume_coefficient,
@@ -383,8 +397,9 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			
 			var energy_density_I = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(energy_denisty_coeficient,timed_volume_I)
 				
-			var  F_transposed = get_tree().get_root().get_node('Simulation/Matrix Math').Transposed_Matrix(material.mechanics[particle]['F'])
-				
+			#var  F_transposed = get_tree().get_root().get_node('Simulation/Matrix Math').Transposed_Matrix(material.mechanics[particle]['F'])
+			var  F_transposed = get_tree().get_root().get_node('Simulation/Matrix Math').Transposed_Matrix(material.F)
+			
 			var energy_density_I_transposed = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(energy_density_I,F_transposed)
 				
 			var q_mass_C = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['C'],material.mass,true)
@@ -411,7 +426,8 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			var q_volumed_stress_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(q_volumed_stress,4.0,true)
 			var q_stressed_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Divide_Matrix_by_Scalar(q_volumed_stress_coefficient,pow(grid_spacing,2),true)
 					
-			var inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
+			#var inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
+			var inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.I)
 			var weighted_stressed_I = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(inverse_I_coefficient,q_stressed_coefficient)
 			var negative_weighted_stressed_I = get_tree().get_root().get_node('Simulation/Matrix Math').Divide_Matrix_by_Scalar(weighted_stressed_I,-1.0,true)
 					
@@ -423,6 +439,7 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			
 		#"""
 		#print(len(grid),' grid')
+		
 		for grid_axis in material.mechanics[particle]['eulerian']:
 			var relation_index = material.mechanics[particle]['eulerian'].find(grid_axis)
 			weight_interpolation = material.mechanics[particle]['weight interpolation'][relation_index] 
@@ -440,10 +457,13 @@ func Particles_to_Grid(time_passed:float,material:Object):
 			### MPM lumped mass
 			
 			### MLS MPM lumped mass
-			grid[grid_axis]['mass'] = snappedf((grid[grid_axis]['mass'] + (material.mass * weight_interpolation)),.001)
+			#grid[grid_axis]['mass'] = snappedf((grid[grid_axis]['mass'] + (material.mass * weight_interpolation)),.001)
 			
-			grid[grid_axis]['momentum'] = grid[grid_axis]['momentum'] + (grid[grid_axis]['mass']*affine)
+			#print((material.mass * weight_interpolation))
 			
+			grid[grid_axis]['mass'] = grid[grid_axis]['mass'] + (material.mechanics[particle]['mass'] * weight_interpolation)
+			grid[grid_axis]['momentum'] = grid[grid_axis]['momentum'] + (material.mechanics[particle]['mass']*affine)
+		
 		#"""
 		### cycle thru each polygon...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
@@ -453,16 +473,39 @@ func Particles_to_Grid(time_passed:float,material:Object):
 
 func Grid_Update(time_passed:float,_material:Object):
 	#Grid Update:
-	
-	for node_point in grid.keys():
+	#print()
+	identify_number = 0
+	#"""
+	### cycle thru each polygon...
+	while true:
+		if identify_number >= len(grid.keys()):
+			break
+		
+		var node_point = grid.keys()[identify_number]
+	#"""
+	#for node_point in grid.keys():
+		#print(node_point,' node ')
 		if grid[node_point]['mass'] > 0.0:
+			if node_point.y >= wall['bottom']['barrier'] or node_point.y <= wall['top']['barrier']:
+				gravity = Vector2(0,0)
+			if node_point.x >= wall['right']['barrier'] or node_point.x <= wall['left']['barrier']:
+				gravity = Vector2(0,0)
 			grid[node_point]['momentum'] = grid[node_point]['momentum'] + (time_passed * (grid[node_point]['mass'] * gravity))
-			
 			grid[node_point]['velocity'] = grid[node_point]['momentum'] / grid[node_point]['mass']
+			
+			#print(grid[node_point]['velocity'],' node velo')
+		### loop counter...
+		identify_number = wrapi(identify_number+1,0,len(grid.keys())+1)
+	
+func Adapt_Constraint():
+	### constraint of the soft body applied to the grid nodes...
+	
+	pass
+
 
 
 func Collision_with_Wall(material:Object):
-	#"""
+
 	### Collision Detection...
 	### how the particles interacts....
 	identify_number = 0
@@ -485,8 +528,8 @@ func Collision_with_Wall(material:Object):
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'top','left','right',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
 			
 		if material.entity_container[identify_number].position.x >= wall['right']['barrier']:
+			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('right',material,particle,wall['right'])
 			
-			material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Collision_with_Walls('right',material,particle, wall['right'])
 			### Apply friction along the the right...
 			if gravity.x > 0:
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'right','top','bottom',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
@@ -504,11 +547,10 @@ func Collision_with_Wall(material:Object):
 			### Apply friction along the the left...
 			if gravity.x < 0:
 				material.mechanics[particle]['velocity'] = get_tree().get_root().get_node('Simulation/Interaction').Apply_Friction(wall,'left','top','bottom',material.mechanics[particle]['mass'],material.mechanics[particle]['velocity'],gravity,material.coefficient_of_static_friction,material.coefficient_of_kinetic_friction)
-			
+		
 		### loop counter...
 		identify_number = wrapi(identify_number+1,0,len(material.mechanics.keys())+1)
 		
-	
 
 
 func Particle_Reset(material:Object):
@@ -576,7 +618,8 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		### Compute C
 		var b_cell_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['B'],4.0,true)
 		var b_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Divide_Matrix_by_Scalar(b_cell_coefficient,pow(grid_spacing,2.0),true)
-		var c_inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
+		#var c_inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.mechanics[particle]['I'])
+		var c_inverse_I_coefficient = get_tree().get_root().get_node('Simulation/Matrix Math').Inverse_Matrix(material.I)
 		#print()
 		#print(pow(grid_spacing,2.0),' pow(grid_spacing,2.0)')
 		#print(b_cell_coefficient,' b_cell_coefficient')
@@ -592,12 +635,14 @@ func Grid_to_Particle(time_passed:float,material:Object):
 		new_particle_position.y = snapped((material.entity_container[particle].position.y + snapped((time_passed * material.mechanics[particle]['velocity'].y),.01)  ),.01)
 		#
 		material.entity_container[particle] = Rect2(new_particle_position,Vector2(1,1))
-		
+		#print(material.entity_container[particle],' material.entity_container[particle]')
 		### MLS-deformation update...
 		#particle.F = (particle.I + time_passed * particle.C ) * particle.F
 		var f_term_1 = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix_by_Scalar(material.mechanics[particle]['C'],time_passed,true)
-		var f_term_2 = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(material.mechanics[particle]['I'],f_term_1)
-		material.mechanics[particle]['F'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(f_term_2,material.mechanics[particle]['F'])
+		#var f_term_2 = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(material.mechanics[particle]['I'],f_term_1)
+		var f_term_2 = get_tree().get_root().get_node('Simulation/Matrix Math').Add_Matrix(material.I,f_term_1)
+		#material.mechanics[particle]['F'] = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(f_term_2,material.mechanics[particle]['F'])
+		material.F = get_tree().get_root().get_node('Simulation/Matrix Math').Multiply_Matrix(f_term_2,material.F)
 		
 		if updating_plasticity == true:
 			### Updating Plasticity...

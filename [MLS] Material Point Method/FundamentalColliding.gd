@@ -91,13 +91,14 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		### used for collision_restitution ( < 1 and > 0 )...
-		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 2.00
-		
 		wall_center = Vector2(particle_composition.entity_container[designation].position.x,0.0)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,0)
+		
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
 			normal_vector = Vector2(wall_center - particle_composition.entity_container[designation].position)
@@ -121,8 +122,13 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			# imperflect inelastic collisions :
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
+		
+			
 			### zero_momentum_frame... 
-			var y_component
+			#var y_component
 			### acquire the zero momentum velocity...
 			var zero_particle_coefficient = particle_composition.mechanics[designation]['mass'] * particle_composition.mechanics[designation]['velocity'].length()
 			var zero_wall_coefficient = baluster['mass'] * baluster['velocity'].length()
@@ -130,18 +136,18 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var zero_momentum_frame_velocity =  (zero_particle_coefficient + zero_wall_coefficient) / zero_mass_coefficient
 			### find the zero momentum velocity before the collision...
 			var zero_particle_velocity = particle_composition.mechanics[designation]['velocity'].length() - zero_momentum_frame_velocity
-			var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
+			#var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
 			
 			var incoming_particle_angle = rad_to_deg(atan2(particle_composition.mechanics[designation]['velocity'].y,particle_composition.mechanics[designation]['velocity'].x))
 			
 			var angle_coefficient = collision_restitution * tan(deg_to_rad(incoming_particle_angle))
-			var outgoing_angle = rad_to_deg(atan(angle_coefficient))
+			outgoing_angle = rad_to_deg(atan(angle_coefficient))
 			
 			var particle_reformed_coefficient = zero_momentum_frame_velocity + zero_particle_velocity
 			
-			var x_component = ((wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x )* sign(particle_composition.mechanics[designation]['velocity'].x)
+			x_component = ((wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x )* sign(particle_composition.mechanics[designation]['velocity'].x)
 			
-			if incoming_particle_angle > -90:
+			if incoming_particle_angle >= -90:
 				y_component = (wall_center.y + particle_reformed_coefficient * -sin(deg_to_rad(outgoing_angle))) - wall_center.y
 			else:
 				y_component = (wall_center.y + particle_reformed_coefficient * sin(deg_to_rad(outgoing_angle))) - wall_center.y
@@ -150,6 +156,8 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
 			
 			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
 			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
@@ -162,13 +170,13 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		### used for collision_restitution ( < 1 and > 0 )...
-		baluster['velocity'] = Vector2(-particle_composition.mechanics[designation]['velocity'].x,0) * 2.00
-		
-		wall_center = Vector2(baluster['outline'],particle_composition.entity_container[designation].position.y)
+		wall_center = Vector2(baluster['barrier'],particle_composition.entity_container[designation].position.y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,0) # at mass of 1000..
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
 			normal_vector = Vector2(wall_center - particle_composition.entity_container[designation].position)
@@ -193,7 +201,11 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			#### zero_momentum_frame... 
-			var x_component
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(particle_composition.mechanics[designation]['velocity'].x,0) * 0
+			
+			#var x_component
 			### acquire the zero momentum velocity...
 			var zero_particle_coefficient = particle_composition.mechanics[designation]['mass'] * particle_composition.mechanics[designation]['velocity'].length()
 			var zero_wall_coefficient = baluster['mass'] * baluster['velocity'].length()
@@ -201,27 +213,35 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var zero_momentum_frame_velocity =  (zero_particle_coefficient + zero_wall_coefficient) / zero_mass_coefficient
 			### find the zero momentum velocity before the collision...
 			var zero_particle_velocity = particle_composition.mechanics[designation]['velocity'].length() - zero_momentum_frame_velocity
-			var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
+			#var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
 			
-			var incoming_particle_angle = rad_to_deg(atan2(particle_composition.mechanics[designation]['velocity'].y,particle_composition.mechanics[designation]['velocity'].y))
+			var incoming_particle_angle = rad_to_deg(atan2(particle_composition.mechanics[designation]['velocity'].y,particle_composition.mechanics[designation]['velocity'].x))
 			
 			var angle_coefficient = collision_restitution * tan(deg_to_rad(incoming_particle_angle))
-			var outgoing_angle = rad_to_deg(atan(angle_coefficient))
-			
+			outgoing_angle = rad_to_deg(atan(angle_coefficient))
+			if incoming_particle_angle > 0 and incoming_particle_angle < 90:
+				var refined_out_angle = -180 - outgoing_angle
 			var particle_reformed_coefficient = zero_momentum_frame_velocity + zero_particle_velocity
 			
-			var y_component = ((wall_center.x + particle_reformed_coefficient * sin(deg_to_rad(outgoing_angle))) - wall_center.x )
+			y_component = ((wall_center.x + particle_reformed_coefficient * sin(deg_to_rad(outgoing_angle))) - wall_center.x )
 			
-			if incoming_particle_angle > 0:
-				x_component = (wall_center.x + particle_reformed_coefficient * -cos(deg_to_rad(outgoing_angle))) - wall_center.x
-			else:
-				x_component = (wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x
-			
+			#if incoming_particle_angle <= 0:
+				#print(incoming_particle_angle,' incoming_particle_angle')
+			x_component = (wall_center.x + (particle_reformed_coefficient * -cos(deg_to_rad(outgoing_angle)))) - wall_center.x
+			#$#	print('a')
+			##else:
+			#	x_component = (wall_center.x + (particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle)))) - wall_center.x
+			#	print('b')
+			#print(x_component,' x')
 			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
+			
 			
 			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
 			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
@@ -234,40 +254,44 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		### used for collision_restitution ( < 1 and > 0 )...
-		baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 2.0
 		### acts as the impact center...
 		wall_center = Vector2(particle_composition.entity_container[designation].position.x,baluster['barrier'])
 		#wall_center = Vector2(baluster['outline']/2,baluster['outline'])
-		
+		#print()
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
-			#print('bounce back')
-			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
+			
+			###default wall velocity
+			baluster['velocity'] = Vector2(0,0) # at mass of 1000..
+		
+			
 			normal_vector = Vector2(wall_center - particle_composition.entity_container[designation].position)
-			#print(unit_vector,' unit_vector check')
-			unit_vector = normal_vector / snapped(sqrt((snapped(pow(normal_vector.x,2.0),.01) + snapped(pow(normal_vector.y,2.0),.01))),.01)
-			#print(unit_vector,' unit_vector check')
+			unit_vector = normal_vector / sqrt( (pow(normal_vector.x,2) + pow(normal_vector.y,2)) )
 			unit_tangent = Vector2(-unit_vector.y,unit_vector.x)
 			
-			#dotted_unit_particle_composition_velocity = unit_vector.dot(particle_composition.mechanics[designation]['velocity'])
-			dotted_unit_particle_composition_velocity = snapped(unit_vector.dot(particle_composition.mechanics[designation]['velocity']),.001)
-			#dotted_tangent_particle_composition_velocity = unit_tangent.dot(particle_composition.mechanics[designation]['velocity'])
-			dotted_tangent_particle_composition_velocity = snapped(unit_tangent.dot(particle_composition.mechanics[designation]['velocity']),.001)
+			dotted_unit_particle_composition_velocity = unit_vector.dot(particle_composition.mechanics[designation]['velocity'])
+			dotted_tangent_particle_composition_velocity = unit_tangent.dot(particle_composition.mechanics[designation]['velocity'])
 			dotted_unit_wall_velocity = unit_vector.dot(baluster['velocity'])
 			dotted_tangent_wall_velocity = unit_tangent.dot(baluster['velocity'])
 			
 			final_tangential_particle_composition_velocity = dotted_tangent_particle_composition_velocity
 			final_tangential_wall_velocity = dotted_tangent_wall_velocity
 			
-			final_normal_particle_composition_velocity = (dotted_unit_particle_composition_velocity * (particle_composition.mechanics[designation]['mass'] - baluster['mass']) + 2.0 * baluster['mass'] * dotted_unit_wall_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
-			final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['mass'] - particle_composition.mechanics[designation]['mass']) + 2.0 * baluster['mass'] * dotted_unit_particle_composition_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
+			final_normal_particle_composition_velocity = (dotted_unit_particle_composition_velocity * (particle_composition.mechanics[designation]['mass'] - baluster['mass']) + (2.0 * baluster['mass'] * dotted_unit_wall_velocity )) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
+			#final_normal_wall_velocity = (dotted_unit_wall_velocity * (baluster['mass'] - particle_composition.mechanics[designation]['mass']) + 2.0 * baluster['mass'] * dotted_unit_particle_composition_velocity ) / (particle_composition.mechanics[designation]['mass'] + baluster['mass'])
 			
 			particle_composition.mechanics[designation]['velocity'] = (final_normal_particle_composition_velocity * unit_vector) + (final_tangential_particle_composition_velocity * unit_tangent)
 			
+			
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
+			### the velocity of the wall...
+			#baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) #* 1.0
+			
+			baluster['velocity'] = Vector2(0,0)
+			
+			
 			### zero_momentum_frame... 
-			var y_component
+			#var y_component
 			### acquire the zero momentum velocity...
 			var zero_particle_coefficient = particle_composition.mechanics[designation]['mass'] * particle_composition.mechanics[designation]['velocity'].length()
 			var zero_wall_coefficient = baluster['mass'] * baluster['velocity'].length()
@@ -275,32 +299,36 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var zero_momentum_frame_velocity =  (zero_particle_coefficient + zero_wall_coefficient) / zero_mass_coefficient
 			### find the zero momentum velocity before the collision...
 			var zero_particle_velocity = particle_composition.mechanics[designation]['velocity'].length() - zero_momentum_frame_velocity
-			var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
+			#var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
 			
 			var incoming_particle_angle = rad_to_deg(atan2(particle_composition.mechanics[designation]['velocity'].y,particle_composition.mechanics[designation]['velocity'].x))
 			
 			var angle_coefficient = collision_restitution * tan(deg_to_rad(incoming_particle_angle))
-			var outgoing_angle = rad_to_deg(atan(angle_coefficient))
+			outgoing_angle = rad_to_deg(atan(angle_coefficient))
 			
 			var particle_reformed_coefficient = zero_momentum_frame_velocity + zero_particle_velocity
 			
-			var x_component = ((wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x )* sign(particle_composition.mechanics[designation]['velocity'].x)
-			if incoming_particle_angle < 90:
+			x_component = ((wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x )* sign(particle_composition.mechanics[designation]['velocity'].x)
+			if incoming_particle_angle <= 90:
 				y_component = (wall_center.y + particle_reformed_coefficient * -sin(deg_to_rad(outgoing_angle))) - wall_center.y
+				
 			else:
 				y_component = (wall_center.y + particle_reformed_coefficient * sin(deg_to_rad(outgoing_angle))) - wall_center.y
-			
+				
 			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
 			
+			### the velocity of the wall...
+			baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 2.0
+			
 			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
 			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
-			
+			if y_component < 0.1:
+				y_component = 0
 			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
-			#print(particle_composition.mechanics[designation]['velocity']," particle_composition.mechanics[designation]['velocity']")
-	
+			
 	
 	if breach == 'left':
 		
@@ -308,13 +336,13 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		collision_static_friction = baluster['coefficient of static friction'] * particle_composition.coefficient_of_static_friction
 		collision_kinetic_friction = baluster['coefficient of kinetic friction'] * particle_composition.coefficient_of_kinetic_friction
 		
-		### used for collision_restitution ( < 1 and > 0 )...
-		baluster['velocity'] = Vector2(particle_composition.mechanics[designation]['velocity'].x,0) * 0
-		
 		wall_center = Vector2(0.0,particle_composition.entity_container[designation].position.y)
 		
 		if collision_restitution >= 1.0 :
 			### the collision is perfect elastic...
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,0)
 			
 			#normal_vector = Vector2(wall_center - particle_boundary.get_center())
 			normal_vector = Vector2(wall_center - particle_composition.entity_container[designation].position)
@@ -340,6 +368,10 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 		elif collision_restitution < 1.0 and collision_restitution > 0.0:
 			#### zero_momentum_frame... 
 			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
+			
+			
 			### acquire the zero momentum velocity...
 			var zero_particle_coefficient = particle_composition.mechanics[designation]['mass'] * particle_composition.mechanics[designation]['velocity'].length()
 			var zero_wall_coefficient = baluster['mass'] * baluster['velocity'].length()
@@ -347,22 +379,25 @@ func Collision_with_Walls(breach,particle_composition,designation,baluster,):
 			var zero_momentum_frame_velocity =  (zero_particle_coefficient + zero_wall_coefficient) / zero_mass_coefficient
 			### find the zero momentum velocity before the collision...
 			var zero_particle_velocity = particle_composition.mechanics[designation]['velocity'].length() - zero_momentum_frame_velocity
-			var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
+			#var zero_wall_velocity = baluster['velocity'].length() - zero_momentum_frame_velocity
 			
 			var incoming_particle_angle = rad_to_deg(atan2(particle_composition.mechanics[designation]['velocity'].y,particle_composition.mechanics[designation]['velocity'].x))
-			
 			var angle_coefficient = collision_restitution * tan(deg_to_rad(incoming_particle_angle))
-			var outgoing_angle = rad_to_deg(atan(angle_coefficient))
+			outgoing_angle = rad_to_deg(atan(angle_coefficient))
 			
 			var particle_reformed_coefficient = zero_momentum_frame_velocity + zero_particle_velocity
 			
-			var y_component = ((wall_center.y + particle_reformed_coefficient * -sin(deg_to_rad(outgoing_angle))) - wall_center.y )# * sign(particle_composition.mechanics[designation]['velocity'].y)
-			var x_component = (wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x
+			y_component = ((wall_center.y + particle_reformed_coefficient * -sin(deg_to_rad(outgoing_angle))) - wall_center.y )# * sign(particle_composition.mechanics[designation]['velocity'].y)
+			x_component = (wall_center.x + particle_reformed_coefficient * cos(deg_to_rad(outgoing_angle))) - wall_center.x
 			
 			particle_composition.mechanics[designation]['velocity'] = Vector2(x_component,y_component)
 			
 		elif collision_restitution == 0.0:
 			#perfect inelastic collisions : [m1 / (m1 + m2)] * vi = vf
+			
+			### velocity of the wall...
+			baluster['velocity'] = Vector2(0,-particle_composition.mechanics[designation]['velocity'].y) * 1.00
+			
 			
 			x_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].x
 			y_component = particle_composition.mechanics[designation]['mass'] / (particle_composition.mechanics[designation]['mass'] + baluster['mass']) * particle_composition.mechanics[designation]['velocity'].y
@@ -385,71 +420,76 @@ func Apply_Friction(surrounding_wall,in_contact_with_wall,wall_side_2,wall_side_
 	if in_contact_with_wall == 'top' or in_contact_with_wall == 'bottom':
 		wall_start = Vector2(surrounding_wall[wall_side_2]['barrier'],surrounding_wall[in_contact_with_wall]['barrier'],)
 		wall_end = Vector2(surrounding_wall[wall_side_3]['barrier'],surrounding_wall[in_contact_with_wall]['barrier'])
+	
+		var midpoint_of_wall = Vector2((wall_start.x + wall_end.x) / 2.0,(wall_start.y + wall_end.y) / 2.0)
+		var wall_half_start = wall_start - midpoint_of_wall
+		var wall_half_end = wall_end - midpoint_of_wall
+					
+		angle_of_wall = atan2( (wall_half_end.y*wall_half_start.x) - (wall_end.x*wall_half_start.y) , (wall_half_end.x*wall_half_start.x) + (wall_half_end.y*wall_half_start.y))
+	
 	elif in_contact_with_wall == 'left' or in_contact_with_wall == 'right':
 		wall_start = Vector2(surrounding_wall[in_contact_with_wall]['barrier'],surrounding_wall[wall_side_2]['barrier'])
 		wall_end = Vector2(surrounding_wall[in_contact_with_wall]['barrier'],surrounding_wall[wall_side_3]['barrier'])
+		
+		var midpoint_of_wall = Vector2((wall_start.x + wall_end.x) / 2.0,(wall_start.y + wall_end.y) / 2.0)
+		var wall_half_start = wall_start - midpoint_of_wall
+		var wall_half_end = wall_end - midpoint_of_wall
+					
+		angle_of_wall = atan2( (wall_half_end.y*wall_half_start.x) - (wall_end.x*wall_half_start.y) , (wall_half_end.x*wall_half_start.x) + (wall_half_end.y*wall_half_start.y))
 	
-	if in_contact_with_wall == 'top' or in_contact_with_wall == 'bottom':
-		var midpoint_of_wall = Vector2((wall_start.x + wall_end.x) / 2.0,(wall_start.y + wall_end.y) / 2.0)
-		var wall_half_start = wall_start - midpoint_of_wall
-		var wall_half_end = wall_end - midpoint_of_wall
-					
-		angle_of_wall = atan2( (wall_half_end.y*wall_half_start.x) - (wall_end.x*wall_half_start.y) , (wall_half_end.x*wall_half_start.x) + (wall_half_end.y*wall_half_start.y))
-	elif in_contact_with_wall == 'left' or in_contact_with_wall == 'right':
-		#angle_of_wall = wall_start.angle_to_point(wall_end)
-		#print(angle_of_wall)
-		var midpoint_of_wall = Vector2((wall_start.x + wall_end.x) / 2.0,(wall_start.y + wall_end.y) / 2.0)
-		var wall_half_start = wall_start - midpoint_of_wall
-		var wall_half_end = wall_end - midpoint_of_wall
-					
-		angle_of_wall = atan2( (wall_half_end.y*wall_half_start.x) - (wall_end.x*wall_half_start.y) , (wall_half_end.x*wall_half_start.x) + (wall_half_end.y*wall_half_start.y))
 	
 	if in_contact_with_wall == 'top' or in_contact_with_wall == 'bottom': 
 		
 		### find the angle of the particle velocity
 		var angle_of_particle = atan2(particle_velocity.y,particle_velocity.x)
 		
-		#print(int(rad_to_deg(angle_of_particle)),' particle')
 		#print(int(rad_to_deg(angle_of_wall)),' angle_of_wall')
 		### if the particle is moving parallel to the wall in either direction...
-		if int(rad_to_deg(angle_of_particle)) in range(rad_to_deg(angle_of_wall)-2,rad_to_deg(angle_of_wall)+3,1):
+		if int(rad_to_deg(angle_of_particle)) in range(rad_to_deg(angle_of_wall)-2,rad_to_deg(angle_of_wall)+3,1) or int(rad_to_deg(angle_of_particle)) in range(0-2,rad_to_deg(0)+3,1):
 			
 			### if the particle is moving parallel to the wall and is in contact with the wall...
 			var weight = particle_mass * gravitation.length()
 			var normal_force = weight
 			var wall_friction
 			var particle_friction
+			
 			### The wall friction depends on the direction of the wall...
 			### friction is in the opposite direction of force...
 			if surrounding_wall[in_contact_with_wall]['velocity'].x == 0:
 				### if the wall isn't moving..
 				wall_friction = normal_force * surrounding_wall[in_contact_with_wall]['coefficient of static friction']
+				
 			elif surrounding_wall[in_contact_with_wall]['velocity'].x > 0:
 				### if the wall is moving positive...
 				wall_friction = -1.0 * normal_force * surrounding_wall[in_contact_with_wall]['coefficient of kinetic friction']
+				
 			elif surrounding_wall[in_contact_with_wall]['velocity'].x < 0:
 				### if the wall is moving negative...
 				wall_friction = normal_force * surrounding_wall[in_contact_with_wall]['coefficient of kinetic friction']
+				
 			### The particle friction depends on the direction of the wall...
 			if particle_velocity.x == 0:
 				particle_friction = normal_force * substance_static_coefficient
+				
 			elif particle_velocity.x > 0:
 				particle_friction = -1.0 * normal_force * substance_kinetic_coefficient
+				
 			elif particle_velocity.x < 0:
 				particle_friction = normal_force * substance_kinetic_coefficient
-			
+				
 			var total_friction_force = wall_friction + particle_friction
-						
 			particle_force = particle_velocity.length() * particle_mass
-			
 			if particle_force >= total_friction_force:
 				particle_force = particle_force - total_friction_force
+				
 			elif particle_force < total_friction_force:
 				particle_force = 0.0
+			
 			###
-			return  Vector2( cos(int(rad_to_deg(angle_of_particle))) * particle_force,
+			return Vector2( cos(int(rad_to_deg(angle_of_particle))) * particle_force,
 			sin(int(rad_to_deg(angle_of_particle))) * particle_force)
 		else:
+			#print('no friction')
 			return particle_velocity
 
 	if in_contact_with_wall == 'left' or in_contact_with_wall == 'right': 
